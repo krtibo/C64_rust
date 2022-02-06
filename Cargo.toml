@@ -1,0 +1,9 @@
+[package]
+name = "c64_rust"
+version = "0.1.0"
+authors = ["tiibo"]
+edition = "2018"
+
+[dependencies]
+rand = "0.6.4"
+sfml = "0.14.0"
