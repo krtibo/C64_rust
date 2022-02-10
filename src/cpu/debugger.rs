@@ -30,37 +30,39 @@ impl Snapshot {
 }
 
 pub struct Debugger {
-    dbg          : RenderWindow,
-    text         : Vec<String>,
-    font         : Font,
-    active_state : u8,
-    line_count   : u8,
-    LIGHT_BLUE   : Color,
-    DARK_BLUE    : Color,
-    PURPLE       : Color,
-    LIGHT_RED    : Color,
-    BLACK        : Color,
-    snapshots    : VecDeque<Snapshot>
+    dbg              : RenderWindow,
+    text             : Vec<String>,
+    font             : Font,
+    active_state     : u8,
+    selected_state   : u8,
+    line_count       : u8,
+    LIGHT_BLUE       : Color,
+    DARK_BLUE        : Color,
+    PURPLE           : Color,
+    LIGHT_RED        : Color,
+    BLACK            : Color,
+    snapshots        : VecDeque<Snapshot>
 }
 
 impl Debugger {
     pub fn new() -> Debugger {
         Debugger {
-            dbg          : RenderWindow::new (
-                           (1600, 1600),
-                           "C64 DBG",
-                           Style::TITLEBAR | Style::CLOSE,
-                           &Default::default(),),
-            text         : Vec::new(),
-            font         : Font::from_file("res/C64_pro.ttf").unwrap(),
-            active_state : 0,
-            line_count   : 0,
-            LIGHT_BLUE   : Color::rgb(134, 122, 221),
-            DARK_BLUE    : Color::rgb(72, 59, 170),
-            PURPLE       : Color::rgb(147, 81, 182),
-            LIGHT_RED    : Color::rgb(255, 119, 119),
-            BLACK        : Color::rgb(51, 51, 51),
-            snapshots    : VecDeque::new()
+            dbg             : RenderWindow::new (
+                            (1600, 1600),
+                            "C64 DBG",
+                            Style::TITLEBAR | Style::CLOSE,
+                            &Default::default(),),
+            text            : Vec::new(),
+            font            : Font::from_file("res/C64_pro.ttf").unwrap(),
+            active_state    : 0,
+            selected_state  : 0,
+            line_count      : 0,
+            LIGHT_BLUE      : Color::rgb(134, 122, 221),
+            DARK_BLUE       : Color::rgb(72, 59, 170),
+            PURPLE          : Color::rgb(147, 81, 182),
+            LIGHT_RED       : Color::rgb(255, 119, 119),
+            BLACK           : Color::rgb(51, 51, 51),
+            snapshots       : VecDeque::new()
         }
     }
 
@@ -86,23 +88,27 @@ impl Debugger {
                         if (delta > 0.0) {
                             if (self.line_count - 1 > self.active_state) {
                                 self.active_state += 1;
+                                if (self.active_state > 48) {
+                                    self.selected_state = 48;
+                                } else {
+                                    self.selected_state = self.active_state;
+                                }
                             }
                         }
                         if (delta < 0.0) {
                             if (self.active_state > 0) {
                                 self.active_state -= 1;
+                                if (self.active_state > 48) {
+                                    self.selected_state = 48;
+                                } else {
+                                    self.selected_state = self.active_state;
+                                }
                             }
                         }
                     },
                     _ => {}
                 }
                 _ => {}
-            }
-            if mouse::Button::Left.is_pressed() {
-                let mouse_position = self.dbg.mouse_position();
-                if mouse_position.x < 1014 {
-                    self.active_state = (((mouse_position.y-32)/32)%255) as u8;
-                }
             }
         }
         true
@@ -114,7 +120,7 @@ impl Debugger {
             self.snapshots.pop_back();
         }
 
-        if self.snapshots.len() < 50 {
+        if self.snapshots.len() < 254 {
             let mut snapshot: Snapshot = Snapshot::new();
             snapshot.instruction = text;
             snapshot.AX = format!("A:  {}       X:  {}", format!("0x{:02X}", cpu.A), format!("0x{:02X}", cpu.X));
@@ -160,17 +166,37 @@ impl Debugger {
         render_text_header.set_fill_color(&self.DARK_BLUE);
         self.dbg.draw(&render_text_header);
 
-        for i in 0..self.snapshots.len() {
-            let mut render_text = Text::new(&self.snapshots[i].instruction, &self.font, 22);
-            render_text.set_position((15.0, i as f32 * 32.0 + 37.0));
+        let mut start_index = 0;
+        let mut end_index = 0;
+        if (self.active_state <= 48) { 
+            start_index = 0; 
+            if (self.snapshots.len() > 48) {
+                end_index = 49;
+            } else {
+                end_index = self.snapshots.len();
+            }
+        } else {
+            start_index = self.active_state - 48;
+            end_index = self.active_state as usize + 1;
+        }
 
-            if (i == self.active_state as usize) {
-                render_text.set_fill_color(&self.DARK_BLUE);
-                text_background_sprite.set_position((0.0, i as f32 * 32.0 + 34.0));
+        let mut line_number = 0;
+        for i in start_index..end_index as u8 {
+            let mut render_text = Text::new(&self.snapshots[i as usize].instruction, &self.font, 22);
+            render_text.set_position((15.0, line_number as f32 * 32.0 + 37.0));
+
+            if (line_number == self.selected_state) {
+                let mut bg_sprite = self.selected_state as usize * 32 + 34;
+                if (bg_sprite > 1570) {
+                    bg_sprite = 1570;
+                }
+                text_background_sprite.set_position((0.0, bg_sprite as f32));
                 self.dbg.draw(&text_background_sprite);
+                render_text.set_fill_color(&self.DARK_BLUE);
             } else {
                 render_text.set_fill_color(&self.LIGHT_BLUE);
             }
+            line_number += 1;
             self.dbg.draw(&render_text);
         }
         self.dbg.draw(&separator_sprite);

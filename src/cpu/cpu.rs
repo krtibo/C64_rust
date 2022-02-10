@@ -54,7 +54,7 @@ impl MOS6510 {
 
             // let's do the trusty old fetch-decode-execute steps
 
-            if self.PC < 50 {
+            if self.PC < 255 {
                 self.PC+=1;
             }
             // debugger initialization
