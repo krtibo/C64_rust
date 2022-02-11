@@ -14,6 +14,7 @@ use rand::Rng;
 fn main() {
 
     let mut c64 : MOS6510 = MOS6510::new();
+    c64.init();
     c64.cycle();
 
     

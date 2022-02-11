@@ -20,14 +20,15 @@ pub struct MOS6510 {
     pub PC : u16,
     pub P  : u8, // flags: N V 1 B D I Z C
 
-    /* N - Negative flag
-     * V - oVerflow flag
-     * 1 - unused flag, always 1
-     * B - Break flag
-     * D - Decimal mode flag
-     * I - Interrupt disable flag
-     * Z - Zero flag
-     * C - Carry flag */
+    //  N - Negative flag
+    //  V - oVerflow flag
+    //  1 - unused flag, always 1
+    //  B - Break flag
+    //  D - Decimal mode flag
+    //  I - Interrupt disable flag
+    //  Z - Zero flag
+    //  C - Carry flag
+    //  initial value: 0010_0100
 
      pub mmu : MMU,
      pub opc : Opcode,
@@ -36,12 +37,12 @@ pub struct MOS6510 {
 impl MOS6510 {
     pub fn new() -> MOS6510 {
         MOS6510 {
-            A   : 0x01,
-            X   : 0x55,
-            Y   : 0x23,
-            S   : 0x30,
+            A   : 0x00,
+            X   : 0x00,
+            Y   : 0x00,
+            S   : 0xFF, // not sure about this one
             PC  : 0x0000,
-            P   : 0b1010_1010,
+            P   : 0b0010_0100,
             mmu : MMU::new(),
             opc : Opcode::new(),
         }
@@ -59,37 +60,32 @@ impl MOS6510 {
             }
             // debugger initialization
             // it should be at the end of a cycle
-            // let text : Vec<String> =
-            //     vec![String::from("This is a test. , : / ( ) [ ] { } = ? ! - + # ' % $"); 50];
-
             dbg.clear();
-            //dbg.assemble_text(&text, self);
-
-            dbg.create_snapshot(format!("PC:  {} ", format!("0x{:02X}", self.PC)), self);
+            dbg.create_snapshot(format!("  0x{:02X}    {:X}", self.PC, self.mmu.read(self.PC)), self);
             dbg.render_instructions();
             dbg.render_registers();
 
-            self.mmu.randomize();
+            // self.mmu.randomize();
             dbg.memory_map(&self.mmu.RAM);
             dbg.render();
         }
+    } // cycle
+
+    pub fn init(&mut self) {
+        // loading basic ROM to A000 - BFFF: 8k
+        self.mmu.copy_file_to_ram("/Users/rustboi/MEGASync/PROGRAMMING/C64_rust/rom/basic.rom", 0xA000);
+        // loading charset to D000 - DFFF: 4k
+        self.mmu.copy_file_to_ram("/Users/rustboi/MEGASync/PROGRAMMING/C64_rust/rom/character.rom", 0xD000);
+        // loading kernal ROM to E000 - FFFF: 8k
+        self.mmu.copy_file_to_ram("/Users/rustboi/MEGASync/PROGRAMMING/C64_rust/rom/kernal.rom", 0xE000);
+
+        // the program counter is loaded with the value at FFFC-FFFD, Default: $FCE2.
+        self.PC = (self.mmu.read(0xFFFD) as u16) << 8 | self.mmu.read(0xFFFC) as u16;
     }
 
-    pub fn load_to_ram(&mut self, path : String, address : u16) {
-        let mut buffer : Vec<u8> = Vec::new();
-
-        // open the file
-        let mut f = File::open(&path)
-        .expect("\n Error with file loading! \n");
-
-        // read the file to rom_buffer
-        f.read_to_end(&mut buffer)
-        .expect("Error with file reading!");
-
-        // copy buffer to a pecific RAM address
-        for i in 0..buffer.len() {
-            self.mmu.write(buffer[i], address);
-        }
-
-    } // fn load_bootrom
+    // pub fn byte_cat(self, h : u8, l : u8) -> u16 {
+    //     let high : u16 = (h as u16) << 8;
+    //     let low : u16 = l as u16;
+    //     (high | low) as u16
+    // }
 }

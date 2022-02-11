@@ -129,7 +129,6 @@ impl Debugger {
             snapshot.Pb = format!("{:08b}", cpu.P);
             self.snapshots.push_front(snapshot);
         }
-
     }
 
     pub fn render_instructions(&mut self) {
@@ -249,9 +248,9 @@ impl Debugger {
                 pixels[i*4+2] = 221;
                 pixels[i*4+3] = 255;
             } else {
-                pixels[i*4] = 72;
-                pixels[i*4+1] = 59;
-                pixels[i*4+2] = 170;
+                pixels[i*4] = 62;
+                pixels[i*4+1] = 49;
+                pixels[i*4+2] = 160;
                 pixels[i*4+3] = 255;
             }
         }
