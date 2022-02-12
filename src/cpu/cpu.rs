@@ -7,6 +7,7 @@
 use super::mmu::MMU;
 use super::debugger::Debugger;
 use super::opcode::Opcode;
+use super::ppu::PPU;
 use std::fs::File;
 use std::io::Read;
 use std::{thread, time};
@@ -50,14 +51,22 @@ impl MOS6510 {
 
     pub fn cycle(&mut self) {
         let mut dbg: Debugger = Debugger::new();
+        let mut ppu: PPU = PPU::new();
         loop {
-            if (!dbg.poll()) { return; }
-
+            dbg.poll();
+            if (!ppu.poll()) { return }
+            
             // let's do the trusty old fetch-decode-execute steps
-
+            
             if self.PC < 255 {
                 self.PC+=1;
             }
+
+
+            // ppu rendering
+            ppu.clear();
+            ppu.render(self);
+        
             // debugger initialization
             // it should be at the end of a cycle
             dbg.clear();
