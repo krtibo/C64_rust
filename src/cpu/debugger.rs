@@ -9,12 +9,31 @@ use super::cpu::MOS6510;
 use std::collections::VecDeque;
 use sfml::system::Vector2i;
 
+pub struct EventCodes {
+    pub OK     : u8,
+    pub EXIT   : u8,
+    pub PAUSE  : u8,
+    pub RESET  : u8,
+}
+
+impl EventCodes {
+    pub fn new() -> EventCodes {
+        EventCodes {
+            OK      : 0,
+            EXIT    : 1,
+            PAUSE   : 2,
+            RESET   : 3,
+        }
+    }
+}
+
 pub struct Snapshot {
     instruction : String,
     AX          : String,
     SY          : String,
     PC          : String,
-    Pb          : String
+    Pb          : String,
+    cycle       : String,
 }
 
 impl Snapshot {
@@ -25,6 +44,7 @@ impl Snapshot {
             SY          : "".to_string(),
             PC          : "".to_string(),
             Pb          : "".to_string(),
+            cycle       : "".to_string(),
         }
     }
 }
@@ -41,14 +61,16 @@ pub struct Debugger {
     PURPLE           : Color,
     LIGHT_RED        : Color,
     BLACK            : Color,
-    snapshots        : VecDeque<Snapshot>
+    snapshots        : VecDeque<Snapshot>,
+    pub events       : EventCodes,
+    is_paused        : bool
 }
 
 impl Debugger {
     pub fn new() -> Debugger {
         Debugger {
             dbg             : RenderWindow::new (
-                            (1600, 1600),
+                            (1850, 1600),
                             "C64 DBG",
                             Style::TITLEBAR | Style::CLOSE,
                             &Default::default(),),
@@ -59,10 +81,12 @@ impl Debugger {
             line_count      : 0,
             LIGHT_BLUE      : Color::rgb(134, 122, 221),
             DARK_BLUE       : Color::rgb(72, 59, 170),
-            PURPLE          : Color::rgb(147, 81, 182),
+            PURPLE          : Color::rgb(221, 136, 85),
             LIGHT_RED       : Color::rgb(255, 119, 119),
             BLACK           : Color::rgb(51, 51, 51),
-            snapshots       : VecDeque::new()
+            snapshots       : VecDeque::new(),
+            events          : EventCodes::new(),
+            is_paused       : false,
         }
     }
 
@@ -70,22 +94,56 @@ impl Debugger {
         self.dbg.clear(&self.DARK_BLUE);
     }
 
-    pub fn render(&mut self) {
+    pub fn render(&mut self, ram: &[u8]) {
+        self.render_instructions();
+        self.render_registers();
+        self.memory_map(ram);
         self.dbg.display();
     }
 
-    pub fn poll(&mut self) -> bool {
+    pub fn poll(&mut self) -> u8 {
         while let Some(event) = self.dbg.poll_event() {
             use crate::Event::*;
             match event {
-                Closed => { self.dbg.close(); return false; }
+                Closed => { self.dbg.close(); return self.events.EXIT; }
                 KeyPressed { code, .. } => match code {
-                    Key::Escape => { self.dbg.close(); return false;},
+                    Key::Escape => { 
+                        self.dbg.close(); 
+                        return self.events.EXIT; },
+                    Key::Space => { 
+                        self.is_paused = !self.is_paused; 
+                        return self.events.PAUSE; },
+                    Key::R => { 
+                        if (!self.is_paused) { self.clear_snapshots(); }
+                        return self.events.RESET; },
+                    Key::Down => { 
+                        if (self.is_paused) {
+                            if (self.line_count - 1 > self.active_state) {
+                                self.active_state += 1;
+                                if (self.active_state > 48) {
+                                    self.selected_state = 48;
+                                } else {
+                                    self.selected_state = self.active_state;
+                                }
+                            }
+                        } },
+                    Key::Up => {
+                        if (self.is_paused) {
+                            if (self.active_state > 0) {
+                                self.active_state -= 1;
+                                if (self.active_state > 48) {
+                                    self.selected_state = 48;
+                                } else {
+                                    self.selected_state = self.active_state;
+                                }
+                            }
+                        }
+                    },
                     _ => {}
                 },
                 MouseWheelScrolled { wheel, delta, .. } => match wheel {
                     Wheel::Vertical => {
-                        if (delta > 0.0) {
+                        if (delta > 0.0 && self.is_paused) {
                             if (self.line_count - 1 > self.active_state) {
                                 self.active_state += 1;
                                 if (self.active_state > 48) {
@@ -95,7 +153,7 @@ impl Debugger {
                                 }
                             }
                         }
-                        if (delta < 0.0) {
+                        if (delta < 0.0 && self.is_paused) {
                             if (self.active_state > 0) {
                                 self.active_state -= 1;
                                 if (self.active_state > 48) {
@@ -111,7 +169,7 @@ impl Debugger {
                 _ => {}
             }
         }
-        true
+        self.events.OK
     }
 
     pub fn create_snapshot(&mut self, text: String, cpu: &MOS6510) {
@@ -120,15 +178,21 @@ impl Debugger {
             self.snapshots.pop_back();
         }
 
-        if self.snapshots.len() < 254 {
-            let mut snapshot: Snapshot = Snapshot::new();
-            snapshot.instruction = text;
-            snapshot.AX = format!("A:  {}       X:  {}", format!("0x{:02X}", cpu.A), format!("0x{:02X}", cpu.X));
-            snapshot.SY = format!("S:  {}       Y:  {}", format!("0x{:02X}", cpu.S), format!("0x{:02X}", cpu.Y));
-            snapshot.PC = format!("PC: {}",format!("0x{:04X}", cpu.PC));
-            snapshot.Pb = format!("{:08b}", cpu.P);
-            self.snapshots.push_front(snapshot);
-        }
+        let mut snapshot: Snapshot = Snapshot::new();
+        snapshot.instruction = text;
+        snapshot.AX = format!("A:  {}       X:  {}", format!("0x{:02X}", cpu.A), format!("0x{:02X}", cpu.X));
+        snapshot.SY = format!("S:  {}       Y:  {}", format!("0x{:02X}", cpu.S), format!("0x{:02X}", cpu.Y));
+        snapshot.PC = format!("PC: {}",format!("0x{:04X}", cpu.PC));
+        snapshot.Pb = format!("{:08b}", cpu.P);
+        snapshot.cycle = format!("CYCLE:   {}", cpu.cycle);
+        self.snapshots.push_front(snapshot);
+
+    }
+
+    pub fn clear_snapshots(&mut self) {
+        self.active_state = 0;
+        self.selected_state = 0;
+        self.snapshots.clear();
     }
 
     pub fn render_instructions(&mut self) {
@@ -155,7 +219,7 @@ impl Debugger {
         // and rendering
         let mut header_background_sprite = Sprite::with_texture(&texture);
         header_background_sprite.set_position((0.0, 0.0));
-        header_background_sprite.set_scale((1600.0, BG_HEIGHT as f32));
+        header_background_sprite.set_scale((1850.0, BG_HEIGHT as f32));
         self.dbg.draw(&header_background_sprite);
 
         // header text initialization and rendering
@@ -184,7 +248,7 @@ impl Debugger {
             let mut render_text = Text::new(&self.snapshots[i as usize].instruction, &self.font, 22);
             render_text.set_position((15.0, line_number as f32 * 32.0 + 37.0));
 
-            if (line_number == self.selected_state) {
+            if (line_number == self.selected_state && self.is_paused) {
                 let mut bg_sprite = self.selected_state as usize * 32 + 34;
                 if (bg_sprite > 1570) {
                     bg_sprite = 1570;
@@ -194,6 +258,9 @@ impl Debugger {
                 render_text.set_fill_color(&self.DARK_BLUE);
             } else {
                 render_text.set_fill_color(&self.LIGHT_BLUE);
+            }
+            if (self.snapshots[i as usize].instruction.contains("PPU RENDER")) {
+                render_text.set_fill_color(&self.PURPLE);
             }
             line_number += 1;
             self.dbg.draw(&render_text);
@@ -235,11 +302,18 @@ impl Debugger {
             }
             self.dbg.draw(&render_text_registers);
         }
+
+        render_text_registers = Text::new(&self.snapshots[self.active_state as usize].cycle, &self.font, 22);
+        render_text_registers.set_position((1032.0, 198.0));
+        render_text_registers.set_fill_color(&self.LIGHT_RED);
+        self.dbg.draw(&render_text_registers);
     } // render_registers
 
     pub fn memory_map(&mut self, ram: &[u8]) {
 
         let mut pixels: [u8; 256 * 256 * 4] = [255; 256 * 256 * 4];
+        let current_pc_str = &self.snapshots[self.active_state as usize].PC[6..];
+        let current_pc: usize = usize::from_str_radix(current_pc_str, 16).unwrap();
 
         for i in 0..ram.len() {
             if (ram[i] != 0) {
@@ -253,13 +327,19 @@ impl Debugger {
                 pixels[i*4+2] = 160;
                 pixels[i*4+3] = 255;
             }
+            if (i == current_pc) {
+                pixels[i*4] = 255;
+                pixels[i*4+1] = 255;
+                pixels[i*4+2] = 255;
+                pixels[i*4+3] = 255;
+            }
         }
 
         let mut texture = Texture::new(256, 256).unwrap();
         texture.update_from_pixels(&pixels, 256, 256, 0, 0);
         let mut sprite = Sprite::with_texture(&texture);
-        sprite.set_position((1050.0, 1050.0));
-        sprite.set_scale((2.0, 2.0));
+        sprite.set_position((1050.0, 800.0));
+        sprite.set_scale((3.0, 3.0));
         self.dbg.draw(&sprite);
     }
 }

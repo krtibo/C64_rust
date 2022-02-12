@@ -11,6 +11,7 @@ use super::ppu::PPU;
 use std::fs::File;
 use std::io::Read;
 use std::{thread, time};
+use std::time::{Duration, Instant};
 
 pub struct MOS6510 {
 
@@ -30,9 +31,8 @@ pub struct MOS6510 {
     //  Z - Zero flag
     //  C - Carry flag
     //  initial value: 0010_0100
-
      pub mmu : MMU,
-     pub opc : Opcode,
+     pub cycle : u16,
 }
 
 impl MOS6510 {
@@ -42,41 +42,65 @@ impl MOS6510 {
             X   : 0x00,
             Y   : 0x00,
             S   : 0xFF, // not sure about this one
-            PC  : 0x0000,
+            PC  : 0xA000,
             P   : 0b0010_0100,
             mmu : MMU::new(),
-            opc : Opcode::new(),
+            cycle : 0, // 19656 is a raster cycle
         }
     }
 
     pub fn cycle(&mut self) {
         let mut dbg: Debugger = Debugger::new();
         let mut ppu: PPU = PPU::new();
+        let mut opc: Opcode = Opcode::new();
+        opc.init();
+        let mut start = Instant::now();
         loop {
-            dbg.poll();
+            // CHECK FOR EVENTS
             if (!ppu.poll()) { return }
             
-            // let's do the trusty old fetch-decode-execute steps
+            // FETCHING
+            // this will fetch a byte from the memory where the PC is then execute it
+            opc.execute(self);
             
-            if self.PC < 255 {
-                self.PC+=1;
+            
+            // PPU RENDER
+            // if the cycle reaches 19656 a ppu render should occur
+            if (self.cycle >= 19656) {
+                self.cycle = 0;
+                let duration = start.elapsed();
+                start = Instant::now();
+                let fps: f32 = 1.0/(duration.as_micros() as f32/1000000.0);
+                //thread::sleep(time::Duration::from_millis(1000));
+                // render ppu
+                ppu.clear();
+                ppu.render(self, fps);
+                dbg.create_snapshot(format!("=================== PPU RENDER ==================="), self);
             }
 
+            // DEBUGGER PAUSE LOOP
+            let dbg_event = dbg.poll();
+            if (dbg_event == dbg.events.PAUSE) {
+                loop {
+                    dbg.clear();
+                    dbg.render(&self.mmu.RAM);
+                    if (dbg.poll() == dbg.events.PAUSE) { break; }
+                    if (!ppu.poll()) { return }
+                }
+            } 
 
-            // ppu rendering
-            ppu.clear();
-            ppu.render(self);
-        
-            // debugger initialization
-            // it should be at the end of a cycle
+            // STATE RESET
+            if (dbg_event == dbg.events.RESET) {
+                self.reset();
+            }
+            
+            // DEBUGGER RENDER
             dbg.clear();
-            dbg.create_snapshot(format!("  0x{:02X}    {:X}", self.PC, self.mmu.read(self.PC)), self);
-            dbg.render_instructions();
-            dbg.render_registers();
+            dbg.create_snapshot(format!("  0x{:02X}   {}", self.PC, opc.current_operation), self);
+            dbg.render(&self.mmu.RAM);
+            // SLOW DOWN
+            // thread::sleep(time::Duration::from_millis(100));
 
-            // self.mmu.randomize();
-            dbg.memory_map(&self.mmu.RAM);
-            dbg.render();
         }
     } // cycle
 
@@ -89,7 +113,19 @@ impl MOS6510 {
         self.mmu.copy_file_to_ram("/Users/rustboi/MEGASync/PROGRAMMING/C64_rust/rom/kernal.rom", 0xE000);
 
         // the program counter is loaded with the value at FFFC-FFFD, Default: $FCE2.
-        self.PC = (self.mmu.read(0xFFFD) as u16) << 8 | self.mmu.read(0xFFFC) as u16;
+        // B
+        // self.PC = (self.mmu.read(0xFFFD) as u16) << 8 | self.mmu.read(0xFFFC) as u16;
+    } // init
+
+    pub fn reset(&mut self) {
+        self.A = 0x00;
+        self.X = 0x00;
+        self.Y = 0x00;
+        self.S = 0xFF;
+        self.P = 0b0010_0100;
+        self.cycle = 0;
+        self.mmu.clear();
+        self.init();
     }
 
     // pub fn byte_cat(self, h : u8, l : u8) -> u16 {

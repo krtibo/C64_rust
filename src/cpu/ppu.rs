@@ -14,6 +14,7 @@ pub struct PPU {
     PURPLE          : Color,
     LIGHT_RED       : Color,
     BLACK           : Color,
+    font            : Font,
 }
 
 impl PPU {
@@ -30,6 +31,7 @@ impl PPU {
             PURPLE          : Color::rgb(147, 81, 182),
             LIGHT_RED       : Color::rgb(255, 119, 119),
             BLACK           : Color::rgb(51, 51, 51),
+            font            : Font::from_file("res/C64_pro.ttf").unwrap(),
         }
     }
 
@@ -37,7 +39,8 @@ impl PPU {
         self.scr.clear(&self.DARK_BLUE);
     }
 
-    pub fn render(&mut self, cpu: &mut MOS6510) {
+    pub fn render(&mut self, cpu: &mut MOS6510, fps: f32) {
+        self.render_fps(fps);
         self.scr.display();
     } 
 
@@ -53,5 +56,13 @@ impl PPU {
             }
         }
         true
+    }
+
+    pub fn render_fps(&mut self, fps: f32) {
+        //println!("{}", fps);
+        let mut fps_text = Text::new(&format!("FPS {:.4}", fps), &self.font, 22);
+        fps_text.set_position((5.0, 5.0));
+        fps_text.set_fill_color(&self.LIGHT_BLUE);
+        self.scr.draw(&fps_text);
     }
 }

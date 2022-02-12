@@ -48,6 +48,12 @@ impl MMU {
             self.RAM[i] = rng.gen_range(0, 2);
         }
     }
+
+    pub fn clear(&mut self) {
+        for i in 0..self.RAM.len() {
+            self.RAM[i] = 0;
+        }
+    }
 }
 
 /* Memory map
