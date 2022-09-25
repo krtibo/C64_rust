@@ -3,6 +3,7 @@
 
 extern crate sfml;
 use sfml::graphics::*;
+use sfml::SfBox;
 use sfml::window::*;
 use crate::Event::*;
 use super::cpu::MOS6510;
@@ -14,7 +15,7 @@ pub struct PPU {
     PURPLE          : Color,
     LIGHT_RED       : Color,
     BLACK           : Color,
-    font            : Font,
+    font            : SfBox<Font>,
 }
 
 impl PPU {
@@ -36,7 +37,7 @@ impl PPU {
     }
 
     pub fn clear(&mut self) {
-        self.scr.clear(&self.DARK_BLUE);
+        self.scr.clear(self.DARK_BLUE);
     }
 
     pub fn render(&mut self, cpu: &mut MOS6510, fps: f32) {
@@ -59,10 +60,10 @@ impl PPU {
     }
 
     pub fn render_fps(&mut self, fps: f32) {
-        //println!("{}", fps);
+        // println!("{}", fps);
         let mut fps_text = Text::new(&format!("FPS {:.4}", fps), &self.font, 22);
         fps_text.set_position((5.0, 5.0));
-        fps_text.set_fill_color(&self.LIGHT_BLUE);
+        fps_text.set_fill_color(self.LIGHT_BLUE);
         self.scr.draw(&fps_text);
     }
 }

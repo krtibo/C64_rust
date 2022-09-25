@@ -3,6 +3,8 @@
 
 extern crate sfml;
 use sfml::graphics::*;
+use std::borrow::Borrow;
+use sfml::SfBox;
 use sfml::window::*;
 use sfml::window::mouse::*;
 use super::cpu::MOS6510;
@@ -52,7 +54,7 @@ impl Snapshot {
 pub struct Debugger {
     dbg              : RenderWindow,
     text             : Vec<String>,
-    font             : Font,
+    font             : SfBox<Font>,
     active_state     : u8,
     selected_state   : u8,
     line_count       : u8,
@@ -91,7 +93,7 @@ impl Debugger {
     }
 
     pub fn clear(&mut self) {
-        self.dbg.clear(&self.DARK_BLUE);
+        self.dbg.clear(self.DARK_BLUE);
     }
 
     pub fn render(&mut self, ram: &[u8]) {
@@ -142,7 +144,7 @@ impl Debugger {
                     _ => {}
                 },
                 MouseWheelScrolled { wheel, delta, .. } => match wheel {
-                    Wheel::Vertical => {
+                    Wheel::VerticalWheel => {
                         if (delta > 0.0 && self.is_paused) {
                             if (self.line_count - 1 > self.active_state) {
                                 self.active_state += 1;
@@ -203,8 +205,11 @@ impl Debugger {
 
         // main texture pixel array and object
         let mut texture_pixels: [u8; 4] = [134, 122, 221, 255];
-        let mut texture = Texture::new(1, 1).unwrap();
-        texture.update_from_pixels(&texture_pixels, 1, 1, 0, 0);
+        let mut texture = Texture::new().unwrap();
+        Texture::create(&mut texture, 1, 1);
+        unsafe {
+            texture.update_from_pixels(&texture_pixels, 1, 1, 0, 0);
+        }
 
         // separator sprite based on the generic texture with scaling
         let mut separator_sprite = Sprite::with_texture(&texture);
@@ -226,7 +231,7 @@ impl Debugger {
         let mut render_text_header = Text::new("    PC    |           CPU INSTRUCTION           |      REGISTERS & FLAGS",
                                                &self.font, 22);
         render_text_header.set_position((15.0, 3.0));
-        render_text_header.set_fill_color(&self.DARK_BLUE);
+        render_text_header.set_fill_color(self.DARK_BLUE);
         self.dbg.draw(&render_text_header);
 
         let mut start_index = 0;
@@ -255,12 +260,12 @@ impl Debugger {
                 }
                 text_background_sprite.set_position((0.0, bg_sprite as f32));
                 self.dbg.draw(&text_background_sprite);
-                render_text.set_fill_color(&self.DARK_BLUE);
+                render_text.set_fill_color(self.DARK_BLUE);
             } else {
-                render_text.set_fill_color(&self.LIGHT_BLUE);
+                render_text.set_fill_color(self.LIGHT_BLUE);
             }
             if (self.snapshots[i as usize].instruction.contains("PPU RENDER")) {
-                render_text.set_fill_color(&self.PURPLE);
+                render_text.set_fill_color(self.PURPLE);
             }
             line_number += 1;
             self.dbg.draw(&render_text);
@@ -272,22 +277,22 @@ impl Debugger {
         // takes the register states from the snapshots and renders them
         let mut render_text_registers = Text::new(&self.snapshots[self.active_state as usize].AX, &self.font, 22);
         render_text_registers.set_position((1032.0, 38.0));
-        render_text_registers.set_fill_color(&self.LIGHT_RED);
+        render_text_registers.set_fill_color(self.LIGHT_RED);
         self.dbg.draw(&render_text_registers);
 
         render_text_registers = Text::new(&self.snapshots[self.active_state as usize].SY, &self.font, 22);
         render_text_registers.set_position((1032.0, 70.0));
-        render_text_registers.set_fill_color(&self.LIGHT_RED);
+        render_text_registers.set_fill_color(self.LIGHT_RED);
         self.dbg.draw(&render_text_registers);
 
         render_text_registers = Text::new(&self.snapshots[self.active_state as usize].PC, &self.font, 22);
         render_text_registers.set_position((1032.0, 102.0));
-        render_text_registers.set_fill_color(&self.LIGHT_RED);
+        render_text_registers.set_fill_color(self.LIGHT_RED);
         self.dbg.draw(&render_text_registers);
 
         render_text_registers = Text::new("FLAGS:", &self.font, 22);
         render_text_registers.set_position((1032.0, 166.0));
-        render_text_registers.set_fill_color(&self.LIGHT_RED);
+        render_text_registers.set_fill_color(self.LIGHT_RED);
         self.dbg.draw(&render_text_registers);
 
         // flags text and coloring based on turned on or off
@@ -296,16 +301,16 @@ impl Debugger {
             render_text_registers = Text::new(&flags_label[i..i+1], &self.font, 22);
             render_text_registers.set_position((1200.0 + i as f32 * 40.0, 166.0));
             if self.snapshots[self.active_state as usize].Pb.chars().nth(i).unwrap() == '1' {
-                render_text_registers.set_fill_color(&self.LIGHT_RED);
+                render_text_registers.set_fill_color(self.LIGHT_RED);
             } else {
-                render_text_registers.set_fill_color(&self.LIGHT_BLUE);
+                render_text_registers.set_fill_color(self.LIGHT_BLUE);
             }
             self.dbg.draw(&render_text_registers);
         }
 
         render_text_registers = Text::new(&self.snapshots[self.active_state as usize].cycle, &self.font, 22);
         render_text_registers.set_position((1032.0, 198.0));
-        render_text_registers.set_fill_color(&self.LIGHT_RED);
+        render_text_registers.set_fill_color(self.LIGHT_RED);
         self.dbg.draw(&render_text_registers);
     } // render_registers
 
@@ -335,8 +340,11 @@ impl Debugger {
             }
         }
 
-        let mut texture = Texture::new(256, 256).unwrap();
-        texture.update_from_pixels(&pixels, 256, 256, 0, 0);
+        let mut texture = Texture::new().unwrap();
+        Texture::create(&mut texture, 256, 256);
+        unsafe {
+            texture.update_from_pixels(&pixels, 256, 256, 0, 0);
+        }
         let mut sprite = Sprite::with_texture(&texture);
         sprite.set_position((1050.0, 800.0));
         sprite.set_scale((3.0, 3.0));

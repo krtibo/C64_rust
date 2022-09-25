@@ -35,6 +35,10 @@ pub struct MOS6510 {
      pub cycle : u16,
 }
 
+pub enum Flags {
+    N, V, Unused, B, D, I, Z, C
+}
+
 impl MOS6510 {
     pub fn new() -> MOS6510 {
         MOS6510 {
@@ -70,7 +74,7 @@ impl MOS6510 {
                 self.cycle = 0;
                 let duration = start.elapsed();
                 start = Instant::now();
-                let fps: f32 = 1.0/(duration.as_micros() as f32/1000000.0);
+                let fps: f32 = (1.0/(duration.as_millis()) as f32 * 1000.0);
                 //thread::sleep(time::Duration::from_millis(1000));
                 // render ppu
                 ppu.clear();
@@ -98,19 +102,19 @@ impl MOS6510 {
             dbg.clear();
             dbg.create_snapshot(format!("  0x{:02X}   {}", self.PC, opc.current_operation), self);
             dbg.render(&self.mmu.RAM);
-            // SLOW DOWN
-            // thread::sleep(time::Duration::from_millis(100));
+            // WHOA SLOW DOWN
+            thread::sleep(time::Duration::from_millis(100));
 
         }
     } // cycle
 
     pub fn init(&mut self) {
         // loading basic ROM to A000 - BFFF: 8k
-        self.mmu.copy_file_to_ram("/Users/rustboi/MEGASync/PROGRAMMING/C64_rust/rom/basic.rom", 0xA000);
+        self.mmu.copy_file_to_ram("/Users/krtibo/MEGA/PROGRAMMING/C64_rust/rom/basic.rom", 0xA000);
         // loading charset to D000 - DFFF: 4k
-        self.mmu.copy_file_to_ram("/Users/rustboi/MEGASync/PROGRAMMING/C64_rust/rom/character.rom", 0xD000);
+        self.mmu.copy_file_to_ram("/Users/krtibo/MEGA/PROGRAMMING/C64_rust/rom/character.rom", 0xD000);
         // loading kernal ROM to E000 - FFFF: 8k
-        self.mmu.copy_file_to_ram("/Users/rustboi/MEGASync/PROGRAMMING/C64_rust/rom/kernal.rom", 0xE000);
+        self.mmu.copy_file_to_ram("/Users/krtibo/MEGA/PROGRAMMING/C64_rust/rom/kernal.rom", 0xE000);
 
         // the program counter is loaded with the value at FFFC-FFFD, Default: $FCE2.
         // B
@@ -133,4 +137,18 @@ impl MOS6510 {
     //     let low : u16 = l as u16;
     //     (high | low) as u16
     // }
+
+    // flags: N V 1 B D I Z C
+    pub fn set_flag(&mut self, flag : Flags, value: u8) {
+        match flag {
+            Flags::N       => self.P = self.P & !(1 << 7) | (value << 7),
+            Flags::V       => self.P = self.P & !(1 << 6) | (value << 6),
+            Flags::Unused  => self.P = self.P & !(1 << 5) | (value << 5),
+            Flags::B       => self.P = self.P & !(1 << 4) | (value << 4),
+            Flags::D       => self.P = self.P & !(1 << 3) | (value << 3),
+            Flags::I       => self.P = self.P & !(1 << 2) | (value << 2),
+            Flags::Z       => self.P = self.P & !(1 << 1) | (value << 1),
+            Flags::C       => self.P = self.P & 0 | value,
+        }
+    }
 }
