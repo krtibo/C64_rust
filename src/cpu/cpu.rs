@@ -13,6 +13,8 @@ use std::io::Read;
 use std::{thread, time};
 use std::time::{Duration, Instant};
 
+const STACK: u16 = 0x0100;
+
 pub struct MOS6510 {
 
     pub A  : u8,
@@ -150,5 +152,15 @@ impl MOS6510 {
             Flags::Z       => self.P = self.P & !(1 << 1) | (value << 1),
             Flags::C       => self.P = self.P & 0 | value,
         }
+    }
+
+    pub fn push_on_stack(&mut self, value : u8) {
+        self.mmu.write(value, STACK + self.S as u16);
+        self.S -= 1;
+    }
+
+    pub fn pull_from_stack(&mut self) -> u8 {
+        self.S += 1;
+        self.mmu.read(STACK + self.S as u16)
     }
 }

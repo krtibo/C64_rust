@@ -21,10 +21,13 @@ impl Opcode {
     }
 
     pub fn init(&mut self) {
-        self.table[0xEA] = Opcode::nop_ea;
+        self.table[0x08] = Opcode::php_08;
         self.table[0x18] = Opcode::clc_18;
+        self.table[0x28] = Opcode::plp_28;
         self.table[0x38] = Opcode::sec_38;
+        self.table[0x48] = Opcode::pha_48;
         self.table[0x58] = Opcode::cli_58;
+        self.table[0x68] = Opcode::pla_68;
         self.table[0x78] = Opcode::sei_78;
         self.table[0x88] = Opcode::dey_88;
         self.table[0x8a] = Opcode::txa_8a;
@@ -38,6 +41,7 @@ impl Opcode {
         self.table[0xca] = Opcode::dex_ca;
         self.table[0xd8] = Opcode::cld_d8;
         self.table[0xe8] = Opcode::inx_e8;
+        self.table[0xEA] = Opcode::nop_ea;
         self.table[0xf8] = Opcode::sed_f8;
     }
 
@@ -185,6 +189,32 @@ impl Opcode {
         self.check_and_set_n(cpu.A, cpu);
         self.check_and_set_z(cpu.A, cpu);
         cpu.cycle += 2;
+    }
+
+    pub fn pha_48(&mut self, cpu : &mut MOS6510) {
+        self.current_operation = String::from("PHA");
+        cpu.push_on_stack(cpu.A);
+        cpu.cycle += 3;
+    }
+
+    pub fn php_08(&mut self, cpu : &mut MOS6510) {
+        self.current_operation = String::from("PHP");
+        cpu.push_on_stack(cpu.P);
+        cpu.cycle += 3;
+    }
+
+    pub fn pla_68(&mut self, cpu : &mut MOS6510) {
+        self.current_operation = String::from("PLA");
+        cpu.A = cpu.pull_from_stack();
+        self.check_and_set_n(cpu.A, cpu);
+        self.check_and_set_z(cpu.A, cpu);
+        cpu.cycle += 4;
+    }
+
+    pub fn plp_28(&mut self, cpu : &mut MOS6510) {
+        self.current_operation = String::from("PLP");
+        cpu.P = cpu.pull_from_stack();
+        cpu.cycle += 4;
     }
 
     // --- HELPER FUNCTIONS ---

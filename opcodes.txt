@@ -8,7 +8,7 @@ Std Mnemonic Hex Value Description                Addressing Mode  Bytes/Time
 *   ORA      $05       A <- (A) V M               (Z-Page)         2/3
 *   ASL      $06       C <- A7, A <- (A) << 1     (Z-Page)         2/5
     SLO      $07       M <- (M >> 1) + A + C      (Z-Page)         2/5
-*   PHP      $08       Stack <- (P)               (Implied)        1/3
+✅  *   PHP      $08       Stack <- (P)               (Implied)        1/3
 *   ORA      $09       A <- (A) V M               (Immediate)      2/2
 *   ASL      $0A       C <- A7, A <- (A) << 1     (Accumalator)    1/2
     ANC      $0B       A <- A /\ M, C=~A7         (Immediate)      1/2
@@ -40,7 +40,7 @@ Std Mnemonic Hex Value Description                Addressing Mode  Bytes/Time
 *   AND      $25       A <- (A) /\ M              (Z-Page)         2/3
 *   ROL      $26       C <- A7 & A <- A << 1 + C  (Z-Page)         2/5
     RLA      $27       M <- (M << 1) /\ (A)       (Z-Page)         2/5'5
-*   PLP      $28       A <- (Stack)               (Implied)        1/4
+✅  *   PLP      $28       A <- (Stack)               (Implied)        1/4
 *   AND      $29       A <- (A) /\ M              (Immediate)      2/2
 *   ROL      $2A       C <- A7 & A <- A << 1 + C  (Accumalator)    1/2
     ANC      $2B       A <- A /\ M, C <- ~A7      (Immediate9      1/2     
@@ -72,7 +72,7 @@ Std Mnemonic Hex Value Description                Addressing Mode  Bytes/Time
 *   EOR      $45       A <- (A) \-/ M             (Z-Page)         2/3
 *   LSR      $46       C <- A0, A <- (A) >> 1     (Absolute,X)     3/7 ;According to AR Monitor and Grahams Table this should be LSR ZP instead of LSR $ffff,x
     SRE      $47       M <- (M >> 1) \-/ A        (Z-Page)         2/5
-*   PHA      $48       Stack <- (A)               (Implied)        1/3
+✅  *   PHA      $48       Stack <- (A)               (Implied)        1/3
 *   EOR      $49       A <- (A) \-/ M             (Immediate)      2/2
 *   LSR      $4A       C <- A0, A <- (A) >> 1     (Accumalator)    1/2
     ASR      $4B       A <- [(A /\ M) >> 1]       (Immediate)      1/2
@@ -103,7 +103,7 @@ Std Mnemonic Hex Value Description                Addressing Mode  Bytes/Time
 *   ADC      $65       A <- (A) + M + C           (Z-Page)         2/3
 *   ROR      $66       C<-A0 & A<- (A7=C + A>>1)  (Z-Page)         2/5
     RRA      $67       M <- (M >> 1) + (A) + C    (Z-Page)         2/5'5
-*   PLA      $68       A <- (Stack)               (Implied)        1/4
+✅  *   PLA      $68       A <- (Stack)               (Implied)        1/4
 *   ADC      $69       A <- (A) + M + C           (Immediate)      2/2
 *   ROR      $6A       C<-A0 & A<- (A7=C + A>>1)  (Accumalator)    1/2
     ARR      $6B       A <- [(A /\ M) >> 1]       (Immediate)      1/2'5
@@ -135,9 +135,9 @@ Std Mnemonic Hex Value Description                Addressing Mode  Bytes/Time
 *   STA      $85       M <- (A)                   (Z-Page)         2/3
 *   STX      $86       M <- (X)                   (Z-Page)         2/3
     SAX      $87       M <- (A) /\ (X)            (Z-Page)         2/3 
-*   DEY      $88       Y <- (Y) - 1               (Implied)        1/2
+✅  *   DEY      $88       Y <- (Y) - 1               (Implied)        1/2
     NOP      $89       [no operation]             (Immediate)      2/2
-*   TXA      $8A       A <- (X)                   (Implied)        1/2
+✅  *   TXA      $8A       A <- (X)                   (Implied)        1/2
     ANE      $8B       M <-[(A)\/$EE] /\ (X)/\(M) (Immediate)      2/2^4
 *   STY      $8C       M <- (Y)                   (Absolute)       3/4
 *   STA      $8D       M <- (A)                   (Absolute)       3/4
@@ -151,9 +151,9 @@ Std Mnemonic Hex Value Description                Addressing Mode  Bytes/Time
 *   STA      $95       M <- (A)                   (Z-Page,X)       2/4
     SAX      $97       M <- (A) /\ (X)            (Z-Page,Y)       2/4
 *   STX      $96       M <- (X)                   (Z-Page,Y)       2/4
-*   TYA      $98       A <- (Y)                   (Implied)        1/2
+✅  *   TYA      $98       A <- (Y)                   (Implied)        1/2
 *   STA      $99       M <- (A)                   (Absolute,Y)     3/5
-*   TXS      $9A       S <- (X)                   (Implied)        1/2
+✅  *   TXS      $9A       S <- (X)                   (Implied)        1/2
     SHS      $9B       X <- (A) /\ (X), S <- (X)  (Absolute,Y)     3/5
                        M <- (X) /\ (PCH+1)      
     SHY      $9C       M <- (Y) /\ (PCH+1)        (Absolute,Y)     3/5'3
@@ -168,9 +168,9 @@ Std Mnemonic Hex Value Description                Addressing Mode  Bytes/Time
 *   LDA      $A5       A <- M                     (Z-Page)         2/3
 *   LDX      $A6       X <- M                     (Z-Page)         2/3
     LAX      $A7       A <- M, X <- M             (Z-Page)         2/3
-*   TAY      $A8       Y <- (A)                   (Implied)        1/2
+✅  *   TAY      $A8       Y <- (A)                   (Implied)        1/2
 *   LDA      $A9       A <- M                     (Immediate)      2/2
-*   TAX      $AA       X <- (A)                   (Implied)        1/2
+✅  *   TAX      $AA       X <- (A)                   (Implied)        1/2
     LXA      $AB       X04 <- (X04) /\ M04        (Immediate)      1/2
                        A04 <- (A04) /\ M04
 *   LDY      $AC       Y <- M                     (Absolute)       3/4
@@ -187,7 +187,7 @@ Std Mnemonic Hex Value Description                Addressing Mode  Bytes/Time
     LAX      $B7       A <- M, X <- M             (Z-Page,Y)       2/4
 ✅  *   CLV      $B8       V <- 0                     (Implied)        1/2
 *   LDA      $B9       A <- M                     (Absolute,Y)     3/4'1
-*   TSX      $BA       X <- (S)                   (Implied)        1/2
+✅  *   TSX      $BA       X <- (S)                   (Implied)        1/2
     LAE      $BB       X,S,A <- (S /\ M)          (Absolute,Y)     3/4'1
 *   LDY      $BC       Y <- M                     (Absolute,X)     3/4'1
 *   LDA      $BD       A <- M                     (Absolute,X)     3/4'1
@@ -201,9 +201,9 @@ Std Mnemonic Hex Value Description                Addressing Mode  Bytes/Time
 *   CMP      $C5       (A - M) -> NZC             (Z-Page)         2/3
 *   DEC      $C6       M <- (M) - 1               (Z-Page)         2/5
     DCP      $C7       M <- (M)-1, (A-M) -> NZC   (Z-Page)         2/5
-*   INY      $C8       Y <- (Y) + 1               (Implied)        1/2
+✅  *   INY      $C8       Y <- (Y) + 1               (Implied)        1/2
 *   CMP      $C9       (A - M) -> NZC             (Immediate)      2/2
-*   DEX      $CA       X <- (X) - 1               (Implied)        1/2
+✅  *   DEX      $CA       X <- (X) - 1               (Implied)        1/2
     SBX      $CB       X <- (X)/\(A) - M          (Immediate)      2/2
 *   CPY      $CC       (Y - M) -> NZC             (Absolute)       3/4
 *   CMP      $CD       (A - M) -> NZC             (Absolute)       3/4
@@ -233,7 +233,7 @@ Std Mnemonic Hex Value Description                Addressing Mode  Bytes/Time
 *   SBC      $E5       A <- (A) - M - ~C          (Z-Page)         2/3
 *   INC      $E6       M <- (M) + 1               (Z-Page)         2/5
     ISB      $E7       M <- (M) - 1,A <- (A)-M-~C (Z-Page)         2/5  
-*   INX      $E8       X <- (X) +1                (Implied)        1/2
+✅  *   INX      $E8       X <- (X) +1                (Implied)        1/2
 *   SBC      $E9       A <- (A) - M - ~C          (Immediate)      2/2
 ✅  *   NOP      $EA       [no operation]             (Implied)        1/2
     SBC      $EB       A <- (A) - M - ~C          (Immediate)      1/2
