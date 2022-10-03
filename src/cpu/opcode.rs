@@ -23,10 +23,12 @@ impl Opcode {
     pub fn init(&mut self) {
         self.table[0x00] = Opcode::brk_00;
         self.table[0x08] = Opcode::php_08;
+        self.table[0x0a] = Opcode::asl_a_0a;
         self.table[0x18] = Opcode::clc_18;
         self.table[0x28] = Opcode::plp_28;
         self.table[0x38] = Opcode::sec_38;
         self.table[0x48] = Opcode::pha_48;
+        self.table[0x4a] = Opcode::lsr_a_4a;
         self.table[0x58] = Opcode::cli_58;
         self.table[0x60] = Opcode::rts_60;
         self.table[0x68] = Opcode::pla_68;
@@ -43,7 +45,7 @@ impl Opcode {
         self.table[0xca] = Opcode::dex_ca;
         self.table[0xd8] = Opcode::cld_d8;
         self.table[0xe8] = Opcode::inx_e8;
-        self.table[0xEA] = Opcode::nop_ea;
+        self.table[0xea] = Opcode::nop_ea;
         self.table[0xf8] = Opcode::sed_f8;
     }
 
@@ -86,6 +88,18 @@ impl Opcode {
         cpu.cycle += 3;
     }
 
+    pub fn asl_a_0a(&mut self, cpu : &mut MOS6510) {
+        self.current_operation.push_str("ASL A");
+        let a_u16: u16 = (cpu.A << 1) as u16;
+        let a_u8s: [u8; 2] = self.u16_to_u8s(a_u16);
+        if a_u8s[0] == 0 { cpu.set_flag(Flags::C, 0) } else { cpu.set_flag(Flags::C, 1) };
+        self.check_and_set_n(a_u8s[1], cpu);
+        self.check_and_set_z(a_u8s[1], cpu);
+        if a_u8s[1] == 0 { cpu.set_flag(Flags::C, cpu.A >> 7) }
+        cpu.A = a_u8s[1];
+        cpu.cycle += 2;
+    }
+
     pub fn clc_18(&mut self, cpu : &mut MOS6510) {
         self.current_operation.push_str("CLC");
         cpu.set_flag(Flags::C, 0);
@@ -108,6 +122,15 @@ impl Opcode {
         self.current_operation.push_str("PHA");
         cpu.push_on_stack(cpu.A);
         cpu.cycle += 3;
+    }
+
+    pub fn lsr_a_4a(&mut self, cpu : &mut MOS6510) {
+        self.current_operation.push_str("LSR A");
+        cpu.set_flag(Flags::N, 0);
+        cpu.set_flag(Flags::C, cpu.A & 0x01);
+        cpu.A = (cpu.A & 0b1111_1110) >> 1;
+        self.check_and_set_z(cpu.A, cpu);
+        cpu.cycle += 2;
     }
 
     pub fn cli_58(&mut self, cpu : &mut MOS6510) {
@@ -269,8 +292,8 @@ impl Opcode {
 
     pub fn u16_to_u8s(&mut self, value : u16) -> [u8; 2] {
         let mut u8s: [u8; 2] = [0; 2];
-        u8s[0] = (value << 8) as u8;
-        u8s[1] = (value & 0x00FF) as u8;
+        u8s[0] = (value << 8) as u8;        // high byte
+        u8s[1] = (value & 0x00FF) as u8;    // low byte
         u8s
     }
 

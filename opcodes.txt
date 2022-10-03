@@ -10,7 +10,7 @@ Std Mnemonic Hex Value Description                Addressing Mode  Bytes/Time
     SLO      $07       M <- (M >> 1) + A + C      (Z-Page)         2/5
 ✅  *   PHP      $08       Stack <- (P)               (Implied)        1/3
 *   ORA      $09       A <- (A) V M               (Immediate)      2/2
-*   ASL      $0A       C <- A7, A <- (A) << 1     (Accumalator)    1/2
+✅  *   ASL      $0A       C <- A7, A <- (A) << 1     (Accumalator)    1/2
     ANC      $0B       A <- A /\ M, C=~A7         (Immediate)      1/2
     NOP      $0C       [no operation]             (Absolute)       3/4
 *   ORA      $0D       A <- (A) V M               (Absolute)       3/4
@@ -74,7 +74,7 @@ Std Mnemonic Hex Value Description                Addressing Mode  Bytes/Time
     SRE      $47       M <- (M >> 1) \-/ A        (Z-Page)         2/5
 ✅  *   PHA      $48       Stack <- (A)               (Implied)        1/3
 *   EOR      $49       A <- (A) \-/ M             (Immediate)      2/2
-*   LSR      $4A       C <- A0, A <- (A) >> 1     (Accumalator)    1/2
+✅  *   LSR      $4A       C <- A0, A <- (A) >> 1     (Accumalator)    1/2
     ASR      $4B       A <- [(A /\ M) >> 1]       (Immediate)      1/2
 *   JMP      $4C       PC <- Address              (Absolute)       3/3
 *   EOR      $4D       A <- (A) \-/ M             (Absolute)       3/4
