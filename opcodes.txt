@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------------
 Std Mnemonic Hex Value Description                Addressing Mode  Bytes/Time 
-*   BRK      $00       Stack <- PC, PC <- ($fffe) (Immediate)      1/7
+✅  *   BRK      $00       Stack <- PC, PC <- ($fffe) (Immediate)      1/7
 *   ORA      $01       A <- (A) V M               (Ind,X)          6/2
     JAM      $02       [locks up machine]         (Implied)        1/-
     SLO      $03       M <- (M >> 1) + A + C      (Ind,X)          2/8
@@ -95,7 +95,7 @@ Std Mnemonic Hex Value Description                Addressing Mode  Bytes/Time
     NOP      $5C       [no operation]             (Absolute,X)     3/4'1
 *   EOR      $5D       A <- (A) \-/ M             (Absolute,X)     3/4'1
     SRE      $5F       M <- (M >> 1) \-/ A        (Absolute,X)     3/7
-*   RTS      $60       PC <- (Stack)              (Implied)        1/6
+✅  *   RTS      $60       PC <- (Stack)              (Implied)        1/6
 *   ADC      $61       A <- (A) + M + C           (Ind,X)          2/6
     JAM      $62       [locks up machine]         (Implied)        1/-
     RRA      $63       M <- (M >> 1) + (A) + C    (Ind,X)          2/8'5
