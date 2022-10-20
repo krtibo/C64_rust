@@ -154,6 +154,19 @@ impl MOS6510 {
         }
     }
 
+    pub fn get_flag(&mut self, flag : Flags) -> bool {
+        match flag {
+            Flags::N       => return (self.P & (1 << 7)) > 0,
+            Flags::V       => return (self.P & (1 << 6)) > 0,
+            Flags::Unused  => return (self.P & (1 << 5)) > 0,
+            Flags::B       => return (self.P & (1 << 4)) > 0,
+            Flags::D       => return (self.P & (1 << 3)) > 0,
+            Flags::I       => return (self.P & (1 << 2)) > 0,
+            Flags::Z       => return (self.P & (1 << 1)) > 0,
+            Flags::C       => return (self.P & 1) > 0,
+        }
+    }
+
     pub fn stack_addr(&mut self) -> u16 {
         STACK + self.S as u16
     }
