@@ -26,6 +26,7 @@ impl Opcode {
         self.table[0x0a] = Opcode::asl_a_0a;
         self.table[0x18] = Opcode::clc_18;
         self.table[0x28] = Opcode::plp_28;
+        self.table[0x2a] = Opcode::rol_a_2a;
         self.table[0x38] = Opcode::sec_38;
         self.table[0x48] = Opcode::pha_48;
         self.table[0x4a] = Opcode::lsr_a_4a;
@@ -110,6 +111,17 @@ impl Opcode {
         self.current_operation.push_str("PLP");
         cpu.P = cpu.pull_from_stack();
         cpu.cycle += 4;
+    }
+
+    pub fn rol_a_2a(&mut self, cpu : &mut MOS6510) {
+        self.current_operation.push_str("ROL A");
+        let new_A: u8 = cpu.A << 1;
+        if (cpu.get_flag(Flags::C)) { new_A | 1; }
+        cpu.set_flag(Flags::C, (cpu.A & (1 << 7)) >> 7);
+        cpu.set_flag(Flags::N, (cpu.A & (1 << 6)) >> 6);
+        self.check_and_set_z(new_A, cpu);
+        cpu.A = new_A;
+        cpu.cycle += 2;
     }
 
     pub fn sec_38(&mut self, cpu : &mut MOS6510) {
