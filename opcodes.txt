@@ -42,7 +42,7 @@ Std Mnemonic Hex Value Description                Addressing Mode  Bytes/Time
     RLA      $27       M <- (M << 1) /\ (A)       (Z-Page)         2/5'5
 ✅  *   PLP      $28       A <- (Stack)               (Implied)        1/4
 *   AND      $29       A <- (A) /\ M              (Immediate)      2/2
-*   ROL      $2A       C <- A7 & A <- A << 1 + C  (Accumalator)    1/2
+✅  *   ROL      $2A       C <- A7 & A <- A << 1 + C  (Accumalator)    1/2
     ANC      $2B       A <- A /\ M, C <- ~A7      (Immediate9      1/2     
 *   BIT      $2C       Z <- ~(A /\ M) N<-M7 V<-M6 (Absolute)       3/4
 *   AND      $2D       A <- (A) /\ M              (Absolute)       3/4
