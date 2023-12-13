@@ -28,6 +28,7 @@ pub struct Snapshot {
 	pub PC			: String,
 	pub Pb			: String,
 	pub cycle		: String,
+    pub memory_map  : String,
 }
 
 impl Snapshot {
@@ -40,6 +41,7 @@ impl Snapshot {
 			PC			: empty.clone(),
 			Pb			: empty.clone(),
 			cycle		: empty.clone(),
+            memory_map  : empty.clone(),
 		}
 	}
 }
@@ -112,7 +114,7 @@ impl Debugger {
 		self.events.OK
 	}
 
-	pub fn create_snapshot(&mut self, text: String, cpu: &MOS6510) {
+	pub fn create_snapshot(&mut self, text: String, cpu: &mut MOS6510) {
 		if self.snapshots.len() == 255 {
 			self.snapshots.pop_back();
 		}
@@ -124,6 +126,7 @@ impl Debugger {
 		snapshot.PC = format!("PC: {}",format!("0x{:04X}", cpu.PC));
 		snapshot.Pb = format!("{:08b}", cpu.P);
 		snapshot.cycle = format!("CYCLE:   {}", cpu.cycle);
+        snapshot.memory_map = format!("Memory map config: {:08b}", cpu.mmu.read(0x0001 as u16));
 		self.snapshots.push_front(snapshot);
 	}
 

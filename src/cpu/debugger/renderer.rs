@@ -37,6 +37,7 @@ pub fn render_registers(debugger: &mut Debugger) {
     }
 
     render_text(debugger, debugger.snapshots[debugger.active_state as usize].cycle.clone(), 1032.0, 198.0, debugger.LIGHT_RED);
+    render_text(debugger, debugger.snapshots[debugger.active_state as usize].memory_map.clone(), 1032.0, 230.0, debugger.LIGHT_RED);
 }
 
 pub fn render_instructions(debugger: &mut Debugger) {

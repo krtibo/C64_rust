@@ -117,6 +117,7 @@ impl MOS6510 {
         self.mmu.copy_file_to_ram("/Users/krtibo/MEGA/PROGRAMMING/C64_rust/rom/character.rom", 0xD000);
         // loading kernal ROM to E000 - FFFF: 8k
         self.mmu.copy_file_to_ram("/Users/krtibo/MEGA/PROGRAMMING/C64_rust/rom/kernal.rom", 0xE000);
+        self.mmu.init();
 
         // the program counter is loaded with the value at FFFC-FFFD, Default: $FCE2.
         // B

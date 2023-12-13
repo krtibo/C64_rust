@@ -17,6 +17,11 @@ impl MMU {
         }
     }
 
+    pub fn init(&mut self) {
+        // initialize the default values of registers in memory
+        self.write(0b0000_0111, 0x0001);
+    }
+
     pub fn write(&mut self, byte : u8, address : u16) {
         self.RAM[address as usize] = byte;
     }
