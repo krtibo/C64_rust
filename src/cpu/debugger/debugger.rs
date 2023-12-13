@@ -3,14 +3,10 @@
 
 extern crate sfml;
 use sfml::graphics::*;
-use sfml::system::Vector2f;
-use std::borrow::Borrow;
 use sfml::SfBox;
 use sfml::window::*;
-use sfml::window::mouse::*;
 use crate::cpu::MOS6510;
 use std::collections::VecDeque;
-use sfml::system::Vector2i;
 use sfml::window::Event::*;
 use super::input_handler::poll_keyboard;
 use super::input_handler::poll_mouse;
