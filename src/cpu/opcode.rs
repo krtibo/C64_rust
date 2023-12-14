@@ -34,10 +34,17 @@ impl Opcode {
         self.table[0x60] = Opcode::rts_60;
         self.table[0x68] = Opcode::pla_68;
         self.table[0x78] = Opcode::sei_78;
+        self.table[0x81] = Opcode::sta_81;
+        self.table[0x85] = Opcode::sta_85;
         self.table[0x88] = Opcode::dey_88;
         self.table[0x8a] = Opcode::txa_8a;
+        self.table[0x8d] = Opcode::sta_8d;
+        self.table[0x91] = Opcode::sta_91;
+        self.table[0x95] = Opcode::sta_95;
         self.table[0x98] = Opcode::tya_98;
+        self.table[0x99] = Opcode::sta_99;
         self.table[0x9a] = Opcode::txs_9a;
+        self.table[0x9d] = Opcode::sta_9d;
         self.table[0xa0] = Opcode::ldy_a0;
         self.table[0xa1] = Opcode::lda_a1;
         self.table[0xa2] = Opcode::ldx_a2;
@@ -491,6 +498,71 @@ impl Opcode {
         self.check_and_set_n(cpu.Y, cpu);
         self.check_and_set_z(cpu.Y, cpu);
         cpu.cycle += 4;
+    }
+
+    pub fn sta_8d(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+        let high: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("STA ${:02X}{:02X}", high, low).as_str());
+        let address: u16 = self.u8s_to_u16(high, low);
+        cpu.mmu.write(cpu.A, address);
+        cpu.cycle += 4;
+    }
+
+    pub fn sta_9d(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+        let high: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("STA ${:02X}{:02X}, X", high, low).as_str());
+        let address: u16 = self.u8s_to_u16(high, low);
+        cpu.mmu.write(cpu.A, address + cpu.X as u16);
+        cpu.cycle += 5;
+    }
+
+    pub fn sta_99(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+        let high: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("STA ${:02X}{:02X}, Y", high, low).as_str());
+        let address: u16 = self.u8s_to_u16(high, low);
+        cpu.mmu.write(cpu.A, address + cpu.Y as u16);
+        cpu.cycle += 5;
+    }
+
+    pub fn sta_85(&mut self, cpu : &mut MOS6510) {
+        let operand: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("STA ${:02X}", operand).as_str());
+        let address: u16 = self.u8s_to_u16(0x00, operand);
+        cpu.mmu.write(cpu.A, address);
+        cpu.cycle += 3;
+    }
+
+    pub fn sta_95(&mut self, cpu : &mut MOS6510) {
+        let mut operand: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("STA ${:02X}, X", operand).as_str());
+        operand = operand.wrapping_add(cpu.X);
+        let address: u16 = self.u8s_to_u16(0x00, operand);
+        cpu.mmu.write(cpu.A, address);
+        cpu.cycle += 4;
+    }
+
+    pub fn sta_81(&mut self, cpu : &mut MOS6510) {
+        let operand: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("STA ((${:02X}, X))", operand).as_str());
+        let low_address = operand.wrapping_add(cpu.X);
+        let high_address = low_address.wrapping_add(1);
+        let low: u8 = cpu.mmu.read(self.u8s_to_u16(0x00, low_address));
+        let high: u8 = cpu.mmu.read(self.u8s_to_u16(0x00, operand));
+        let address: u16 = self.u8s_to_u16(high, low);
+        cpu.mmu.write(cpu.A, address);
+        cpu.cycle += 6;
+    }
+
+    pub fn sta_91(&mut self, cpu : &mut MOS6510) {
+        let mut low: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("STA ((${:02X})), Y", low).as_str());
+        let high: u8 = low.wrapping_add(1);
+        let address: u16 = self.u8s_to_u16(high, low) + cpu.Y as u16;
+        cpu.mmu.write(cpu.A, address);
+        cpu.cycle += 6;
     }
 
     // --- HELPER FUNCTIONS ---
