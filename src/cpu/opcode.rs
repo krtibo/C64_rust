@@ -324,7 +324,7 @@ impl Opcode {
         let high: u8 = self.fetch(cpu);
 		self.current_operation.push_str(format!("LDA ${:02X}{:02X}, Y", high, low).as_str());
         let address: u16 = self.u8s_to_u16(high, low);
-        cpu.A = cpu.mmu.read(address + cpu.X as u16);    
+        cpu.A = cpu.mmu.read(address + cpu.Y as u16);    
         self.check_and_set_n(cpu.A, cpu);
         self.check_and_set_z(cpu.A, cpu);
         cpu.cycle += 4;
