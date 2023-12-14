@@ -38,10 +38,18 @@ impl Opcode {
         self.table[0x8a] = Opcode::txa_8a;
         self.table[0x98] = Opcode::tya_98;
         self.table[0x9a] = Opcode::txs_9a;
+        self.table[0xa1] = Opcode::lda_a1;
+        self.table[0xa5] = Opcode::lda_a5;
         self.table[0xa8] = Opcode::tay_a8;
+        self.table[0xa9] = Opcode::lda_a9;
         self.table[0xaa] = Opcode::tax_aa;
+        self.table[0xad] = Opcode::lda_ad;
+        self.table[0xb1] = Opcode::lda_b1;
+        self.table[0xb5] = Opcode::lda_b5;
         self.table[0xb8] = Opcode::clv_b8;
+        self.table[0xb9] = Opcode::lda_b9;
         self.table[0xba] = Opcode::tsx_ba;
+        self.table[0xbd] = Opcode::lda_bd;
         self.table[0xc8] = Opcode::iny_c8;
         self.table[0xca] = Opcode::dex_ca;
         self.table[0xd8] = Opcode::cld_d8;
@@ -278,7 +286,96 @@ impl Opcode {
         cpu.set_flag(Flags::D, 1);
         cpu.cycle += 2;
     }
-    
+
+    pub fn lda_a9(&mut self, cpu : &mut MOS6510) {
+        let operand: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("LDA #${:02X}", operand).as_str());
+        cpu.A = operand;
+        self.check_and_set_n(cpu.A, cpu);
+        self.check_and_set_z(cpu.A, cpu);
+        cpu.cycle += 2;
+    }
+
+    pub fn lda_ad(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+        let high: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("LDA ${:02X}{:02X}", high, low).as_str());
+        let address: u16 = self.u8s_to_u16(high, low);
+        cpu.A = cpu.mmu.read(address);    
+        self.check_and_set_n(cpu.A, cpu);
+        self.check_and_set_z(cpu.A, cpu);
+        cpu.cycle += 4;
+    }
+
+    pub fn lda_bd(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+        let high: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("LDA ${:02X}{:02X}, X", high, low).as_str());
+        let address: u16 = self.u8s_to_u16(high, low);
+        cpu.A = cpu.mmu.read(address + cpu.X as u16);    
+        self.check_and_set_n(cpu.A, cpu);
+        self.check_and_set_z(cpu.A, cpu);
+        cpu.cycle += 4;
+        // TODO: cycle is 4+1 if page is crossed
+    }
+
+    pub fn lda_b9(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+        let high: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("LDA ${:02X}{:02X}, Y", high, low).as_str());
+        let address: u16 = self.u8s_to_u16(high, low);
+        cpu.A = cpu.mmu.read(address + cpu.X as u16);    
+        self.check_and_set_n(cpu.A, cpu);
+        self.check_and_set_z(cpu.A, cpu);
+        cpu.cycle += 4;
+        // TODO: cycle is 4+1 if page is crossed
+    }
+
+    pub fn lda_a5(&mut self, cpu : &mut MOS6510) {
+        let operand: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("LDA ${:02X}", operand).as_str());
+        let address: u16 = self.u8s_to_u16(0x00, operand);
+        cpu.A = cpu.mmu.read(address);    
+        self.check_and_set_n(cpu.A, cpu);
+        self.check_and_set_z(cpu.A, cpu);
+        cpu.cycle += 3;
+    }
+
+    pub fn lda_b5(&mut self, cpu : &mut MOS6510) {
+        let mut operand: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("LDA ${:02X}, X", operand).as_str());
+        operand = operand.wrapping_add(cpu.X);
+        let address: u16 = self.u8s_to_u16(0x00, operand);
+        cpu.A = cpu.mmu.read(address);    
+        self.check_and_set_n(cpu.A, cpu);
+        self.check_and_set_z(cpu.A, cpu);
+        cpu.cycle += 4;
+    }
+
+    pub fn lda_a1(&mut self, cpu : &mut MOS6510) {
+        let operand: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("LDA ((${:02X}, X))", operand).as_str());
+        let low_address = operand.wrapping_add(cpu.X);
+        let high_address = low_address.wrapping_add(1);
+        let low: u8 = cpu.mmu.read(self.u8s_to_u16(0x00, low_address));
+        let high: u8 = cpu.mmu.read(self.u8s_to_u16(0x00, operand));
+        cpu.A = cpu.mmu.read(self.u8s_to_u16(high, low));    
+        self.check_and_set_n(cpu.A, cpu);
+        self.check_and_set_z(cpu.A, cpu);
+        cpu.cycle += 6;
+    }
+
+    pub fn lda_b1(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("LDA ((${:02X})), Y", low).as_str());
+        let high: u8 = low.wrapping_add(1);
+        let address: u16 = self.u8s_to_u16(high, low) + cpu.Y as u16;
+        cpu.A = cpu.mmu.read(address);
+        self.check_and_set_n(cpu.A, cpu);
+        self.check_and_set_z(cpu.A, cpu);
+        cpu.cycle += 5;
+        // TODO: cycle is 5+1 if page is crossed
+    }
 
     // --- HELPER FUNCTIONS ---
 

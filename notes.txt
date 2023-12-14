@@ -1,0 +1,9 @@
+immediate addressing mode: just puts the value to e.g. Accumulator
+absolute: gets 2 bytes which makes an address, looks at that address, reads it to e.g. Accumulator
+zero page: if wanna read from the zero page (first 256 bytes), gets a byte (value 0-255), reads from RAM [0..255] note: if the address > 255, it will wrap around
+absolute, X: specified 2 byte address + X register value
+absolute, Y: specified 2 byte address + Y register value
+zero page, X: same as absolute, X. note: if the address > 255, it will wrap around
+zero page, Y: same as absolute, Y. This is a rare one.
+(zero page,X) (zero page indirect): adds X to the 1 byte zero page address, reads the byte from the result and result+1, this will get us a 2 byte address, and we read from that 2 byte address location. e.g. LDA ($80,X), X=0C, A=0. 80+0C=8C, read from 008C, 008D -> 3F, C4 -> read from address C43F (little endianness, higher byte goes first) -> reads 5 -> A=5.
+(zero page), Y (zero page indirect): e.g. LDA ($14), Y, Y=28, A=0. read from 0014 = 00, and 0015 = D8. Thats D800. Add Y -> D828. Read from D828. A = value of address D828.
