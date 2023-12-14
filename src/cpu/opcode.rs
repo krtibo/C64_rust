@@ -35,13 +35,16 @@ impl Opcode {
         self.table[0x68] = Opcode::pla_68;
         self.table[0x78] = Opcode::sei_78;
         self.table[0x81] = Opcode::sta_81;
+        self.table[0x84] = Opcode::sty_84;
         self.table[0x85] = Opcode::sta_85;
         self.table[0x86] = Opcode::stx_86;
         self.table[0x88] = Opcode::dey_88;
         self.table[0x8a] = Opcode::txa_8a;
+        self.table[0x8c] = Opcode::sty_8c;
         self.table[0x8d] = Opcode::sta_8d;
         self.table[0x8e] = Opcode::stx_8e;
         self.table[0x91] = Opcode::sta_91;
+        self.table[0x94] = Opcode::sty_94;
         self.table[0x95] = Opcode::sta_95;
         self.table[0x96] = Opcode::stx_96;
         self.table[0x98] = Opcode::tya_98;
@@ -591,6 +594,32 @@ impl Opcode {
         operand = operand.wrapping_add(cpu.Y);
         let address: u16 = self.u8s_to_u16(0x00, operand);
         cpu.mmu.write(cpu.X, address);
+        cpu.cycle += 4;
+    }
+
+    pub fn sty_8c(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+        let high: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("STY ${:02X}{:02X}", high, low).as_str());
+        let address: u16 = self.u8s_to_u16(high, low);
+        cpu.mmu.write(cpu.Y, address);
+        cpu.cycle += 4;
+    }
+
+    pub fn sty_84(&mut self, cpu : &mut MOS6510) {
+        let operand: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("STY ${:02X}", operand).as_str());
+        let address: u16 = self.u8s_to_u16(0x00, operand);
+        cpu.mmu.write(cpu.Y, address);
+        cpu.cycle += 3;
+    }
+
+    pub fn sty_94(&mut self, cpu : &mut MOS6510) {
+        let mut operand: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("STY ${:02X}, X", operand).as_str());
+        operand = operand.wrapping_add(cpu.X);
+        let address: u16 = self.u8s_to_u16(0x00, operand);
+        cpu.mmu.write(cpu.Y, address);
         cpu.cycle += 4;
     }
 
