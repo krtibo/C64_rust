@@ -73,16 +73,24 @@ impl Opcode {
         self.table[0xbc] = Opcode::ldy_bc;
         self.table[0xbd] = Opcode::lda_bd;
         self.table[0xbe] = Opcode::ldx_be;
+        self.table[0xc1] = Opcode::cmp_c1;
+        self.table[0xc5] = Opcode::cmp_c5;
         self.table[0xc8] = Opcode::iny_c8;
+        self.table[0xc9] = Opcode::cmp_c9;
         self.table[0xca] = Opcode::dex_ca;
+        self.table[0xcd] = Opcode::cmp_cd;
+        self.table[0xd1] = Opcode::cmp_d1;
+        self.table[0xd5] = Opcode::cmp_d5;
         self.table[0xd8] = Opcode::cld_d8;
+        self.table[0xd9] = Opcode::cmp_d9;
+        self.table[0xdd] = Opcode::cmp_dd;
         self.table[0xe8] = Opcode::inx_e8;
         self.table[0xea] = Opcode::nop_ea;
         self.table[0xf8] = Opcode::sed_f8;
     }
 
     pub fn unknown(&mut self, cpu : &mut MOS6510) {
-        self.current_operation.push_str("/// Unknown/unimplemented opcode.");
+        self.current_operation.push_str("////////////// n/a");
         cpu.cycle += 4;
     }
 
@@ -377,7 +385,7 @@ impl Opcode {
 
     pub fn lda_a1(&mut self, cpu : &mut MOS6510) {
         let operand: u8 = self.fetch(cpu);
-		self.current_operation.push_str(format!("LDA ((${:02X}, X))", operand).as_str());
+		self.current_operation.push_str(format!("LDA (${:02X}, X)", operand).as_str());
         let low_address = operand.wrapping_add(cpu.X);
         let high_address = low_address.wrapping_add(1);
         let low: u8 = cpu.mmu.read(self.u8s_to_u16(0x00, low_address));
@@ -390,7 +398,7 @@ impl Opcode {
 
     pub fn lda_b1(&mut self, cpu : &mut MOS6510) {
         let low: u8 = self.fetch(cpu);
-		self.current_operation.push_str(format!("LDA ((${:02X})), Y", low).as_str());
+		self.current_operation.push_str(format!("LDA (${:02X}), Y", low).as_str());
         let high: u8 = low.wrapping_add(1);
         let address: u16 = self.u8s_to_u16(high, low) + cpu.Y as u16;
         cpu.A = cpu.mmu.read(address);
@@ -552,7 +560,7 @@ impl Opcode {
 
     pub fn sta_81(&mut self, cpu : &mut MOS6510) {
         let operand: u8 = self.fetch(cpu);
-		self.current_operation.push_str(format!("STA ((${:02X}, X))", operand).as_str());
+		self.current_operation.push_str(format!("STA (${:02X}, X)", operand).as_str());
         let low_address = operand.wrapping_add(cpu.X);
         let high_address = low_address.wrapping_add(1);
         let low: u8 = cpu.mmu.read(self.u8s_to_u16(0x00, low_address));
@@ -564,7 +572,7 @@ impl Opcode {
 
     pub fn sta_91(&mut self, cpu : &mut MOS6510) {
         let mut low: u8 = self.fetch(cpu);
-		self.current_operation.push_str(format!("STA ((${:02X})), Y", low).as_str());
+		self.current_operation.push_str(format!("STA (${:02X}), Y", low).as_str());
         let high: u8 = low.wrapping_add(1);
         let address: u16 = self.u8s_to_u16(high, low) + cpu.Y as u16;
         cpu.mmu.write(cpu.A, address);
@@ -623,6 +631,102 @@ impl Opcode {
         cpu.cycle += 4;
     }
 
+    pub fn cmp_c9(&mut self, cpu : &mut MOS6510) {
+        let operand: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("CMP #${:02X}", operand).as_str());
+        let result: u8 = cpu.A.wrapping_sub(operand);
+        if result == 0 { cpu.set_flag(Flags::Z, 1) } else { cpu.set_flag(Flags::Z, 0) }
+        if operand <= cpu.A { cpu.set_flag(Flags::C, 1) } else { cpu.set_flag(Flags::C, 0) }
+        self.check_and_set_n(result, cpu);
+        cpu.cycle += 2;
+    }
+
+    pub fn cmp_cd(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+        let high: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("CMP ${:02X}{:02X}", high, low).as_str());
+        let operand = cpu.mmu.read(self.u8s_to_u16(high, low));
+        let result: u8 = cpu.A.wrapping_sub(operand);
+        if result == 0 { cpu.set_flag(Flags::Z, 1) } else { cpu.set_flag(Flags::Z, 0) }
+        if operand <= cpu.A { cpu.set_flag(Flags::C, 1) } else { cpu.set_flag(Flags::C, 0) }
+        self.check_and_set_n(result, cpu);
+        cpu.cycle += 4;
+    }
+
+    pub fn cmp_dd(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+        let high: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("CMP ${:02X}{:02X}, X", high, low).as_str());
+        let operand = cpu.mmu.read(self.u8s_to_u16(high, low) + cpu.X as u16);
+        let result: u8 = cpu.A.wrapping_sub(operand);
+        if result == 0 { cpu.set_flag(Flags::Z, 1) } else { cpu.set_flag(Flags::Z, 0) }
+        if operand <= cpu.A { cpu.set_flag(Flags::C, 1) } else { cpu.set_flag(Flags::C, 0) }
+        self.check_and_set_n(result, cpu);
+        cpu.cycle += 4;
+    }
+
+    pub fn cmp_d9(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+        let high: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("CMP ${:02X}{:02X}, Y", high, low).as_str());
+        let operand = cpu.mmu.read(self.u8s_to_u16(high, low) + cpu.Y as u16);
+        let result: u8 = cpu.A.wrapping_sub(operand);
+        if result == 0 { cpu.set_flag(Flags::Z, 1) } else { cpu.set_flag(Flags::Z, 0) }
+        if operand <= cpu.A { cpu.set_flag(Flags::C, 1) } else { cpu.set_flag(Flags::C, 0) }
+        self.check_and_set_n(result, cpu);
+        cpu.cycle += 4;
+    }
+
+    pub fn cmp_c5(&mut self, cpu : &mut MOS6510) {
+        let address: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("CMP ${:02X}", address).as_str());
+        let operand = cpu.mmu.read(self.u8s_to_u16(0x00, address));
+        let result: u8 = cpu.A.wrapping_sub(operand);
+        if result == 0 { cpu.set_flag(Flags::Z, 1) } else { cpu.set_flag(Flags::Z, 0) }
+        if operand <= cpu.A { cpu.set_flag(Flags::C, 1) } else { cpu.set_flag(Flags::C, 0) }
+        self.check_and_set_n(result, cpu);
+        cpu.cycle += 3;
+    }
+
+    pub fn cmp_d5(&mut self, cpu : &mut MOS6510) {
+        let address: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("CMP ${:02X}, X", address).as_str());
+        let operand = cpu.mmu.read(self.u8s_to_u16(0x00, address.wrapping_add(cpu.X)));
+        let result: u8 = cpu.A.wrapping_sub(operand);
+        if result == 0 { cpu.set_flag(Flags::Z, 1) } else { cpu.set_flag(Flags::Z, 0) }
+        if operand <= cpu.A { cpu.set_flag(Flags::C, 1) } else { cpu.set_flag(Flags::C, 0) }
+        self.check_and_set_n(result, cpu);
+        cpu.cycle += 4;
+    }
+
+    pub fn cmp_c1(&mut self, cpu : &mut MOS6510) {
+        let operand: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("CMP (${:02X}, X)", operand).as_str());
+        let low_address = operand.wrapping_add(cpu.X);
+        let high_address = low_address.wrapping_add(1);
+        let low: u8 = cpu.mmu.read(self.u8s_to_u16(0x00, low_address));
+        let high: u8 = cpu.mmu.read(self.u8s_to_u16(0x00, operand));
+        let value = cpu.mmu.read(self.u8s_to_u16(high, low));
+        let result: u8 = cpu.A.wrapping_sub(value);
+        if result == 0 { cpu.set_flag(Flags::Z, 1) } else { cpu.set_flag(Flags::Z, 0) }
+        if value <= cpu.A { cpu.set_flag(Flags::C, 1) } else { cpu.set_flag(Flags::C, 0) }
+        self.check_and_set_n(value, cpu);
+        cpu.cycle += 6;
+    }
+
+    pub fn cmp_d1(&mut self, cpu : &mut MOS6510) {
+        let mut low: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("CMP (${:02X}), Y", low).as_str());
+        let high: u8 = low.wrapping_add(1);
+        let address: u16 = self.u8s_to_u16(high, low) + cpu.Y as u16;
+        let value = cpu.mmu.read(address);
+        let result: u8 = cpu.A.wrapping_sub(value);
+        if result == 0 { cpu.set_flag(Flags::Z, 1) } else { cpu.set_flag(Flags::Z, 0) }
+        if value <= cpu.A { cpu.set_flag(Flags::C, 1) } else { cpu.set_flag(Flags::C, 0) }
+        self.check_and_set_n(value, cpu);
+        cpu.cycle += 5;
+    }
+
     // --- HELPER FUNCTIONS ---
 
     pub fn check_and_set_n(&mut self, value : u8, cpu : &mut MOS6510) {
@@ -634,11 +738,7 @@ impl Opcode {
     }
 
     pub fn check_and_set_z(&mut self, value : u8, cpu : &mut MOS6510) {
-        if (value == 0) {
-            cpu.set_flag(Flags::Z, 1);
-        } else {
-            cpu.set_flag(Flags::Z, 0);
-        }
+        if value == 0 { cpu.set_flag(Flags::Z, 1) } else { cpu.set_flag(Flags::Z, 0) }
     }
 
     pub fn u8s_to_u16(&mut self, high : u8, low : u8) -> u16 {
@@ -651,5 +751,4 @@ impl Opcode {
         u8s[1] = (value & 0x00FF) as u8;    // low byte
         u8s
     }
-
 }
