@@ -88,9 +88,12 @@ impl Opcode {
         self.table[0xd9] = Opcode::cmp_d9;
         self.table[0xdd] = Opcode::cmp_dd;
         self.table[0xde] = Opcode::dec_de;
+        self.table[0xe0] = Opcode::cpx_e0;
+        self.table[0xe4] = Opcode::cpx_e4;
         self.table[0xe6] = Opcode::inc_e6;
         self.table[0xe8] = Opcode::inx_e8;
         self.table[0xea] = Opcode::nop_ea;
+        self.table[0xec] = Opcode::cpx_ec;
         self.table[0xee] = Opcode::inc_ee;
         self.table[0xf6] = Opcode::inc_f6;
         self.table[0xf8] = Opcode::sed_f8;
@@ -825,6 +828,39 @@ impl Opcode {
         self.check_and_set_n(value, cpu);
         self.check_and_set_z(value, cpu);
         cpu.cycle += 6;
+    }
+
+    pub fn cpx_e0(&mut self, cpu : &mut MOS6510) {
+        let operand: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("CPX #${:02X}", operand).as_str());
+        let result: u8 = cpu.X.wrapping_sub(operand);
+        if result == 0 { cpu.set_flag(Flags::Z, 1) } else { cpu.set_flag(Flags::Z, 0) }
+        if operand <= cpu.X { cpu.set_flag(Flags::C, 1) } else { cpu.set_flag(Flags::C, 0) }
+        self.check_and_set_n(result, cpu);
+        cpu.cycle += 2;
+    }
+
+    pub fn cpx_ec(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+        let high: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("CPX ${:02X}{:02X}", high, low).as_str());
+        let operand = cpu.mmu.read(self.u8s_to_u16(high, low));
+        let result: u8 = cpu.X.wrapping_sub(operand);
+        if result == 0 { cpu.set_flag(Flags::Z, 1) } else { cpu.set_flag(Flags::Z, 0) }
+        if operand <= cpu.X { cpu.set_flag(Flags::C, 1) } else { cpu.set_flag(Flags::C, 0) }
+        self.check_and_set_n(result, cpu);
+        cpu.cycle += 4;
+    }
+
+    pub fn cpx_e4(&mut self, cpu : &mut MOS6510) {
+        let address: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("CPX ${:02X}", address).as_str());
+        let operand = cpu.mmu.read(self.u8s_to_u16(0x00, address));
+        let result: u8 = cpu.X.wrapping_sub(operand);
+        if result == 0 { cpu.set_flag(Flags::Z, 1) } else { cpu.set_flag(Flags::Z, 0) }
+        if operand <= cpu.X { cpu.set_flag(Flags::C, 1) } else { cpu.set_flag(Flags::C, 0) }
+        self.check_and_set_n(result, cpu);
+        cpu.cycle += 3;
     }
 
     // --- HELPER FUNCTIONS ---
