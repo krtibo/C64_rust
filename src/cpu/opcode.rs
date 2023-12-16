@@ -73,12 +73,15 @@ impl Opcode {
         self.table[0xbc] = Opcode::ldy_bc;
         self.table[0xbd] = Opcode::lda_bd;
         self.table[0xbe] = Opcode::ldx_be;
+        self.table[0xc0] = Opcode::cpy_c0;
         self.table[0xc1] = Opcode::cmp_c1;
+        self.table[0xc4] = Opcode::cpy_c4;
         self.table[0xc5] = Opcode::cmp_c5;
         self.table[0xc6] = Opcode::dec_c6;
         self.table[0xc8] = Opcode::iny_c8;
         self.table[0xc9] = Opcode::cmp_c9;
         self.table[0xca] = Opcode::dex_ca;
+        self.table[0xcc] = Opcode::cpy_cc;
         self.table[0xcd] = Opcode::cmp_cd;
         self.table[0xce] = Opcode::dec_ce;
         self.table[0xd1] = Opcode::cmp_d1;
@@ -859,6 +862,39 @@ impl Opcode {
         let result: u8 = cpu.X.wrapping_sub(operand);
         if result == 0 { cpu.set_flag(Flags::Z, 1) } else { cpu.set_flag(Flags::Z, 0) }
         if operand <= cpu.X { cpu.set_flag(Flags::C, 1) } else { cpu.set_flag(Flags::C, 0) }
+        self.check_and_set_n(result, cpu);
+        cpu.cycle += 3;
+    }
+
+    pub fn cpy_c0(&mut self, cpu : &mut MOS6510) {
+        let operand: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("CPY #${:02X}", operand).as_str());
+        let result: u8 = cpu.Y.wrapping_sub(operand);
+        if result == 0 { cpu.set_flag(Flags::Z, 1) } else { cpu.set_flag(Flags::Z, 0) }
+        if operand <= cpu.Y { cpu.set_flag(Flags::C, 1) } else { cpu.set_flag(Flags::C, 0) }
+        self.check_and_set_n(result, cpu);
+        cpu.cycle += 2;
+    }
+
+    pub fn cpy_cc(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+        let high: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("CPY ${:02X}{:02X}", high, low).as_str());
+        let operand = cpu.mmu.read(self.u8s_to_u16(high, low));
+        let result: u8 = cpu.Y.wrapping_sub(operand);
+        if result == 0 { cpu.set_flag(Flags::Z, 1) } else { cpu.set_flag(Flags::Z, 0) }
+        if operand <= cpu.Y { cpu.set_flag(Flags::C, 1) } else { cpu.set_flag(Flags::C, 0) }
+        self.check_and_set_n(result, cpu);
+        cpu.cycle += 4;
+    }
+
+    pub fn cpy_c4(&mut self, cpu : &mut MOS6510) {
+        let address: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("CPY ${:02X}", address).as_str());
+        let operand = cpu.mmu.read(self.u8s_to_u16(0x00, address));
+        let result: u8 = cpu.Y.wrapping_sub(operand);
+        if result == 0 { cpu.set_flag(Flags::Z, 1) } else { cpu.set_flag(Flags::Z, 0) }
+        if operand <= cpu.Y { cpu.set_flag(Flags::C, 1) } else { cpu.set_flag(Flags::C, 0) }
         self.check_and_set_n(result, cpu);
         cpu.cycle += 3;
     }
