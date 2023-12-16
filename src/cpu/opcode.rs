@@ -30,9 +30,11 @@ impl Opcode {
         self.table[0x38] = Opcode::sec_38;
         self.table[0x48] = Opcode::pha_48;
         self.table[0x4a] = Opcode::lsr_a_4a;
+        self.table[0x4c] = Opcode::jmp_4c;
         self.table[0x58] = Opcode::cli_58;
         self.table[0x60] = Opcode::rts_60;
         self.table[0x68] = Opcode::pla_68;
+        self.table[0x6c] = Opcode::jmp_6c;
         self.table[0x78] = Opcode::sei_78;
         self.table[0x81] = Opcode::sta_81;
         self.table[0x84] = Opcode::sty_84;
@@ -897,6 +899,24 @@ impl Opcode {
         if operand <= cpu.Y { cpu.set_flag(Flags::C, 1) } else { cpu.set_flag(Flags::C, 0) }
         self.check_and_set_n(result, cpu);
         cpu.cycle += 3;
+    }
+
+    pub fn jmp_4c(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+        let high: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("JMP ${:02X}{:02X}", high, low).as_str());
+        cpu.PC = self.u8s_to_u16(high, low);
+        cpu.cycle += 3;
+    }
+
+    pub fn jmp_6c(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+        let high: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("JMP (${:02X}{:02X})", high, low).as_str());
+        let low_address: u16 = self.u8s_to_u16(high, low);
+        let high_address: u16 = self.u8s_to_u16(high, low.wrapping_add(1));
+        cpu.PC = self.u8s_to_u16(cpu.mmu.read(high_address), cpu.mmu.read(low_address));
+        cpu.cycle += 5;
     }
 
     // --- HELPER FUNCTIONS ---
