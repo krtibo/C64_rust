@@ -25,6 +25,7 @@ impl Opcode {
         self.table[0x08] = Opcode::php_08;
         self.table[0x0a] = Opcode::asl_a_0a;
         self.table[0x18] = Opcode::clc_18;
+        self.table[0x20] = Opcode::jsr_20;
         self.table[0x28] = Opcode::plp_28;
         self.table[0x2a] = Opcode::rol_a_2a;
         self.table[0x38] = Opcode::sec_38;
@@ -917,6 +918,17 @@ impl Opcode {
         let high_address: u16 = self.u8s_to_u16(high, low.wrapping_add(1));
         cpu.PC = self.u8s_to_u16(cpu.mmu.read(high_address), cpu.mmu.read(low_address));
         cpu.cycle += 5;
+    }
+
+    pub fn jsr_20(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+        let high: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("JSR ${:02X}{:02X}", high, low).as_str());
+        let pc_bytes = self.u16_to_u8s(cpu.PC);
+        cpu.push_on_stack(pc_bytes[0]);
+        cpu.push_on_stack(pc_bytes[1]);
+        cpu.PC = self.u8s_to_u16(high, low);
+        cpu.cycle += 6;
     }
 
     // --- HELPER FUNCTIONS ---
