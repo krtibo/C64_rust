@@ -88,9 +88,13 @@ impl Opcode {
         self.table[0xd9] = Opcode::cmp_d9;
         self.table[0xdd] = Opcode::cmp_dd;
         self.table[0xde] = Opcode::dec_de;
+        self.table[0xe6] = Opcode::inc_e6;
         self.table[0xe8] = Opcode::inx_e8;
         self.table[0xea] = Opcode::nop_ea;
+        self.table[0xee] = Opcode::inc_ee;
+        self.table[0xf6] = Opcode::inc_f6;
         self.table[0xf8] = Opcode::sed_f8;
+        self.table[0xfe] = Opcode::inc_fe;
     }
 
     pub fn unknown(&mut self, cpu : &mut MOS6510) {
@@ -771,6 +775,52 @@ impl Opcode {
 		self.current_operation.push_str(format!("DEC ${:02X}, X", operand).as_str());
         let address = self.u8s_to_u16(0x00, operand.wrapping_add(cpu.X));
         let value = cpu.mmu.read(address).wrapping_sub(1);
+        cpu.mmu.write(value, address);
+        self.check_and_set_n(value, cpu);
+        self.check_and_set_z(value, cpu);
+        cpu.cycle += 6;
+    }
+
+    pub fn inc_ee(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+        let high: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("INC ${:02X}{:02X}", high, low).as_str());
+        let address = self.u8s_to_u16(high, low);
+        let value = cpu.mmu.read(address).wrapping_add(1);
+        cpu.mmu.write(value, address);
+        self.check_and_set_n(value, cpu);
+        self.check_and_set_z(value, cpu);
+        cpu.cycle += 6;
+    }
+
+    pub fn inc_fe(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+        let high: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("INC ${:02X}{:02X}, X", high, low).as_str());
+        let address = self.u8s_to_u16(high, low) + cpu.X as u16;
+        let value = cpu.mmu.read(address).wrapping_add(1);
+        cpu.mmu.write(value, address);
+        self.check_and_set_n(value, cpu);
+        self.check_and_set_z(value, cpu);
+        cpu.cycle += 7;
+    }
+
+    pub fn inc_e6(&mut self, cpu : &mut MOS6510) {
+        let operand: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("INC ${:02X}", operand).as_str());
+        let address = self.u8s_to_u16(0x00, operand);
+        let value = cpu.mmu.read(address).wrapping_add(1);
+        cpu.mmu.write(value, address);
+        self.check_and_set_n(value, cpu);
+        self.check_and_set_z(value, cpu);
+        cpu.cycle += 5;
+    }
+
+    pub fn inc_f6(&mut self, cpu : &mut MOS6510) {
+        let operand: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("INC ${:02X}, X", operand).as_str());
+        let address = self.u8s_to_u16(0x00, operand.wrapping_add(cpu.X));
+        let value = cpu.mmu.read(address).wrapping_add(1);
         cpu.mmu.write(value, address);
         self.check_and_set_n(value, cpu);
         self.check_and_set_z(value, cpu);
