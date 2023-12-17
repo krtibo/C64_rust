@@ -22,9 +22,13 @@ impl Opcode {
 
     pub fn init(&mut self) {
         self.table[0x00] = Opcode::brk_00;
+        self.table[0x06] = Opcode::asl_06;
         self.table[0x08] = Opcode::php_08;
-        self.table[0x0a] = Opcode::asl_a_0a;
+        self.table[0x0a] = Opcode::asl_0a;
+        self.table[0x0e] = Opcode::asl_0e;
+        self.table[0x16] = Opcode::asl_16;
         self.table[0x18] = Opcode::clc_18;
+        self.table[0x1e] = Opcode::asl_1e;
         self.table[0x20] = Opcode::jsr_20;
         self.table[0x28] = Opcode::plp_28;
         self.table[0x2a] = Opcode::rol_a_2a;
@@ -143,18 +147,6 @@ impl Opcode {
         self.current_operation.push_str("PHP");
         cpu.push_on_stack(cpu.P);
         cpu.cycle += 3;
-    }
-
-    pub fn asl_a_0a(&mut self, cpu : &mut MOS6510) {
-        self.current_operation.push_str("ASL A");
-        let a_u16: u16 = (cpu.A << 1) as u16;
-        let a_u8s: [u8; 2] = self.u16_to_u8s(a_u16);
-        if a_u8s[0] == 0 { cpu.set_flag(Flags::C, 0) } else { cpu.set_flag(Flags::C, 1) };
-        self.check_and_set_n(a_u8s[1], cpu);
-        self.check_and_set_z(a_u8s[1], cpu);
-        if a_u8s[1] == 0 { cpu.set_flag(Flags::C, cpu.A >> 7) }
-        cpu.A = a_u8s[1];
-        cpu.cycle += 2;
     }
 
     pub fn clc_18(&mut self, cpu : &mut MOS6510) {
@@ -931,6 +923,69 @@ impl Opcode {
         cpu.cycle += 6;
     }
 
+    pub fn asl_0a(&mut self, cpu : &mut MOS6510) {
+		self.current_operation.push_str(format!("ASL A").as_str());
+        cpu.set_flag(Flags::C, self.get_bit(cpu.A, 7));
+        cpu.set_flag(Flags::N, self.get_bit(cpu.A, 6));
+        cpu.A = cpu.A << 1;
+        self.check_and_set_z(cpu.A, cpu);
+        cpu.cycle += 2;
+    }
+
+    pub fn asl_0e(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+        let high: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("ASL ${:02X}{:02X}", high, low).as_str());
+        let address = self.u8s_to_u16(high, low);
+        let mut operand = cpu.mmu.read(address);
+        cpu.set_flag(Flags::C, self.get_bit(operand, 7));
+        cpu.set_flag(Flags::N, self.get_bit(operand, 6));
+        operand = operand << 1;
+        cpu.mmu.write(operand, address);
+        self.check_and_set_z(operand, cpu);
+        cpu.cycle += 6;
+    }
+
+    pub fn asl_1e(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+        let high: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("ASL ${:02X}{:02X}, X", high, low).as_str());
+        let address = self.u8s_to_u16(high, low) + cpu.X as u16;
+        let mut operand = cpu.mmu.read(address);
+        cpu.set_flag(Flags::C, self.get_bit(operand, 7));
+        cpu.set_flag(Flags::N, self.get_bit(operand, 6));
+        operand = operand << 1;
+        cpu.mmu.write(operand, address);
+        self.check_and_set_z(operand, cpu);
+        cpu.cycle += 7;
+    }
+
+    pub fn asl_06(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("ASL ${:02X}", low).as_str());
+        let address = self.u8s_to_u16(0x00, low);
+        let mut operand = cpu.mmu.read(address);
+        cpu.set_flag(Flags::C, self.get_bit(operand, 7));
+        cpu.set_flag(Flags::N, self.get_bit(operand, 6));
+        operand = operand << 1;
+        cpu.mmu.write(operand, address);
+        self.check_and_set_z(operand, cpu);
+        cpu.cycle += 5;
+    }
+
+    pub fn asl_16(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("ASL ${:02X}", low).as_str());
+        let address = self.u8s_to_u16(0x00, low.wrapping_add(cpu.X));
+        let mut operand = cpu.mmu.read(address);
+        cpu.set_flag(Flags::C, self.get_bit(operand, 7));
+        cpu.set_flag(Flags::N, self.get_bit(operand, 6));
+        operand = operand << 1;
+        cpu.mmu.write(operand, address);
+        self.check_and_set_z(operand, cpu);
+        cpu.cycle += 6;
+    }
+
     // --- HELPER FUNCTIONS ---
 
     pub fn check_and_set_n(&mut self, value : u8, cpu : &mut MOS6510) {
@@ -954,5 +1009,11 @@ impl Opcode {
         u8s[0] = (value << 8) as u8;        // high byte
         u8s[1] = (value & 0x00FF) as u8;    // low byte
         u8s
+    }
+
+    pub fn get_bit(&mut self, byte: u8, index: u8) -> u8 {
+        let helper: u8 = 0b0000_0001 << index;
+        let result: u8 = byte & helper;
+        if result == 0 { return 0 } else { return 1 }
     }
 }
