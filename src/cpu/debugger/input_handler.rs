@@ -16,7 +16,7 @@ pub fn poll_keyboard(debugger: &mut Debugger, event: Event) -> u8 {
             Key::R => { 
                 if (!debugger.is_paused) { debugger.clear_snapshots(); }
                 return debugger.events.RESET; },
-            Key::Down => { 
+            Key::Down | Key::J => { 
                 if (debugger.is_paused) {
                     if (debugger.line_count - 1 > debugger.active_state) {
                         debugger.active_state += 1;
@@ -29,7 +29,7 @@ pub fn poll_keyboard(debugger: &mut Debugger, event: Event) -> u8 {
                 } 
                 return debugger.events.OK;
             },
-            Key::Up => {
+            Key::Up | Key::K => {
                 if (debugger.is_paused) {
                     if (debugger.active_state > 0) {
                         debugger.active_state -= 1;
