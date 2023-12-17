@@ -30,9 +30,13 @@ impl Opcode {
         self.table[0x18] = Opcode::clc_18;
         self.table[0x1e] = Opcode::asl_1e;
         self.table[0x20] = Opcode::jsr_20;
+        self.table[0x26] = Opcode::rol_26;
         self.table[0x28] = Opcode::plp_28;
-        self.table[0x2a] = Opcode::rol_a_2a;
+        self.table[0x2a] = Opcode::rol_2a;
+        self.table[0x2e] = Opcode::rol_2e;
+        self.table[0x36] = Opcode::rol_36;
         self.table[0x38] = Opcode::sec_38;
+        self.table[0x3e] = Opcode::rol_3e;
         self.table[0x46] = Opcode::lsr_46;
         self.table[0x48] = Opcode::pha_48;
         self.table[0x4a] = Opcode::lsr_4a;
@@ -163,17 +167,6 @@ impl Opcode {
         self.current_operation.push_str("PLP");
         cpu.P = cpu.pull_from_stack();
         cpu.cycle += 4;
-    }
-
-    pub fn rol_a_2a(&mut self, cpu : &mut MOS6510) {
-        self.current_operation.push_str("ROL A");
-        let new_A: u8 = cpu.A << 1;
-        if (cpu.get_flag(Flags::C)) { new_A | 1; }
-        cpu.set_flag(Flags::C, (cpu.A & (1 << 7)) >> 7);
-        cpu.set_flag(Flags::N, (cpu.A & (1 << 6)) >> 6);
-        self.check_and_set_z(new_A, cpu);
-        cpu.A = new_A;
-        cpu.cycle += 2;
     }
 
     pub fn sec_38(&mut self, cpu : &mut MOS6510) {
@@ -1040,6 +1033,79 @@ impl Opcode {
         cpu.set_flag(Flags::C, self.get_bit(operand, 0));
         operand = operand >> 1;
         cpu.mmu.write(operand, address);
+        self.check_and_set_z(operand, cpu);
+        cpu.cycle += 6;
+    }
+
+    pub fn rol_2a(&mut self, cpu : &mut MOS6510) {
+		self.current_operation.push_str(format!("ROL A").as_str());
+        cpu.set_flag(Flags::N, self.get_bit(cpu.A, 6));
+        let input_bit_7: u8 = self.get_bit(cpu.A, 7);
+        cpu.A = cpu.A << 1;
+        if cpu.get_flag(Flags::C) { cpu.A = cpu.A | 0b0000_0001 }
+        cpu.set_flag(Flags::C, input_bit_7);
+        self.check_and_set_z(cpu.A, cpu);
+        cpu.cycle += 2;
+    }
+
+    pub fn rol_2e(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+        let high: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("ROL ${:02X}{:02X}", high, low).as_str());
+        let address = self.u8s_to_u16(high, low);
+        let mut operand = cpu.mmu.read(address);
+        cpu.set_flag(Flags::N, self.get_bit(operand, 6));
+        let input_bit_7: u8 = self.get_bit(operand, 7);
+        operand = operand << 1;
+        if cpu.get_flag(Flags::C) { operand = operand | 0b0000_0001 }
+        cpu.mmu.write(operand, address);
+        cpu.set_flag(Flags::C, input_bit_7);
+        self.check_and_set_z(operand, cpu);
+        cpu.cycle += 6;
+    }
+
+    pub fn rol_3e(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+        let high: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("ROL ${:02X}{:02X}, X", high, low).as_str());
+        let address = self.u8s_to_u16(high, low) + cpu.X as u16;
+        let mut operand = cpu.mmu.read(address);
+        cpu.set_flag(Flags::N, self.get_bit(operand, 6));
+        let input_bit_7: u8 = self.get_bit(operand, 7);
+        operand = operand << 1;
+        if cpu.get_flag(Flags::C) { operand = operand | 0b0000_0001 }
+        cpu.mmu.write(operand, address);
+        cpu.set_flag(Flags::C, input_bit_7);
+        self.check_and_set_z(operand, cpu);
+        cpu.cycle += 7;
+    }
+
+    pub fn rol_26(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("ROL ${:02X}", low).as_str());
+        let address = self.u8s_to_u16(0x00, low);
+        let mut operand = cpu.mmu.read(address);
+        cpu.set_flag(Flags::N, self.get_bit(operand, 6));
+        let input_bit_7: u8 = self.get_bit(operand, 7);
+        operand = operand << 1;
+        if cpu.get_flag(Flags::C) { operand = operand | 0b0000_0001 }
+        cpu.mmu.write(operand, address);
+        cpu.set_flag(Flags::C, input_bit_7);
+        self.check_and_set_z(operand, cpu);
+        cpu.cycle += 5;
+    }
+
+    pub fn rol_36(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("ROL ${:02X}", low).as_str());
+        let address = self.u8s_to_u16(0x00, low.wrapping_add(cpu.X));
+        let mut operand = cpu.mmu.read(address);
+        cpu.set_flag(Flags::N, self.get_bit(operand, 6));
+        let input_bit_7: u8 = self.get_bit(operand, 7);
+        operand = operand << 1;
+        if cpu.get_flag(Flags::C) { operand = operand | 0b0000_0001 }
+        cpu.mmu.write(operand, address);
+        cpu.set_flag(Flags::C, input_bit_7);
         self.check_and_set_z(operand, cpu);
         cpu.cycle += 6;
     }
