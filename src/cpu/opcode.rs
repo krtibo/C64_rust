@@ -46,9 +46,14 @@ impl Opcode {
         self.table[0x58] = Opcode::cli_58;
         self.table[0x5e] = Opcode::lsr_5e;
         self.table[0x60] = Opcode::rts_60;
+        self.table[0x66] = Opcode::ror_66;
         self.table[0x68] = Opcode::pla_68;
+        self.table[0x6a] = Opcode::ror_6a;
         self.table[0x6c] = Opcode::jmp_6c;
+        self.table[0x6e] = Opcode::ror_6e;
+        self.table[0x76] = Opcode::ror_76;
         self.table[0x78] = Opcode::sei_78;
+        self.table[0x7e] = Opcode::ror_7e;
         self.table[0x81] = Opcode::sta_81;
         self.table[0x84] = Opcode::sty_84;
         self.table[0x85] = Opcode::sta_85;
@@ -1106,6 +1111,79 @@ impl Opcode {
         if cpu.get_flag(Flags::C) { operand = operand | 0b0000_0001 }
         cpu.mmu.write(operand, address);
         cpu.set_flag(Flags::C, input_bit_7);
+        self.check_and_set_z(operand, cpu);
+        cpu.cycle += 6;
+    }
+
+    pub fn ror_6a(&mut self, cpu : &mut MOS6510) {
+		self.current_operation.push_str(format!("ROR A").as_str());
+        if cpu.get_flag(Flags::C) { cpu.set_flag(Flags::N, 1) } else { cpu.set_flag(Flags::N, 0) }
+        let input_bit_0: u8 = self.get_bit(cpu.A, 0);
+        cpu.A = cpu.A >> 1;
+        if cpu.get_flag(Flags::C) { cpu.A = cpu.A | 0b1000_0000 }
+        cpu.set_flag(Flags::C, input_bit_0);
+        self.check_and_set_z(cpu.A, cpu);
+        cpu.cycle += 2;
+    }
+
+    pub fn ror_6e(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+        let high: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("ROR ${:02X}{:02X}", high, low).as_str());
+        let address = self.u8s_to_u16(high, low);
+        let mut operand = cpu.mmu.read(address);
+        if cpu.get_flag(Flags::C) { cpu.set_flag(Flags::N, 1) } else { cpu.set_flag(Flags::N, 0) }
+        let input_bit_0: u8 = self.get_bit(operand, 0);
+        operand = operand >> 1;
+        if cpu.get_flag(Flags::C) { operand = operand | 0b1000_0000 }
+        cpu.mmu.write(operand, address);
+        cpu.set_flag(Flags::C, input_bit_0);
+        self.check_and_set_z(operand, cpu);
+        cpu.cycle += 6;
+    }
+
+    pub fn ror_7e(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+        let high: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("ROR ${:02X}{:02X}, X", high, low).as_str());
+        let address = self.u8s_to_u16(high, low) + cpu.X as u16;
+        let mut operand = cpu.mmu.read(address);
+        if cpu.get_flag(Flags::C) { cpu.set_flag(Flags::N, 1) } else { cpu.set_flag(Flags::N, 0) }
+        let input_bit_0: u8 = self.get_bit(operand, 0);
+        operand = operand >> 1;
+        if cpu.get_flag(Flags::C) { operand = operand | 0b1000_0000 }
+        cpu.mmu.write(operand, address);
+        cpu.set_flag(Flags::C, input_bit_0);
+        self.check_and_set_z(operand, cpu);
+        cpu.cycle += 7;
+    }
+
+    pub fn ror_66(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("ROR ${:02X}", low).as_str());
+        let address = self.u8s_to_u16(0x00, low);
+        let mut operand = cpu.mmu.read(address);
+        if cpu.get_flag(Flags::C) { cpu.set_flag(Flags::N, 1) } else { cpu.set_flag(Flags::N, 0) }
+        let input_bit_0: u8 = self.get_bit(operand, 0);
+        operand = operand >> 1;
+        if cpu.get_flag(Flags::C) { operand = operand | 0b1000_0000 }
+        cpu.mmu.write(operand, address);
+        cpu.set_flag(Flags::C, input_bit_0);
+        self.check_and_set_z(operand, cpu);
+        cpu.cycle += 5;
+    }
+
+    pub fn ror_76(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("ROR ${:02X}", low).as_str());
+        let address = self.u8s_to_u16(0x00, low.wrapping_add(cpu.X));
+        let mut operand = cpu.mmu.read(address);
+        if cpu.get_flag(Flags::C) { cpu.set_flag(Flags::N, 1) } else { cpu.set_flag(Flags::N, 0) }
+        let input_bit_0: u8 = self.get_bit(operand, 0);
+        operand = operand >> 1;
+        if cpu.get_flag(Flags::C) { operand = operand | 0b1000_0000 }
+        cpu.mmu.write(operand, address);
+        cpu.set_flag(Flags::C, input_bit_0);
         self.check_and_set_z(operand, cpu);
         cpu.cycle += 6;
     }
