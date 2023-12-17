@@ -12,6 +12,7 @@ use std::fs::File;
 use std::io::Read;
 use std::{thread, time};
 use std::time::{Duration, Instant};
+use std::process;
 
 const STACK: u16 = 0x0100;
 
@@ -56,14 +57,14 @@ impl MOS6510 {
     }
 
     pub fn cycle(&mut self) {
-        let mut ppu: PPU = PPU::new();
         let mut dbg: Debugger = Debugger::new(0.5);
+        // let mut ppu: PPU = PPU::new();
         let mut opc: Opcode = Opcode::new();
         opc.init();
         let mut start = Instant::now();
         loop {
             // CHECK FOR EVENTS
-            if (!ppu.poll()) { return }
+            // if (!ppu.poll()) { return }
             
             // FETCHING
             // this will fetch a byte from the memory where the PC is then execute it
@@ -79,8 +80,8 @@ impl MOS6510 {
                 let fps: f32 = (1.0/(duration.as_millis()) as f32 * 1000.0);
                 //thread::sleep(time::Duration::from_millis(1000));
                 // render ppu
-                ppu.clear();
-                ppu.render(self, fps);
+                // ppu.clear();
+                // ppu.render(self, fps);
                 dbg.create_snapshot(format!("=================== PPU RENDER ==================="), self);
             }
 
@@ -90,8 +91,10 @@ impl MOS6510 {
                 loop {
                     dbg.clear();
                     dbg.render(&self.mmu.RAM);
-                    if (dbg.poll() == dbg.events.PAUSE) { break; }
-                    if (!ppu.poll()) { return }
+                    let dbg_event_stopped = dbg.poll();
+                    if dbg_event_stopped == dbg.events.PAUSE { break }
+                    // if (!ppu.poll()) { return }
+                    if dbg_event_stopped == dbg.events.EXIT { return }
                 }
             } 
 
@@ -99,6 +102,8 @@ impl MOS6510 {
             if (dbg_event == dbg.events.RESET) {
                 self.reset();
             }
+
+            if(dbg_event == dbg.events.EXIT) { return }
             
             // DEBUGGER RENDER
             dbg.clear();
@@ -106,7 +111,6 @@ impl MOS6510 {
             dbg.render(&self.mmu.RAM);
             // WHOA SLOW DOWN
             thread::sleep(time::Duration::from_millis(100));
-
         }
     } // cycle
 
