@@ -37,6 +37,7 @@ impl Opcode {
         self.table[0x36] = Opcode::rol_36;
         self.table[0x38] = Opcode::sec_38;
         self.table[0x3e] = Opcode::rol_3e;
+        self.table[0x40] = Opcode::rti_40;
         self.table[0x46] = Opcode::lsr_46;
         self.table[0x48] = Opcode::pha_48;
         self.table[0x4a] = Opcode::lsr_4a;
@@ -1185,6 +1186,16 @@ impl Opcode {
         cpu.mmu.write(operand, address);
         cpu.set_flag(Flags::C, input_bit_0);
         self.check_and_set_z(operand, cpu);
+        cpu.cycle += 6;
+    }
+
+    pub fn rti_40(&mut self, cpu : &mut MOS6510) {
+        let status: u8 = self.fetch(cpu);
+        let low: u8 = self.fetch(cpu);
+        let high: u8 = self.fetch(cpu);
+        self.current_operation.push_str(format!("RTI flags: {:08b} PC: {:02X}{:02X}", status, high, low).as_str());
+        cpu.PC = self.u8s_to_u16(high, low);
+        cpu.P = status;
         cpu.cycle += 6;
     }
 
