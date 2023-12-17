@@ -22,12 +22,20 @@ impl Opcode {
 
     pub fn init(&mut self) {
         self.table[0x00] = Opcode::brk_00;
+        self.table[0x01] = Opcode::ora_01;
+        self.table[0x05] = Opcode::ora_05;
         self.table[0x06] = Opcode::asl_06;
         self.table[0x08] = Opcode::php_08;
+        self.table[0x09] = Opcode::ora_09;
         self.table[0x0a] = Opcode::asl_0a;
         self.table[0x0e] = Opcode::asl_0e;
+        self.table[0x0d] = Opcode::ora_0d;
+        self.table[0x11] = Opcode::ora_11;
+        self.table[0x15] = Opcode::ora_15;
         self.table[0x16] = Opcode::asl_16;
         self.table[0x18] = Opcode::clc_18;
+        self.table[0x19] = Opcode::ora_19;
+        self.table[0x1d] = Opcode::ora_1d;
         self.table[0x1e] = Opcode::asl_1e;
         self.table[0x20] = Opcode::jsr_20;
         self.table[0x21] = Opcode::and_21;
@@ -1299,7 +1307,94 @@ impl Opcode {
         self.check_and_set_n(cpu.A, cpu);
         self.check_and_set_z(cpu.A, cpu);
         cpu.cycle += 5;
-        // TODO: cycle is 5+1 if page is crossed
+    }
+
+    pub fn ora_09(&mut self, cpu : &mut MOS6510) {
+        let operand: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("ORA #${:02X}", operand).as_str());
+        cpu.A = cpu.A | operand;
+        self.check_and_set_z(cpu.A, cpu);
+        self.check_and_set_n(cpu.A, cpu);
+        cpu.cycle += 2;
+    }
+
+    pub fn ora_0d(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+        let high: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("ORA ${:02X}{:02X}", low, high).as_str());
+        let operand: u8 = cpu.mmu.read(self.u8s_to_u16(high, low));
+        cpu.A = cpu.A | operand;
+        self.check_and_set_z(cpu.A, cpu);
+        self.check_and_set_n(cpu.A, cpu);
+        cpu.cycle += 4;
+    }
+
+    pub fn ora_1d(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+        let high: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("ORA ${:02X}{:02X}, X", low, high).as_str());
+        let operand: u8 = cpu.mmu.read(self.u8s_to_u16(high, low) + cpu.X as u16);
+        cpu.A = cpu.A | operand;
+        self.check_and_set_z(cpu.A, cpu);
+        self.check_and_set_n(cpu.A, cpu);
+        cpu.cycle += 4;
+    }
+
+    pub fn ora_19(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+        let high: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("ORA ${:02X}{:02X}, Y", low, high).as_str());
+        let operand: u8 = cpu.mmu.read(self.u8s_to_u16(high, low) + cpu.Y as u16);
+        cpu.A = cpu.A | operand;
+        self.check_and_set_z(cpu.A, cpu);
+        self.check_and_set_n(cpu.A, cpu);
+        cpu.cycle += 4;
+    }
+
+    pub fn ora_05(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("ORA ${:02X}", low).as_str());
+        let operand: u8 = cpu.mmu.read(self.u8s_to_u16(0x00, low));
+        cpu.A = cpu.A | operand;
+        self.check_and_set_z(cpu.A, cpu);
+        self.check_and_set_n(cpu.A, cpu);
+        cpu.cycle += 3;
+    }
+
+    pub fn ora_15(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("ORA ${:02X}, X", low).as_str());
+        let operand: u8 = cpu.mmu.read(self.u8s_to_u16(0x00, low) + cpu.X as u16);
+        cpu.A = cpu.A | operand;
+        self.check_and_set_z(cpu.A, cpu);
+        self.check_and_set_n(cpu.A, cpu);
+        cpu.cycle += 4;
+    }
+
+    pub fn ora_01(&mut self, cpu : &mut MOS6510) {
+        let operand: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("ORA (${:02X}, X)", operand).as_str());
+        let low_address = operand.wrapping_add(cpu.X);
+        let high_address = low_address.wrapping_add(1);
+        let low: u8 = cpu.mmu.read(self.u8s_to_u16(0x00, low_address));
+        let high: u8 = cpu.mmu.read(self.u8s_to_u16(0x00, high_address));
+        cpu.A = cpu.A | cpu.mmu.read(self.u8s_to_u16(high, low));    
+        self.check_and_set_n(cpu.A, cpu);
+        self.check_and_set_z(cpu.A, cpu);
+        cpu.cycle += 6;
+    }
+
+    pub fn ora_11(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("ORA (${:02X}), Y", low).as_str());
+        let high: u8 = low.wrapping_add(1);
+        let low_address: u8 = cpu.mmu.read(self.u8s_to_u16(0x00, low));
+        let high_address: u8 = cpu.mmu.read(self.u8s_to_u16(0x00, high));
+        let address: u16 = self.u8s_to_u16(high_address, low_address) + cpu.Y as u16;
+        cpu.A = cpu.A | cpu.mmu.read(address);
+        self.check_and_set_n(cpu.A, cpu);
+        self.check_and_set_z(cpu.A, cpu);
+        cpu.cycle += 5;
     }
 
     // --- HELPER FUNCTIONS ---
