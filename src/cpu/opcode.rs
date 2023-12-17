@@ -30,12 +30,20 @@ impl Opcode {
         self.table[0x18] = Opcode::clc_18;
         self.table[0x1e] = Opcode::asl_1e;
         self.table[0x20] = Opcode::jsr_20;
+        self.table[0x21] = Opcode::and_21;
+        self.table[0x25] = Opcode::and_25;
         self.table[0x26] = Opcode::rol_26;
         self.table[0x28] = Opcode::plp_28;
+        self.table[0x29] = Opcode::and_29;
         self.table[0x2a] = Opcode::rol_2a;
+        self.table[0x2d] = Opcode::and_2d;
         self.table[0x2e] = Opcode::rol_2e;
+        self.table[0x31] = Opcode::and_31;
+        self.table[0x35] = Opcode::and_35;
         self.table[0x36] = Opcode::rol_36;
         self.table[0x38] = Opcode::sec_38;
+        self.table[0x39] = Opcode::and_39;
+        self.table[0x3d] = Opcode::and_3d;
         self.table[0x3e] = Opcode::rol_3e;
         self.table[0x40] = Opcode::rti_40;
         self.table[0x46] = Opcode::lsr_46;
@@ -392,7 +400,7 @@ impl Opcode {
         let low_address = operand.wrapping_add(cpu.X);
         let high_address = low_address.wrapping_add(1);
         let low: u8 = cpu.mmu.read(self.u8s_to_u16(0x00, low_address));
-        let high: u8 = cpu.mmu.read(self.u8s_to_u16(0x00, operand));
+        let high: u8 = cpu.mmu.read(self.u8s_to_u16(0x00, high_address));
         cpu.A = cpu.mmu.read(self.u8s_to_u16(high, low));    
         self.check_and_set_n(cpu.A, cpu);
         self.check_and_set_z(cpu.A, cpu);
@@ -403,7 +411,9 @@ impl Opcode {
         let low: u8 = self.fetch(cpu);
 		self.current_operation.push_str(format!("LDA (${:02X}), Y", low).as_str());
         let high: u8 = low.wrapping_add(1);
-        let address: u16 = self.u8s_to_u16(high, low) + cpu.Y as u16;
+        let low_address: u8 = cpu.mmu.read(self.u8s_to_u16(0x00, low));
+        let high_address: u8 = cpu.mmu.read(self.u8s_to_u16(0x00, high));
+        let address: u16 = self.u8s_to_u16(high_address, low_address) + cpu.Y as u16;
         cpu.A = cpu.mmu.read(address);
         self.check_and_set_n(cpu.A, cpu);
         self.check_and_set_z(cpu.A, cpu);
@@ -567,7 +577,7 @@ impl Opcode {
         let low_address = operand.wrapping_add(cpu.X);
         let high_address = low_address.wrapping_add(1);
         let low: u8 = cpu.mmu.read(self.u8s_to_u16(0x00, low_address));
-        let high: u8 = cpu.mmu.read(self.u8s_to_u16(0x00, operand));
+        let high: u8 = cpu.mmu.read(self.u8s_to_u16(0x00, high_address));
         let address: u16 = self.u8s_to_u16(high, low);
         cpu.mmu.write(cpu.A, address);
         cpu.cycle += 6;
@@ -577,7 +587,9 @@ impl Opcode {
         let mut low: u8 = self.fetch(cpu);
 		self.current_operation.push_str(format!("STA (${:02X}), Y", low).as_str());
         let high: u8 = low.wrapping_add(1);
-        let address: u16 = self.u8s_to_u16(high, low) + cpu.Y as u16;
+        let low_address: u8 = cpu.mmu.read(self.u8s_to_u16(0x00, low));
+        let high_address: u8 = cpu.mmu.read(self.u8s_to_u16(0x00, high));
+        let address: u16 = self.u8s_to_u16(high_address, low_address) + cpu.Y as u16;
         cpu.mmu.write(cpu.A, address);
         cpu.cycle += 6;
     }
@@ -708,7 +720,7 @@ impl Opcode {
         let low_address = operand.wrapping_add(cpu.X);
         let high_address = low_address.wrapping_add(1);
         let low: u8 = cpu.mmu.read(self.u8s_to_u16(0x00, low_address));
-        let high: u8 = cpu.mmu.read(self.u8s_to_u16(0x00, operand));
+        let high: u8 = cpu.mmu.read(self.u8s_to_u16(0x00, high_address));
         let value = cpu.mmu.read(self.u8s_to_u16(high, low));
         let result: u8 = cpu.A.wrapping_sub(value);
         if result == 0 { cpu.set_flag(Flags::Z, 1) } else { cpu.set_flag(Flags::Z, 0) }
@@ -721,7 +733,9 @@ impl Opcode {
         let mut low: u8 = self.fetch(cpu);
 		self.current_operation.push_str(format!("CMP (${:02X}), Y", low).as_str());
         let high: u8 = low.wrapping_add(1);
-        let address: u16 = self.u8s_to_u16(high, low) + cpu.Y as u16;
+        let low_address: u8 = cpu.mmu.read(self.u8s_to_u16(0x00, low));
+        let high_address: u8 = cpu.mmu.read(self.u8s_to_u16(0x00, high));
+        let address: u16 = self.u8s_to_u16(high_address, low_address) + cpu.Y as u16;
         let value = cpu.mmu.read(address);
         let result: u8 = cpu.A.wrapping_sub(value);
         if result == 0 { cpu.set_flag(Flags::Z, 1) } else { cpu.set_flag(Flags::Z, 0) }
@@ -1197,6 +1211,95 @@ impl Opcode {
         cpu.PC = self.u8s_to_u16(high, low);
         cpu.P = status;
         cpu.cycle += 6;
+    }
+
+    pub fn and_29(&mut self, cpu : &mut MOS6510) {
+        let operand: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("AND #${:02X}", operand).as_str());
+        cpu.A = cpu.A & operand;
+        self.check_and_set_z(cpu.A, cpu);
+        self.check_and_set_n(cpu.A, cpu);
+        cpu.cycle += 2;
+    }
+
+    pub fn and_2d(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+        let high: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("AND ${:02X}{:02X}", low, high).as_str());
+        let operand: u8 = cpu.mmu.read(self.u8s_to_u16(high, low));
+        cpu.A = cpu.A & operand;
+        self.check_and_set_z(cpu.A, cpu);
+        self.check_and_set_n(cpu.A, cpu);
+        cpu.cycle += 4;
+    }
+
+    pub fn and_3d(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+        let high: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("AND ${:02X}{:02X}, X", low, high).as_str());
+        let operand: u8 = cpu.mmu.read(self.u8s_to_u16(high, low) + cpu.X as u16);
+        cpu.A = cpu.A & operand;
+        self.check_and_set_z(cpu.A, cpu);
+        self.check_and_set_n(cpu.A, cpu);
+        cpu.cycle += 4;
+    }
+
+    pub fn and_39(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+        let high: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("AND ${:02X}{:02X}, Y", low, high).as_str());
+        let operand: u8 = cpu.mmu.read(self.u8s_to_u16(high, low) + cpu.Y as u16);
+        cpu.A = cpu.A & operand;
+        self.check_and_set_z(cpu.A, cpu);
+        self.check_and_set_n(cpu.A, cpu);
+        cpu.cycle += 4;
+    }
+
+    pub fn and_25(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("AND ${:02X}", low).as_str());
+        let operand: u8 = cpu.mmu.read(self.u8s_to_u16(0x00, low));
+        cpu.A = cpu.A & operand;
+        self.check_and_set_z(cpu.A, cpu);
+        self.check_and_set_n(cpu.A, cpu);
+        cpu.cycle += 3;
+    }
+
+    pub fn and_35(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("AND ${:02X}, X", low).as_str());
+        let operand: u8 = cpu.mmu.read(self.u8s_to_u16(0x00, low) + cpu.X as u16);
+        cpu.A = cpu.A & operand;
+        self.check_and_set_z(cpu.A, cpu);
+        self.check_and_set_n(cpu.A, cpu);
+        cpu.cycle += 4;
+    }
+
+    pub fn and_21(&mut self, cpu : &mut MOS6510) {
+        let operand: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("AND (${:02X}, X)", operand).as_str());
+        let low_address = operand.wrapping_add(cpu.X);
+        let high_address = low_address.wrapping_add(1);
+        let low: u8 = cpu.mmu.read(self.u8s_to_u16(0x00, low_address));
+        let high: u8 = cpu.mmu.read(self.u8s_to_u16(0x00, high_address));
+        cpu.A = cpu.A & cpu.mmu.read(self.u8s_to_u16(high, low));    
+        self.check_and_set_n(cpu.A, cpu);
+        self.check_and_set_z(cpu.A, cpu);
+        cpu.cycle += 6;
+    }
+
+    pub fn and_31(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("AND (${:02X}), Y", low).as_str());
+        let high: u8 = low.wrapping_add(1);
+        let low_address: u8 = cpu.mmu.read(self.u8s_to_u16(0x00, low));
+        let high_address: u8 = cpu.mmu.read(self.u8s_to_u16(0x00, high));
+        let address: u16 = self.u8s_to_u16(high_address, low_address) + cpu.Y as u16;
+        cpu.A = cpu.A & cpu.mmu.read(address);
+        self.check_and_set_n(cpu.A, cpu);
+        self.check_and_set_z(cpu.A, cpu);
+        cpu.cycle += 5;
+        // TODO: cycle is 5+1 if page is crossed
     }
 
     // --- HELPER FUNCTIONS ---
