@@ -33,10 +33,14 @@ impl Opcode {
         self.table[0x28] = Opcode::plp_28;
         self.table[0x2a] = Opcode::rol_a_2a;
         self.table[0x38] = Opcode::sec_38;
+        self.table[0x46] = Opcode::lsr_46;
         self.table[0x48] = Opcode::pha_48;
-        self.table[0x4a] = Opcode::lsr_a_4a;
+        self.table[0x4a] = Opcode::lsr_4a;
         self.table[0x4c] = Opcode::jmp_4c;
+        self.table[0x4e] = Opcode::lsr_4e;
+        self.table[0x56] = Opcode::lsr_56;
         self.table[0x58] = Opcode::cli_58;
+        self.table[0x5e] = Opcode::lsr_5e;
         self.table[0x60] = Opcode::rts_60;
         self.table[0x68] = Opcode::pla_68;
         self.table[0x6c] = Opcode::jmp_6c;
@@ -182,15 +186,6 @@ impl Opcode {
         self.current_operation.push_str("PHA");
         cpu.push_on_stack(cpu.A);
         cpu.cycle += 3;
-    }
-
-    pub fn lsr_a_4a(&mut self, cpu : &mut MOS6510) {
-        self.current_operation.push_str("LSR A");
-        cpu.set_flag(Flags::N, 0);
-        cpu.set_flag(Flags::C, cpu.A & 0x01);
-        cpu.A = (cpu.A & 0b1111_1110) >> 1;
-        self.check_and_set_z(cpu.A, cpu);
-        cpu.cycle += 2;
     }
 
     pub fn cli_58(&mut self, cpu : &mut MOS6510) {
@@ -975,12 +970,75 @@ impl Opcode {
 
     pub fn asl_16(&mut self, cpu : &mut MOS6510) {
         let low: u8 = self.fetch(cpu);
-		self.current_operation.push_str(format!("ASL ${:02X}", low).as_str());
+		self.current_operation.push_str(format!("ASL ${:02X}, X", low).as_str());
         let address = self.u8s_to_u16(0x00, low.wrapping_add(cpu.X));
         let mut operand = cpu.mmu.read(address);
         cpu.set_flag(Flags::C, self.get_bit(operand, 7));
         cpu.set_flag(Flags::N, self.get_bit(operand, 6));
         operand = operand << 1;
+        cpu.mmu.write(operand, address);
+        self.check_and_set_z(operand, cpu);
+        cpu.cycle += 6;
+    }
+
+    pub fn lsr_4a(&mut self, cpu : &mut MOS6510) {
+		self.current_operation.push_str(format!("LSR A").as_str());
+        cpu.set_flag(Flags::N, 0);
+        cpu.set_flag(Flags::C, self.get_bit(cpu.A, 0));
+        cpu.A = cpu.A >> 1;
+        self.check_and_set_z(cpu.A, cpu);
+        cpu.cycle += 2;
+    }
+
+    pub fn lsr_4e(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+        let high: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("LSR ${:02X}{:02X}", high, low).as_str());
+        let address = self.u8s_to_u16(high, low);
+        let mut operand = cpu.mmu.read(address);
+        cpu.set_flag(Flags::N, 0);
+        cpu.set_flag(Flags::C, self.get_bit(operand, 0));
+        operand = operand >> 1;
+        cpu.mmu.write(operand, address);
+        self.check_and_set_z(operand, cpu);
+        cpu.cycle += 6;
+    }
+
+    pub fn lsr_5e(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+        let high: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("LSR ${:02X}{:02X}, X", high, low).as_str());
+        let address = self.u8s_to_u16(high, low) + cpu.X as u16;
+        let mut operand = cpu.mmu.read(address);
+        cpu.set_flag(Flags::N, 0);
+        cpu.set_flag(Flags::C, self.get_bit(operand, 0));
+        operand = operand >> 1;
+        cpu.mmu.write(operand, address);
+        self.check_and_set_z(operand, cpu);
+        cpu.cycle += 7;
+    }
+
+    pub fn lsr_46(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("LSR ${:02X}", low).as_str());
+        let address = self.u8s_to_u16(0x00, low);
+        let mut operand = cpu.mmu.read(address);
+        cpu.set_flag(Flags::N, 0);
+        cpu.set_flag(Flags::C, self.get_bit(operand, 0));
+        operand = operand >> 1;
+        cpu.mmu.write(operand, address);
+        self.check_and_set_z(operand, cpu);
+        cpu.cycle += 5;
+    }
+
+    pub fn lsr_56(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("LSR ${:02X}, X", low).as_str());
+        let address = self.u8s_to_u16(0x00, low.wrapping_add(cpu.X));
+        let mut operand = cpu.mmu.read(address);
+        cpu.set_flag(Flags::N, 0);
+        cpu.set_flag(Flags::C, self.get_bit(operand, 0));
+        operand = operand >> 1;
         cpu.mmu.write(operand, address);
         self.check_and_set_z(operand, cpu);
         cpu.cycle += 6;
