@@ -12,7 +12,6 @@ use std::fs::File;
 use std::io::Read;
 use std::{thread, time};
 use std::time::{Duration, Instant};
-use std::process;
 
 const STACK: u16 = 0x0100;
 
