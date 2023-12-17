@@ -7,15 +7,16 @@ use sfml::system::Vector2f;
 fn render_text(debugger: &mut Debugger, value: String, horizontal_position: f32, vertical_position: f32, color: Color) {
     let font_size = 22;
     let mut render_register = Text::new(&value, &debugger.font, font_size);
-    render_register.set_position((horizontal_position, vertical_position));
+    render_register.set_position(Vector2f::new(horizontal_position * debugger.scale, vertical_position * debugger.scale));
+    render_register.set_scale(Vector2f::new(debugger.scale, debugger.scale));
     render_register.set_fill_color(color);
     debugger.dbg.draw(&render_register);
 }
 
 fn render_sprite(debugger: &mut Debugger, texture: &Texture, position: Vector2f, scale: Vector2f) {
     let mut sprite = Sprite::with_texture(texture);
-    sprite.set_position(position);
-    sprite.set_scale(scale);
+    sprite.set_position(Vector2f::new(position.x * debugger.scale, position.y * debugger.scale));
+    sprite.set_scale(Vector2f::new(scale.x * debugger.scale, scale.y * debugger.scale));
     debugger.dbg.draw(&sprite);
 }
 
@@ -126,8 +127,5 @@ pub fn memory_map(debugger: &mut Debugger, ram: &[u8]) {
     unsafe {
         texture.update_from_pixels(&pixels, 256, 256, 0, 0);
     }
-    let mut sprite = Sprite::with_texture(&texture);
-    sprite.set_position((1050.0, 800.0));
-    sprite.set_scale((3.0, 3.0));
-    debugger.dbg.draw(&sprite);
+    render_sprite(debugger, &texture, Vector2f::new(1050.0, 800.0), Vector2f::new(3.0, 3.0));
 }

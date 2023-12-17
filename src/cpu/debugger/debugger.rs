@@ -60,14 +60,15 @@ pub struct Debugger {
 	BLACK				: Color,
 	pub snapshots		: VecDeque<Snapshot>,
 	pub events			: EventCodes,
-	pub is_paused		: bool
+	pub is_paused		: bool,
+    pub scale           : f32,
 }
 
 impl Debugger {
-	pub fn new() -> Debugger {
+	pub fn new(scale: f32) -> Debugger {
 		Debugger {
 			dbg				: RenderWindow::new (
-							(1850, 1600),
+							((1850.0 * scale) as u32, (1600.0 * scale) as u32),
 							"C64 DBG",
 							Style::TITLEBAR | Style::CLOSE,
 							&Default::default(),),
@@ -84,6 +85,7 @@ impl Debugger {
 			snapshots		: VecDeque::new(),
 			events			: EventCodes { OK: 0, EXIT: 1, PAUSE: 2, RESET: 3 },
 			is_paused		: false,
+            scale,
 		}
 	}
 
