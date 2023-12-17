@@ -54,14 +54,22 @@ impl Opcode {
         self.table[0x3d] = Opcode::and_3d;
         self.table[0x3e] = Opcode::rol_3e;
         self.table[0x40] = Opcode::rti_40;
+        self.table[0x41] = Opcode::eor_41;
+        self.table[0x45] = Opcode::eor_45;
         self.table[0x46] = Opcode::lsr_46;
         self.table[0x48] = Opcode::pha_48;
+        self.table[0x49] = Opcode::eor_49;
         self.table[0x4a] = Opcode::lsr_4a;
         self.table[0x4c] = Opcode::jmp_4c;
+        self.table[0x4d] = Opcode::eor_4d;
         self.table[0x4e] = Opcode::lsr_4e;
+        self.table[0x51] = Opcode::eor_51;
+        self.table[0x55] = Opcode::eor_55;
         self.table[0x56] = Opcode::lsr_56;
         self.table[0x58] = Opcode::cli_58;
+        self.table[0x59] = Opcode::eor_59;
         self.table[0x5e] = Opcode::lsr_5e;
+        self.table[0x5d] = Opcode::eor_5d;
         self.table[0x60] = Opcode::rts_60;
         self.table[0x66] = Opcode::ror_66;
         self.table[0x68] = Opcode::pla_68;
@@ -1392,6 +1400,94 @@ impl Opcode {
         let high_address: u8 = cpu.mmu.read(self.u8s_to_u16(0x00, high));
         let address: u16 = self.u8s_to_u16(high_address, low_address) + cpu.Y as u16;
         cpu.A = cpu.A | cpu.mmu.read(address);
+        self.check_and_set_n(cpu.A, cpu);
+        self.check_and_set_z(cpu.A, cpu);
+        cpu.cycle += 5;
+    }
+
+    pub fn eor_49(&mut self, cpu : &mut MOS6510) {
+        let operand: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("EOR #${:02X}", operand).as_str());
+        cpu.A = cpu.A ^ operand;
+        self.check_and_set_z(cpu.A, cpu);
+        self.check_and_set_n(cpu.A, cpu);
+        cpu.cycle += 2;
+    }
+
+    pub fn eor_4d(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+        let high: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("EOR ${:02X}{:02X}", low, high).as_str());
+        let operand: u8 = cpu.mmu.read(self.u8s_to_u16(high, low));
+        cpu.A = cpu.A ^ operand;
+        self.check_and_set_z(cpu.A, cpu);
+        self.check_and_set_n(cpu.A, cpu);
+        cpu.cycle += 4;
+    }
+
+    pub fn eor_5d(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+        let high: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("EOR ${:02X}{:02X}, X", low, high).as_str());
+        let operand: u8 = cpu.mmu.read(self.u8s_to_u16(high, low) + cpu.X as u16);
+        cpu.A = cpu.A ^ operand;
+        self.check_and_set_z(cpu.A, cpu);
+        self.check_and_set_n(cpu.A, cpu);
+        cpu.cycle += 4;
+    }
+
+    pub fn eor_59(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+        let high: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("EOR ${:02X}{:02X}, Y", low, high).as_str());
+        let operand: u8 = cpu.mmu.read(self.u8s_to_u16(high, low) + cpu.Y as u16);
+        cpu.A = cpu.A ^ operand;
+        self.check_and_set_z(cpu.A, cpu);
+        self.check_and_set_n(cpu.A, cpu);
+        cpu.cycle += 4;
+    }
+
+    pub fn eor_45(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("EOR ${:02X}", low).as_str());
+        let operand: u8 = cpu.mmu.read(self.u8s_to_u16(0x00, low));
+        cpu.A = cpu.A ^ operand;
+        self.check_and_set_z(cpu.A, cpu);
+        self.check_and_set_n(cpu.A, cpu);
+        cpu.cycle += 3;
+    }
+
+    pub fn eor_55(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("EOR ${:02X}, X", low).as_str());
+        let operand: u8 = cpu.mmu.read(self.u8s_to_u16(0x00, low) + cpu.X as u16);
+        cpu.A = cpu.A ^ operand;
+        self.check_and_set_z(cpu.A, cpu);
+        self.check_and_set_n(cpu.A, cpu);
+        cpu.cycle += 4;
+    }
+
+    pub fn eor_41(&mut self, cpu : &mut MOS6510) {
+        let operand: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("EOR (${:02X}, X)", operand).as_str());
+        let low_address = operand.wrapping_add(cpu.X);
+        let high_address = low_address.wrapping_add(1);
+        let low: u8 = cpu.mmu.read(self.u8s_to_u16(0x00, low_address));
+        let high: u8 = cpu.mmu.read(self.u8s_to_u16(0x00, high_address));
+        cpu.A = cpu.A ^ cpu.mmu.read(self.u8s_to_u16(high, low));    
+        self.check_and_set_n(cpu.A, cpu);
+        self.check_and_set_z(cpu.A, cpu);
+        cpu.cycle += 6;
+    }
+
+    pub fn eor_51(&mut self, cpu : &mut MOS6510) {
+        let low: u8 = self.fetch(cpu);
+		self.current_operation.push_str(format!("EOR (${:02X}), Y", low).as_str());
+        let high: u8 = low.wrapping_add(1);
+        let low_address: u8 = cpu.mmu.read(self.u8s_to_u16(0x00, low));
+        let high_address: u8 = cpu.mmu.read(self.u8s_to_u16(0x00, high));
+        let address: u16 = self.u8s_to_u16(high_address, low_address) + cpu.Y as u16;
+        cpu.A = cpu.A ^ cpu.mmu.read(address);
         self.check_and_set_n(cpu.A, cpu);
         self.check_and_set_z(cpu.A, cpu);
         cpu.cycle += 5;
