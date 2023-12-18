@@ -3,6 +3,7 @@
 
 extern crate sfml;
 use sfml::graphics::*;
+use sfml::graphics::Image;
 use sfml::SfBox;
 use sfml::window::*;
 use crate::cpu::MOS6510;
@@ -92,6 +93,13 @@ impl Debugger {
 	pub fn clear(&mut self) {
 		self.dbg.clear(self.DARK_BLUE);
 	}
+
+    pub fn init(&mut self) {
+        let image = Image::from_file("res/icon.png").unwrap();
+        unsafe {
+            self.dbg.set_icon(512, 512, image.pixel_data());
+        }
+    }
 
 	pub fn render(&mut self, ram: &[u8]) {
 		render_instructions(self);

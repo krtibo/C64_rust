@@ -57,6 +57,7 @@ impl MOS6510 {
 
     pub fn cycle(&mut self) {
         let mut dbg: Debugger = Debugger::new(0.5);
+        dbg.init();
         // let mut ppu: PPU = PPU::new();
         let mut opc: Opcode = Opcode::new();
         opc.init();
