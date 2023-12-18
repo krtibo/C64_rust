@@ -891,12 +891,9 @@ impl Opcode {
     }
 
     pub fn jmp_6c(&mut self, cpu : &mut MOS6510) {
-        let low: u8 = self.fetch(cpu);
-        let high: u8 = self.fetch(cpu);
-		self.current_operation.push_str(format!("JMP (${:02X}{:02X})", high, low).as_str());
-        let low_address: u16 = self.u8s_to_u16(high, low);
-        let high_address: u16 = self.u8s_to_u16(high, low.wrapping_add(1));
-        cpu.PC = self.u8s_to_u16(cpu.mmu.read(high_address), cpu.mmu.read(low_address));
+        let AddrReturn { operand, address, high, low } = self.absolute_indirect(cpu);
+		self.current_operation.push_str(format!("JMP (${:02X}{:02X})", high.unwrap(), low).as_str());
+        cpu.PC = address;
         cpu.cycle += 5;
     }
 
