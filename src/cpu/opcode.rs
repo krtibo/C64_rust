@@ -1531,6 +1531,12 @@ impl Opcode {
         if result == 0 { return 0 } else { return 1 }
     }
 
+    pub fn bcd(&mut self, byte: u8) -> u8 {
+        let high: u8 = (byte & 0xF0) >> 4;
+        let low: u8 = byte & 0x0F;
+        high * 10 + low
+    }
+
     pub fn absolute(&mut self, cpu : &mut MOS6510) -> AddrReturn {
         let low: u8 = self.fetch(cpu);
         let high: u8 = self.fetch(cpu);
