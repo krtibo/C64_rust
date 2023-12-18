@@ -362,11 +362,9 @@ impl Opcode {
     }
 
     pub fn lda_ad(&mut self, cpu : &mut MOS6510) {
-        let low: u8 = self.fetch(cpu);
-        let high: u8 = self.fetch(cpu);
-		self.current_operation.push_str(format!("LDA ${:02X}{:02X}", high, low).as_str());
-        let address: u16 = self.u8s_to_u16(high, low);
-        cpu.A = cpu.mmu.read(address);    
+        let AddrReturn { operand, address, high, low } = self.absolute(cpu);
+		self.current_operation.push_str(format!("LDA ${:02X}{:02X}", high.unwrap(), low).as_str());
+        cpu.A = operand;
         self.check_and_set_n(cpu.A, cpu);
         self.check_and_set_z(cpu.A, cpu);
         cpu.cycle += 4;
@@ -454,11 +452,9 @@ impl Opcode {
     }
 
     pub fn ldx_ae(&mut self, cpu : &mut MOS6510) {
-        let low: u8 = self.fetch(cpu);
-        let high: u8 = self.fetch(cpu);
-		self.current_operation.push_str(format!("LDX ${:02X}{:02X}", high, low).as_str());
-        let address: u16 = self.u8s_to_u16(high, low);
-        cpu.X = cpu.mmu.read(address);    
+        let AddrReturn { operand, address, high, low } = self.absolute(cpu);
+		self.current_operation.push_str(format!("LDX ${:02X}{:02X}", high.unwrap(), low).as_str());
+        cpu.X = operand;
         self.check_and_set_n(cpu.X, cpu);
         self.check_and_set_z(cpu.X, cpu);
         cpu.cycle += 4;
@@ -507,11 +503,9 @@ impl Opcode {
     }
 
     pub fn ldy_ac(&mut self, cpu : &mut MOS6510) {
-        let low: u8 = self.fetch(cpu);
-        let high: u8 = self.fetch(cpu);
-		self.current_operation.push_str(format!("LDY ${:02X}{:02X}", high, low).as_str());
-        let address: u16 = self.u8s_to_u16(high, low);
-        cpu.Y = cpu.mmu.read(address);
+        let AddrReturn { operand, address, high, low } = self.absolute(cpu);
+		self.current_operation.push_str(format!("LDY ${:02X}{:02X}", high.unwrap(), low).as_str());
+        cpu.Y = operand;
         self.check_and_set_n(cpu.Y, cpu);
         self.check_and_set_z(cpu.Y, cpu);
         cpu.cycle += 4;
@@ -551,10 +545,8 @@ impl Opcode {
     }
 
     pub fn sta_8d(&mut self, cpu : &mut MOS6510) {
-        let low: u8 = self.fetch(cpu);
-        let high: u8 = self.fetch(cpu);
-		self.current_operation.push_str(format!("STA ${:02X}{:02X}", high, low).as_str());
-        let address: u16 = self.u8s_to_u16(high, low);
+        let AddrReturn { operand, address, high, low } = self.absolute(cpu);
+		self.current_operation.push_str(format!("STA ${:02X}{:02X}", high.unwrap(), low).as_str());
         cpu.mmu.write(cpu.A, address);
         cpu.cycle += 4;
     }
@@ -618,10 +610,8 @@ impl Opcode {
     }
 
     pub fn stx_8e(&mut self, cpu : &mut MOS6510) {
-        let low: u8 = self.fetch(cpu);
-        let high: u8 = self.fetch(cpu);
-		self.current_operation.push_str(format!("STX ${:02X}{:02X}", high, low).as_str());
-        let address: u16 = self.u8s_to_u16(high, low);
+        let AddrReturn { operand, address, high, low } = self.absolute(cpu);
+		self.current_operation.push_str(format!("STX ${:02X}{:02X}", high.unwrap(), low).as_str());
         cpu.mmu.write(cpu.X, address);
         cpu.cycle += 4;
     }
@@ -644,10 +634,8 @@ impl Opcode {
     }
 
     pub fn sty_8c(&mut self, cpu : &mut MOS6510) {
-        let low: u8 = self.fetch(cpu);
-        let high: u8 = self.fetch(cpu);
-		self.current_operation.push_str(format!("STY ${:02X}{:02X}", high, low).as_str());
-        let address: u16 = self.u8s_to_u16(high, low);
+        let AddrReturn { operand, address, high, low } = self.absolute(cpu);
+		self.current_operation.push_str(format!("STY ${:02X}{:02X}", high.unwrap(), low).as_str());
         cpu.mmu.write(cpu.Y, address);
         cpu.cycle += 4;
     }
@@ -680,10 +668,8 @@ impl Opcode {
     }
 
     pub fn cmp_cd(&mut self, cpu : &mut MOS6510) {
-        let low: u8 = self.fetch(cpu);
-        let high: u8 = self.fetch(cpu);
-		self.current_operation.push_str(format!("CMP ${:02X}{:02X}", high, low).as_str());
-        let operand = cpu.mmu.read(self.u8s_to_u16(high, low));
+        let AddrReturn { operand, address, high, low } = self.absolute(cpu);
+		self.current_operation.push_str(format!("CMP ${:02X}{:02X}", high.unwrap(), low).as_str());
         let result: u8 = cpu.A.wrapping_sub(operand);
         if result == 0 { cpu.set_flag(Flags::Z, 1) } else { cpu.set_flag(Flags::Z, 0) }
         if operand <= cpu.A { cpu.set_flag(Flags::C, 1) } else { cpu.set_flag(Flags::C, 0) }
@@ -768,11 +754,9 @@ impl Opcode {
     }
 
     pub fn dec_ce(&mut self, cpu : &mut MOS6510) {
-        let low: u8 = self.fetch(cpu);
-        let high: u8 = self.fetch(cpu);
-		self.current_operation.push_str(format!("DEC ${:02X}{:02X}", high, low).as_str());
-        let address = self.u8s_to_u16(high, low);
-        let value = cpu.mmu.read(address).wrapping_sub(1);
+        let AddrReturn { operand, address, high, low } = self.absolute(cpu);
+		self.current_operation.push_str(format!("DEC ${:02X}{:02X}", high.unwrap(), low).as_str());
+        let value = operand.wrapping_sub(1);
         cpu.mmu.write(value, address);
         self.check_and_set_n(value, cpu);
         self.check_and_set_z(value, cpu);
@@ -814,11 +798,9 @@ impl Opcode {
     }
 
     pub fn inc_ee(&mut self, cpu : &mut MOS6510) {
-        let low: u8 = self.fetch(cpu);
-        let high: u8 = self.fetch(cpu);
-		self.current_operation.push_str(format!("INC ${:02X}{:02X}", high, low).as_str());
-        let address = self.u8s_to_u16(high, low);
-        let value = cpu.mmu.read(address).wrapping_add(1);
+        let AddrReturn { operand, address, high, low } = self.absolute(cpu);
+		self.current_operation.push_str(format!("INC ${:02X}{:02X}", high.unwrap(), low).as_str());
+        let value = operand.wrapping_add(1);
         cpu.mmu.write(value, address);
         self.check_and_set_n(value, cpu);
         self.check_and_set_z(value, cpu);
@@ -870,10 +852,8 @@ impl Opcode {
     }
 
     pub fn cpx_ec(&mut self, cpu : &mut MOS6510) {
-        let low: u8 = self.fetch(cpu);
-        let high: u8 = self.fetch(cpu);
-		self.current_operation.push_str(format!("CPX ${:02X}{:02X}", high, low).as_str());
-        let operand = cpu.mmu.read(self.u8s_to_u16(high, low));
+        let AddrReturn { operand, address, high, low } = self.absolute(cpu);
+		self.current_operation.push_str(format!("CPX ${:02X}{:02X}", high.unwrap(), low).as_str());
         let result: u8 = cpu.X.wrapping_sub(operand);
         if result == 0 { cpu.set_flag(Flags::Z, 1) } else { cpu.set_flag(Flags::Z, 0) }
         if operand <= cpu.X { cpu.set_flag(Flags::C, 1) } else { cpu.set_flag(Flags::C, 0) }
@@ -903,10 +883,8 @@ impl Opcode {
     }
 
     pub fn cpy_cc(&mut self, cpu : &mut MOS6510) {
-        let low: u8 = self.fetch(cpu);
-        let high: u8 = self.fetch(cpu);
-		self.current_operation.push_str(format!("CPY ${:02X}{:02X}", high, low).as_str());
-        let operand = cpu.mmu.read(self.u8s_to_u16(high, low));
+        let AddrReturn { operand, address, high, low } = self.absolute(cpu);
+		self.current_operation.push_str(format!("CPY ${:02X}{:02X}", high.unwrap(), low).as_str());
         let result: u8 = cpu.Y.wrapping_sub(operand);
         if result == 0 { cpu.set_flag(Flags::Z, 1) } else { cpu.set_flag(Flags::Z, 0) }
         if operand <= cpu.Y { cpu.set_flag(Flags::C, 1) } else { cpu.set_flag(Flags::C, 0) }
@@ -926,10 +904,9 @@ impl Opcode {
     }
 
     pub fn jmp_4c(&mut self, cpu : &mut MOS6510) {
-        let low: u8 = self.fetch(cpu);
-        let high: u8 = self.fetch(cpu);
-		self.current_operation.push_str(format!("JMP ${:02X}{:02X}", high, low).as_str());
-        cpu.PC = self.u8s_to_u16(high, low);
+        let AddrReturn { operand, address, high, low } = self.absolute(cpu);
+		self.current_operation.push_str(format!("JMP ${:02X}{:02X}", high.unwrap(), low).as_str());
+        cpu.PC = address;
         cpu.cycle += 3;
     }
 
@@ -944,13 +921,12 @@ impl Opcode {
     }
 
     pub fn jsr_20(&mut self, cpu : &mut MOS6510) {
-        let low: u8 = self.fetch(cpu);
-        let high: u8 = self.fetch(cpu);
-		self.current_operation.push_str(format!("JSR ${:02X}{:02X}", high, low).as_str());
+        let AddrReturn { operand, address, high, low } = self.absolute(cpu);
+		self.current_operation.push_str(format!("JSR ${:02X}{:02X}", high.unwrap(), low).as_str());
         let pc_bytes = self.u16_to_u8s(cpu.PC);
         cpu.push_on_stack(pc_bytes[0]);
         cpu.push_on_stack(pc_bytes[1]);
-        cpu.PC = self.u8s_to_u16(high, low);
+        cpu.PC = address;
         cpu.cycle += 6;
     }
 
@@ -964,11 +940,8 @@ impl Opcode {
     }
 
     pub fn asl_0e(&mut self, cpu : &mut MOS6510) {
-        let low: u8 = self.fetch(cpu);
-        let high: u8 = self.fetch(cpu);
-		self.current_operation.push_str(format!("ASL ${:02X}{:02X}", high, low).as_str());
-        let address = self.u8s_to_u16(high, low);
-        let mut operand = cpu.mmu.read(address);
+        let AddrReturn { mut operand, address, high, low } = self.absolute(cpu);
+		self.current_operation.push_str(format!("ASL ${:02X}{:02X}", high.unwrap(), low).as_str());
         cpu.set_flag(Flags::C, self.get_bit(operand, 7));
         cpu.set_flag(Flags::N, self.get_bit(operand, 6));
         operand = operand << 1;
@@ -1027,11 +1000,8 @@ impl Opcode {
     }
 
     pub fn lsr_4e(&mut self, cpu : &mut MOS6510) {
-        let low: u8 = self.fetch(cpu);
-        let high: u8 = self.fetch(cpu);
-		self.current_operation.push_str(format!("LSR ${:02X}{:02X}", high, low).as_str());
-        let address = self.u8s_to_u16(high, low);
-        let mut operand = cpu.mmu.read(address);
+        let AddrReturn { mut operand, address, high, low } = self.absolute(cpu);
+		self.current_operation.push_str(format!("LSR ${:02X}{:02X}", high.unwrap(), low).as_str());
         cpu.set_flag(Flags::N, 0);
         cpu.set_flag(Flags::C, self.get_bit(operand, 0));
         operand = operand >> 1;
@@ -1092,11 +1062,8 @@ impl Opcode {
     }
 
     pub fn rol_2e(&mut self, cpu : &mut MOS6510) {
-        let low: u8 = self.fetch(cpu);
-        let high: u8 = self.fetch(cpu);
-		self.current_operation.push_str(format!("ROL ${:02X}{:02X}", high, low).as_str());
-        let address = self.u8s_to_u16(high, low);
-        let mut operand = cpu.mmu.read(address);
+        let AddrReturn { mut operand, address, high, low } = self.absolute(cpu);
+		self.current_operation.push_str(format!("ROL ${:02X}{:02X}", high.unwrap(), low).as_str());
         cpu.set_flag(Flags::N, self.get_bit(operand, 6));
         let input_bit_7: u8 = self.get_bit(operand, 7);
         operand = operand << 1;
@@ -1140,7 +1107,7 @@ impl Opcode {
 
     pub fn rol_36(&mut self, cpu : &mut MOS6510) {
         let low: u8 = self.fetch(cpu);
-		self.current_operation.push_str(format!("ROL ${:02X}", low).as_str());
+		self.current_operation.push_str(format!("ROL ${:02X}, X", low).as_str());
         let address = self.u8s_to_u16(0x00, low.wrapping_add(cpu.X));
         let mut operand = cpu.mmu.read(address);
         cpu.set_flag(Flags::N, self.get_bit(operand, 6));
@@ -1165,11 +1132,8 @@ impl Opcode {
     }
 
     pub fn ror_6e(&mut self, cpu : &mut MOS6510) {
-        let low: u8 = self.fetch(cpu);
-        let high: u8 = self.fetch(cpu);
-		self.current_operation.push_str(format!("ROR ${:02X}{:02X}", high, low).as_str());
-        let address = self.u8s_to_u16(high, low);
-        let mut operand = cpu.mmu.read(address);
+        let AddrReturn { mut operand, address, high, low } = self.absolute(cpu);
+		self.current_operation.push_str(format!("ROR ${:02X}{:02X}", high.unwrap(), low).as_str());
         if cpu.get_flag(Flags::C) { cpu.set_flag(Flags::N, 1) } else { cpu.set_flag(Flags::N, 0) }
         let input_bit_0: u8 = self.get_bit(operand, 0);
         operand = operand >> 1;
@@ -1246,10 +1210,8 @@ impl Opcode {
     }
 
     pub fn and_2d(&mut self, cpu : &mut MOS6510) {
-        let low: u8 = self.fetch(cpu);
-        let high: u8 = self.fetch(cpu);
-		self.current_operation.push_str(format!("AND ${:02X}{:02X}", low, high).as_str());
-        let operand: u8 = cpu.mmu.read(self.u8s_to_u16(high, low));
+        let AddrReturn { operand, address, high, low } = self.absolute(cpu);
+		self.current_operation.push_str(format!("AND ${:02X}{:02X}", high.unwrap(), low).as_str());
         cpu.A = cpu.A & operand;
         self.check_and_set_z(cpu.A, cpu);
         self.check_and_set_n(cpu.A, cpu);
@@ -1259,7 +1221,7 @@ impl Opcode {
     pub fn and_3d(&mut self, cpu : &mut MOS6510) {
         let low: u8 = self.fetch(cpu);
         let high: u8 = self.fetch(cpu);
-		self.current_operation.push_str(format!("AND ${:02X}{:02X}, X", low, high).as_str());
+		self.current_operation.push_str(format!("AND ${:02X}{:02X}, X", high, low).as_str());
         let operand: u8 = cpu.mmu.read(self.u8s_to_u16(high, low) + cpu.X as u16);
         cpu.A = cpu.A & operand;
         self.check_and_set_z(cpu.A, cpu);
@@ -1270,7 +1232,7 @@ impl Opcode {
     pub fn and_39(&mut self, cpu : &mut MOS6510) {
         let low: u8 = self.fetch(cpu);
         let high: u8 = self.fetch(cpu);
-		self.current_operation.push_str(format!("AND ${:02X}{:02X}, Y", low, high).as_str());
+		self.current_operation.push_str(format!("AND ${:02X}{:02X}, Y", high, low).as_str());
         let operand: u8 = cpu.mmu.read(self.u8s_to_u16(high, low) + cpu.Y as u16);
         cpu.A = cpu.A & operand;
         self.check_and_set_z(cpu.A, cpu);
@@ -1334,10 +1296,8 @@ impl Opcode {
     }
 
     pub fn ora_0d(&mut self, cpu : &mut MOS6510) {
-        let low: u8 = self.fetch(cpu);
-        let high: u8 = self.fetch(cpu);
-		self.current_operation.push_str(format!("ORA ${:02X}{:02X}", low, high).as_str());
-        let operand: u8 = cpu.mmu.read(self.u8s_to_u16(high, low));
+        let AddrReturn { operand, address, high, low } = self.absolute(cpu);
+		self.current_operation.push_str(format!("ORA ${:02X}{:02X}", high.unwrap(), low).as_str());
         cpu.A = cpu.A | operand;
         self.check_and_set_z(cpu.A, cpu);
         self.check_and_set_n(cpu.A, cpu);
@@ -1347,7 +1307,7 @@ impl Opcode {
     pub fn ora_1d(&mut self, cpu : &mut MOS6510) {
         let low: u8 = self.fetch(cpu);
         let high: u8 = self.fetch(cpu);
-		self.current_operation.push_str(format!("ORA ${:02X}{:02X}, X", low, high).as_str());
+		self.current_operation.push_str(format!("ORA ${:02X}{:02X}, X", high, low).as_str());
         let operand: u8 = cpu.mmu.read(self.u8s_to_u16(high, low) + cpu.X as u16);
         cpu.A = cpu.A | operand;
         self.check_and_set_z(cpu.A, cpu);
@@ -1358,7 +1318,7 @@ impl Opcode {
     pub fn ora_19(&mut self, cpu : &mut MOS6510) {
         let low: u8 = self.fetch(cpu);
         let high: u8 = self.fetch(cpu);
-		self.current_operation.push_str(format!("ORA ${:02X}{:02X}, Y", low, high).as_str());
+		self.current_operation.push_str(format!("ORA ${:02X}{:02X}, Y", high, low).as_str());
         let operand: u8 = cpu.mmu.read(self.u8s_to_u16(high, low) + cpu.Y as u16);
         cpu.A = cpu.A | operand;
         self.check_and_set_z(cpu.A, cpu);
@@ -1422,10 +1382,8 @@ impl Opcode {
     }
 
     pub fn eor_4d(&mut self, cpu : &mut MOS6510) {
-        let low: u8 = self.fetch(cpu);
-        let high: u8 = self.fetch(cpu);
-		self.current_operation.push_str(format!("EOR ${:02X}{:02X}", low, high).as_str());
-        let operand: u8 = cpu.mmu.read(self.u8s_to_u16(high, low));
+        let AddrReturn { operand, address, high, low } = self.absolute(cpu);
+		self.current_operation.push_str(format!("EOR ${:02X}{:02X}", high.unwrap(), low).as_str());
         cpu.A = cpu.A ^ operand;
         self.check_and_set_z(cpu.A, cpu);
         self.check_and_set_n(cpu.A, cpu);
@@ -1435,7 +1393,7 @@ impl Opcode {
     pub fn eor_5d(&mut self, cpu : &mut MOS6510) {
         let low: u8 = self.fetch(cpu);
         let high: u8 = self.fetch(cpu);
-		self.current_operation.push_str(format!("EOR ${:02X}{:02X}, X", low, high).as_str());
+		self.current_operation.push_str(format!("EOR ${:02X}{:02X}, X", high, low).as_str());
         let operand: u8 = cpu.mmu.read(self.u8s_to_u16(high, low) + cpu.X as u16);
         cpu.A = cpu.A ^ operand;
         self.check_and_set_z(cpu.A, cpu);
@@ -1446,7 +1404,7 @@ impl Opcode {
     pub fn eor_59(&mut self, cpu : &mut MOS6510) {
         let low: u8 = self.fetch(cpu);
         let high: u8 = self.fetch(cpu);
-		self.current_operation.push_str(format!("EOR ${:02X}{:02X}, Y", low, high).as_str());
+		self.current_operation.push_str(format!("EOR ${:02X}{:02X}, Y", high, low).as_str());
         let operand: u8 = cpu.mmu.read(self.u8s_to_u16(high, low) + cpu.Y as u16);
         cpu.A = cpu.A ^ operand;
         self.check_and_set_z(cpu.A, cpu);
