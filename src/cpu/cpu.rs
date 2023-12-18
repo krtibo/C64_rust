@@ -6,7 +6,7 @@
 
 use super::mmu::MMU;
 use super::debugger::debugger::Debugger;
-use super::opcode::Opcode;
+use super::Opcode;
 use super::ppu::PPU;
 use std::fs::File;
 use std::io::Read;

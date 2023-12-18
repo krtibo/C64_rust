@@ -3,8 +3,9 @@
 #![allow(non_snake_case)]
 #![allow(unused)]
 
-use super::cpu::MOS6510;
-use super::cpu::Flags;
+use super::super::MOS6510;
+use super::super::Flags;
+use super::*;
 
 pub struct AddrReturn {
     pub operand : u8,
@@ -110,7 +111,7 @@ impl Opcode {
         self.table[0xa5] = Opcode::lda_a5;
         self.table[0xa6] = Opcode::ldx_a6;
         self.table[0xa8] = Opcode::tay_a8;
-        self.table[0xa9] = Opcode::lda_a9;
+        self.table[0xa9] = lda_a9;
         self.table[0xaa] = Opcode::tax_aa;
         self.table[0xac] = Opcode::ldy_ac;
         self.table[0xad] = Opcode::lda_ad;
