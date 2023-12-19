@@ -91,7 +91,7 @@ impl Opcode {
         self.table[0x84] = sty_84;
         self.table[0x85] = sta_85;
         self.table[0x86] = stx_86;
-        self.table[0x88] = Opcode::dey_88;
+        self.table[0x88] = dey_88;
         self.table[0x8a] = txa_8a;
         self.table[0x8c] = sty_8c;
         self.table[0x8d] = sta_8d;
@@ -126,34 +126,34 @@ impl Opcode {
         self.table[0xbc] = ldy_bc;
         self.table[0xbd] = lda_bd;
         self.table[0xbe] = ldx_be;
-        self.table[0xc0] = Opcode::cpy_c0;
-        self.table[0xc1] = Opcode::cmp_c1;
-        self.table[0xc4] = Opcode::cpy_c4;
-        self.table[0xc5] = Opcode::cmp_c5;
-        self.table[0xc6] = Opcode::dec_c6;
-        self.table[0xc8] = Opcode::iny_c8;
-        self.table[0xc9] = Opcode::cmp_c9;
-        self.table[0xca] = Opcode::dex_ca;
-        self.table[0xcc] = Opcode::cpy_cc;
-        self.table[0xcd] = Opcode::cmp_cd;
-        self.table[0xce] = Opcode::dec_ce;
-        self.table[0xd1] = Opcode::cmp_d1;
-        self.table[0xd5] = Opcode::cmp_d5;
-        self.table[0xd6] = Opcode::dec_d6;
+        self.table[0xc0] = cpy_c0;
+        self.table[0xc1] = cmp_c1;
+        self.table[0xc4] = cpy_c4;
+        self.table[0xc5] = cmp_c5;
+        self.table[0xc6] = dec_c6;
+        self.table[0xc8] = iny_c8;
+        self.table[0xc9] = cmp_c9;
+        self.table[0xca] = dex_ca;
+        self.table[0xcc] = cpy_cc;
+        self.table[0xcd] = cmp_cd;
+        self.table[0xce] = dec_ce;
+        self.table[0xd1] = cmp_d1;
+        self.table[0xd5] = cmp_d5;
+        self.table[0xd6] = dec_d6;
         self.table[0xd8] = Opcode::cld_d8;
-        self.table[0xd9] = Opcode::cmp_d9;
-        self.table[0xdd] = Opcode::cmp_dd;
-        self.table[0xde] = Opcode::dec_de;
-        self.table[0xe0] = Opcode::cpx_e0;
-        self.table[0xe4] = Opcode::cpx_e4;
-        self.table[0xe6] = Opcode::inc_e6;
-        self.table[0xe8] = Opcode::inx_e8;
+        self.table[0xd9] = cmp_d9;
+        self.table[0xdd] = cmp_dd;
+        self.table[0xde] = dec_de;
+        self.table[0xe0] = cpx_e0;
+        self.table[0xe4] = cpx_e4;
+        self.table[0xe6] = inc_e6;
+        self.table[0xe8] = inx_e8;
         self.table[0xea] = Opcode::nop_ea;
-        self.table[0xec] = Opcode::cpx_ec;
-        self.table[0xee] = Opcode::inc_ee;
-        self.table[0xf6] = Opcode::inc_f6;
+        self.table[0xec] = cpx_ec;
+        self.table[0xee] = inc_ee;
+        self.table[0xf6] = inc_f6;
         self.table[0xf8] = Opcode::sed_f8;
-        self.table[0xfe] = Opcode::inc_fe;
+        self.table[0xfe] = inc_fe;
     }
 
     pub fn unknown(&mut self, cpu : &mut MOS6510) {
@@ -249,13 +249,13 @@ impl Opcode {
         cpu.cycle += 2;
     }
 
-    pub fn dey_88(&mut self, cpu : &mut MOS6510) {
-        self.current_operation.push_str("DEY");
-        cpu.Y = cpu.Y.wrapping_sub(1);
-        self.check_and_set_n(cpu.Y, cpu);
-        self.check_and_set_z(cpu.Y, cpu);
-        cpu.cycle += 2;
-    }
+    // pub fn dey_88(&mut self, cpu : &mut MOS6510) {
+    //     self.current_operation.push_str("DEY");
+    //     cpu.Y = cpu.Y.wrapping_sub(1);
+    //     self.check_and_set_n(cpu.Y, cpu);
+    //     self.check_and_set_z(cpu.Y, cpu);
+    //     cpu.cycle += 2;
+    // }
 
     // pub fn txa_8a(&mut self, cpu : &mut MOS6510) {
     //     self.current_operation.push_str("TXA");
@@ -312,21 +312,21 @@ impl Opcode {
     //     cpu.cycle += 2;
     // }
 
-    pub fn iny_c8(&mut self, cpu : &mut MOS6510) {
-        self.current_operation.push_str("INY");
-        cpu.Y = cpu.Y.wrapping_add(1);
-        self.check_and_set_n(cpu.Y, cpu);
-        self.check_and_set_z(cpu.Y, cpu);
-        cpu.cycle += 2;
-    }
+    // pub fn iny_c8(&mut self, cpu : &mut MOS6510) {
+    //     self.current_operation.push_str("INY");
+    //     cpu.Y = cpu.Y.wrapping_add(1);
+    //     self.check_and_set_n(cpu.Y, cpu);
+    //     self.check_and_set_z(cpu.Y, cpu);
+    //     cpu.cycle += 2;
+    // }
 
-    pub fn dex_ca(&mut self, cpu : &mut MOS6510) {
-        self.current_operation.push_str("DEX");
-        cpu.X -= 1;
-        self.check_and_set_n(cpu.X, cpu);
-        self.check_and_set_z(cpu.X, cpu);
-        cpu.cycle += 2;
-    }
+    // pub fn dex_ca(&mut self, cpu : &mut MOS6510) {
+    //     self.current_operation.push_str("DEX");
+    //     cpu.X -= 1;
+    //     self.check_and_set_n(cpu.X, cpu);
+    //     self.check_and_set_z(cpu.X, cpu);
+    //     cpu.cycle += 2;
+    // }
 
     pub fn cld_d8(&mut self, cpu : &mut MOS6510) {
         self.current_operation.push_str("CLD");
@@ -334,13 +334,13 @@ impl Opcode {
         cpu.cycle += 2;
     }
 
-    pub fn inx_e8(&mut self, cpu : &mut MOS6510) {
-        self.current_operation.push_str("INX");
-        cpu.X = cpu.X.wrapping_add(1);
-        self.check_and_set_n(cpu.X, cpu);
-        self.check_and_set_z(cpu.X, cpu);
-        cpu.cycle += 2;
-    }
+    // pub fn inx_e8(&mut self, cpu : &mut MOS6510) {
+    //     self.current_operation.push_str("INX");
+    //     cpu.X = cpu.X.wrapping_add(1);
+    //     self.check_and_set_n(cpu.X, cpu);
+    //     self.check_and_set_z(cpu.X, cpu);
+    //     cpu.cycle += 2;
+    // }
 
     pub fn nop_ea(&mut self, cpu : &mut MOS6510) {
         self.current_operation.push_str("NOP");
@@ -611,225 +611,225 @@ impl Opcode {
   //       cpu.cycle += 4;
   //   }
 
-    pub fn cmp_c9(&mut self, cpu : &mut MOS6510) {
-        let operand: u8 = self.fetch(cpu);
-		self.current_operation.push_str(format!("CMP #${:02X}", operand).as_str());
-        let result: u8 = cpu.A.wrapping_sub(operand);
-        if result == 0 { cpu.set_flag(Flags::Z, 1) } else { cpu.set_flag(Flags::Z, 0) }
-        if operand <= cpu.A { cpu.set_flag(Flags::C, 1) } else { cpu.set_flag(Flags::C, 0) }
-        self.check_and_set_n(result, cpu);
-        cpu.cycle += 2;
-    }
+  //   pub fn cmp_c9(&mut self, cpu : &mut MOS6510) {
+  //       let operand: u8 = self.fetch(cpu);
+		// self.current_operation.push_str(format!("CMP #${:02X}", operand).as_str());
+  //       let result: u8 = cpu.A.wrapping_sub(operand);
+  //       if result == 0 { cpu.set_flag(Flags::Z, 1) } else { cpu.set_flag(Flags::Z, 0) }
+  //       if operand <= cpu.A { cpu.set_flag(Flags::C, 1) } else { cpu.set_flag(Flags::C, 0) }
+  //       self.check_and_set_n(result, cpu);
+  //       cpu.cycle += 2;
+  //   }
 
-    pub fn cmp_cd(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { operand, address, high, low } = self.absolute(cpu);
-		self.current_operation.push_str(format!("CMP ${:02X}{:02X}", high.unwrap(), low).as_str());
-        let result: u8 = cpu.A.wrapping_sub(operand);
-        if result == 0 { cpu.set_flag(Flags::Z, 1) } else { cpu.set_flag(Flags::Z, 0) }
-        if operand <= cpu.A { cpu.set_flag(Flags::C, 1) } else { cpu.set_flag(Flags::C, 0) }
-        self.check_and_set_n(result, cpu);
-        cpu.cycle += 4;
-    }
+  //   pub fn cmp_cd(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { operand, address, high, low } = self.absolute(cpu);
+		// self.current_operation.push_str(format!("CMP ${:02X}{:02X}", high.unwrap(), low).as_str());
+  //       let result: u8 = cpu.A.wrapping_sub(operand);
+  //       if result == 0 { cpu.set_flag(Flags::Z, 1) } else { cpu.set_flag(Flags::Z, 0) }
+  //       if operand <= cpu.A { cpu.set_flag(Flags::C, 1) } else { cpu.set_flag(Flags::C, 0) }
+  //       self.check_and_set_n(result, cpu);
+  //       cpu.cycle += 4;
+  //   }
 
-    pub fn cmp_dd(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { operand, address, high, low } = self.absolute_indexed(cpu.X as u16, cpu);
-		self.current_operation.push_str(format!("CMP ${:02X}{:02X}, X", high.unwrap(), low).as_str());
-        let result: u8 = cpu.A.wrapping_sub(operand);
-        if result == 0 { cpu.set_flag(Flags::Z, 1) } else { cpu.set_flag(Flags::Z, 0) }
-        if operand <= cpu.A { cpu.set_flag(Flags::C, 1) } else { cpu.set_flag(Flags::C, 0) }
-        self.check_and_set_n(result, cpu);
-        cpu.cycle += 4;
-    }
+  //   pub fn cmp_dd(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { operand, address, high, low } = self.absolute_indexed(cpu.X as u16, cpu);
+		// self.current_operation.push_str(format!("CMP ${:02X}{:02X}, X", high.unwrap(), low).as_str());
+  //       let result: u8 = cpu.A.wrapping_sub(operand);
+  //       if result == 0 { cpu.set_flag(Flags::Z, 1) } else { cpu.set_flag(Flags::Z, 0) }
+  //       if operand <= cpu.A { cpu.set_flag(Flags::C, 1) } else { cpu.set_flag(Flags::C, 0) }
+  //       self.check_and_set_n(result, cpu);
+  //       cpu.cycle += 4;
+  //   }
 
-    pub fn cmp_d9(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { operand, address, high, low } = self.absolute_indexed(cpu.Y as u16, cpu);
-		self.current_operation.push_str(format!("CMP ${:02X}{:02X}, Y", high.unwrap(), low).as_str());
-        let result: u8 = cpu.A.wrapping_sub(operand);
-        if result == 0 { cpu.set_flag(Flags::Z, 1) } else { cpu.set_flag(Flags::Z, 0) }
-        if operand <= cpu.A { cpu.set_flag(Flags::C, 1) } else { cpu.set_flag(Flags::C, 0) }
-        self.check_and_set_n(result, cpu);
-        cpu.cycle += 4;
-    }
+  //   pub fn cmp_d9(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { operand, address, high, low } = self.absolute_indexed(cpu.Y as u16, cpu);
+		// self.current_operation.push_str(format!("CMP ${:02X}{:02X}, Y", high.unwrap(), low).as_str());
+  //       let result: u8 = cpu.A.wrapping_sub(operand);
+  //       if result == 0 { cpu.set_flag(Flags::Z, 1) } else { cpu.set_flag(Flags::Z, 0) }
+  //       if operand <= cpu.A { cpu.set_flag(Flags::C, 1) } else { cpu.set_flag(Flags::C, 0) }
+  //       self.check_and_set_n(result, cpu);
+  //       cpu.cycle += 4;
+  //   }
 
-    pub fn cmp_c5(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { operand, address, high, low } = self.zero_page(cpu);
-		self.current_operation.push_str(format!("CMP ${:02X}", low).as_str());
-        let result: u8 = cpu.A.wrapping_sub(operand);
-        if result == 0 { cpu.set_flag(Flags::Z, 1) } else { cpu.set_flag(Flags::Z, 0) }
-        if operand <= cpu.A { cpu.set_flag(Flags::C, 1) } else { cpu.set_flag(Flags::C, 0) }
-        self.check_and_set_n(result, cpu);
-        cpu.cycle += 3;
-    }
+  //   pub fn cmp_c5(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { operand, address, high, low } = self.zero_page(cpu);
+		// self.current_operation.push_str(format!("CMP ${:02X}", low).as_str());
+  //       let result: u8 = cpu.A.wrapping_sub(operand);
+  //       if result == 0 { cpu.set_flag(Flags::Z, 1) } else { cpu.set_flag(Flags::Z, 0) }
+  //       if operand <= cpu.A { cpu.set_flag(Flags::C, 1) } else { cpu.set_flag(Flags::C, 0) }
+  //       self.check_and_set_n(result, cpu);
+  //       cpu.cycle += 3;
+  //   }
 
-    pub fn cmp_d5(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { mut operand, address, high, low } = self.zero_page_indexed(cpu.X, cpu);
-		self.current_operation.push_str(format!("CMP ${:02X}, X", low).as_str());
-        let result: u8 = cpu.A.wrapping_sub(operand);
-        if result == 0 { cpu.set_flag(Flags::Z, 1) } else { cpu.set_flag(Flags::Z, 0) }
-        if operand <= cpu.A { cpu.set_flag(Flags::C, 1) } else { cpu.set_flag(Flags::C, 0) }
-        self.check_and_set_n(result, cpu);
-        cpu.cycle += 4;
-    }
+  //   pub fn cmp_d5(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { mut operand, address, high, low } = self.zero_page_indexed(cpu.X, cpu);
+		// self.current_operation.push_str(format!("CMP ${:02X}, X", low).as_str());
+  //       let result: u8 = cpu.A.wrapping_sub(operand);
+  //       if result == 0 { cpu.set_flag(Flags::Z, 1) } else { cpu.set_flag(Flags::Z, 0) }
+  //       if operand <= cpu.A { cpu.set_flag(Flags::C, 1) } else { cpu.set_flag(Flags::C, 0) }
+  //       self.check_and_set_n(result, cpu);
+  //       cpu.cycle += 4;
+  //   }
 
-    pub fn cmp_c1(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { operand, address, high, low } = self.zero_page_indexed_indirect(cpu.X, cpu);
-		self.current_operation.push_str(format!("CMP (${:02X}, X)", low).as_str());
-        let result: u8 = cpu.A.wrapping_sub(operand);
-        if result == 0 { cpu.set_flag(Flags::Z, 1) } else { cpu.set_flag(Flags::Z, 0) }
-        if operand <= cpu.A { cpu.set_flag(Flags::C, 1) } else { cpu.set_flag(Flags::C, 0) }
-        self.check_and_set_n(operand, cpu);
-        cpu.cycle += 6;
-    }
+  //   pub fn cmp_c1(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { operand, address, high, low } = self.zero_page_indexed_indirect(cpu.X, cpu);
+		// self.current_operation.push_str(format!("CMP (${:02X}, X)", low).as_str());
+  //       let result: u8 = cpu.A.wrapping_sub(operand);
+  //       if result == 0 { cpu.set_flag(Flags::Z, 1) } else { cpu.set_flag(Flags::Z, 0) }
+  //       if operand <= cpu.A { cpu.set_flag(Flags::C, 1) } else { cpu.set_flag(Flags::C, 0) }
+  //       self.check_and_set_n(operand, cpu);
+  //       cpu.cycle += 6;
+  //   }
 
-    pub fn cmp_d1(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { operand, address, high, low } = self.zero_page_indirect_indexed(cpu.X, cpu);
-		self.current_operation.push_str(format!("CMP (${:02X}), Y", low).as_str());
-        let result: u8 = cpu.A.wrapping_sub(operand);
-        if result == 0 { cpu.set_flag(Flags::Z, 1) } else { cpu.set_flag(Flags::Z, 0) }
-        if operand <= cpu.A { cpu.set_flag(Flags::C, 1) } else { cpu.set_flag(Flags::C, 0) }
-        self.check_and_set_n(operand, cpu);
-        cpu.cycle += 5;
-    }
+  //   pub fn cmp_d1(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { operand, address, high, low } = self.zero_page_indirect_indexed(cpu.X, cpu);
+		// self.current_operation.push_str(format!("CMP (${:02X}), Y", low).as_str());
+  //       let result: u8 = cpu.A.wrapping_sub(operand);
+  //       if result == 0 { cpu.set_flag(Flags::Z, 1) } else { cpu.set_flag(Flags::Z, 0) }
+  //       if operand <= cpu.A { cpu.set_flag(Flags::C, 1) } else { cpu.set_flag(Flags::C, 0) }
+  //       self.check_and_set_n(operand, cpu);
+  //       cpu.cycle += 5;
+  //   }
 
-    pub fn dec_ce(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { operand, address, high, low } = self.absolute(cpu);
-		self.current_operation.push_str(format!("DEC ${:02X}{:02X}", high.unwrap(), low).as_str());
-        let value = operand.wrapping_sub(1);
-        cpu.mmu.write(value, address);
-        self.check_and_set_n(value, cpu);
-        self.check_and_set_z(value, cpu);
-        cpu.cycle += 6;
-    }
+  //   pub fn dec_ce(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { operand, address, high, low } = self.absolute(cpu);
+		// self.current_operation.push_str(format!("DEC ${:02X}{:02X}", high.unwrap(), low).as_str());
+  //       let value = operand.wrapping_sub(1);
+  //       cpu.mmu.write(value, address);
+  //       self.check_and_set_n(value, cpu);
+  //       self.check_and_set_z(value, cpu);
+  //       cpu.cycle += 6;
+  //   }
 
-    pub fn dec_de(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { operand, address, high, low } = self.absolute_indexed(cpu.X as u16, cpu);
-		self.current_operation.push_str(format!("DEC ${:02X}{:02X}, X", high.unwrap(), low).as_str());
-        let value = operand.wrapping_sub(1);
-        cpu.mmu.write(value, address);
-        self.check_and_set_n(value, cpu);
-        self.check_and_set_z(value, cpu);
-        cpu.cycle += 7;
-    }
+  //   pub fn dec_de(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { operand, address, high, low } = self.absolute_indexed(cpu.X as u16, cpu);
+		// self.current_operation.push_str(format!("DEC ${:02X}{:02X}, X", high.unwrap(), low).as_str());
+  //       let value = operand.wrapping_sub(1);
+  //       cpu.mmu.write(value, address);
+  //       self.check_and_set_n(value, cpu);
+  //       self.check_and_set_z(value, cpu);
+  //       cpu.cycle += 7;
+  //   }
 
-    pub fn dec_c6(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { operand, address, high, low } = self.zero_page(cpu);
-		self.current_operation.push_str(format!("DEC ${:02X}", low).as_str());
-        let value = operand.wrapping_sub(1);
-        cpu.mmu.write(value, address);
-        self.check_and_set_n(value, cpu);
-        self.check_and_set_z(value, cpu);
-        cpu.cycle += 5;
-    }
+  //   pub fn dec_c6(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { operand, address, high, low } = self.zero_page(cpu);
+		// self.current_operation.push_str(format!("DEC ${:02X}", low).as_str());
+  //       let value = operand.wrapping_sub(1);
+  //       cpu.mmu.write(value, address);
+  //       self.check_and_set_n(value, cpu);
+  //       self.check_and_set_z(value, cpu);
+  //       cpu.cycle += 5;
+  //   }
 
-    pub fn dec_d6(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { mut operand, address, high, low } = self.zero_page_indexed(cpu.X, cpu);
-		self.current_operation.push_str(format!("DEC ${:02X}, X", low).as_str());
-        let value = operand.wrapping_sub(1);
-        cpu.mmu.write(value, address);
-        self.check_and_set_n(value, cpu);
-        self.check_and_set_z(value, cpu);
-        cpu.cycle += 6;
-    }
+  //   pub fn dec_d6(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { mut operand, address, high, low } = self.zero_page_indexed(cpu.X, cpu);
+		// self.current_operation.push_str(format!("DEC ${:02X}, X", low).as_str());
+  //       let value = operand.wrapping_sub(1);
+  //       cpu.mmu.write(value, address);
+  //       self.check_and_set_n(value, cpu);
+  //       self.check_and_set_z(value, cpu);
+  //       cpu.cycle += 6;
+  //   }
 
-    pub fn inc_ee(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { operand, address, high, low } = self.absolute(cpu);
-		self.current_operation.push_str(format!("INC ${:02X}{:02X}", high.unwrap(), low).as_str());
-        let value = operand.wrapping_add(1);
-        cpu.mmu.write(value, address);
-        self.check_and_set_n(value, cpu);
-        self.check_and_set_z(value, cpu);
-        cpu.cycle += 6;
-    }
+  //   pub fn inc_ee(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { operand, address, high, low } = self.absolute(cpu);
+		// self.current_operation.push_str(format!("INC ${:02X}{:02X}", high.unwrap(), low).as_str());
+  //       let value = operand.wrapping_add(1);
+  //       cpu.mmu.write(value, address);
+  //       self.check_and_set_n(value, cpu);
+  //       self.check_and_set_z(value, cpu);
+  //       cpu.cycle += 6;
+  //   }
 
-    pub fn inc_fe(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { operand, address, high, low } = self.absolute_indexed(cpu.X as u16, cpu);
-		self.current_operation.push_str(format!("INC ${:02X}{:02X}, X", high.unwrap(), low).as_str());
-        let value = operand.wrapping_add(1);
-        cpu.mmu.write(value, address);
-        self.check_and_set_n(value, cpu);
-        self.check_and_set_z(value, cpu);
-        cpu.cycle += 7;
-    }
+  //   pub fn inc_fe(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { operand, address, high, low } = self.absolute_indexed(cpu.X as u16, cpu);
+		// self.current_operation.push_str(format!("INC ${:02X}{:02X}, X", high.unwrap(), low).as_str());
+  //       let value = operand.wrapping_add(1);
+  //       cpu.mmu.write(value, address);
+  //       self.check_and_set_n(value, cpu);
+  //       self.check_and_set_z(value, cpu);
+  //       cpu.cycle += 7;
+  //   }
 
-    pub fn inc_e6(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { operand, address, high, low } = self.zero_page(cpu);
-		self.current_operation.push_str(format!("INC ${:02X}", low).as_str());
-        let value = operand.wrapping_add(1);
-        cpu.mmu.write(value, address);
-        self.check_and_set_n(value, cpu);
-        self.check_and_set_z(value, cpu);
-        cpu.cycle += 5;
-    }
+  //   pub fn inc_e6(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { operand, address, high, low } = self.zero_page(cpu);
+		// self.current_operation.push_str(format!("INC ${:02X}", low).as_str());
+  //       let value = operand.wrapping_add(1);
+  //       cpu.mmu.write(value, address);
+  //       self.check_and_set_n(value, cpu);
+  //       self.check_and_set_z(value, cpu);
+  //       cpu.cycle += 5;
+  //   }
 
-    pub fn inc_f6(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { mut operand, address, high, low } = self.zero_page_indexed(cpu.X, cpu);
-		self.current_operation.push_str(format!("INC ${:02X}, X", low).as_str());
-        let value = operand.wrapping_add(1);
-        cpu.mmu.write(value, address);
-        self.check_and_set_n(value, cpu);
-        self.check_and_set_z(value, cpu);
-        cpu.cycle += 6;
-    }
+  //   pub fn inc_f6(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { mut operand, address, high, low } = self.zero_page_indexed(cpu.X, cpu);
+		// self.current_operation.push_str(format!("INC ${:02X}, X", low).as_str());
+  //       let value = operand.wrapping_add(1);
+  //       cpu.mmu.write(value, address);
+  //       self.check_and_set_n(value, cpu);
+  //       self.check_and_set_z(value, cpu);
+  //       cpu.cycle += 6;
+  //   }
 
-    pub fn cpx_e0(&mut self, cpu : &mut MOS6510) {
-        let operand: u8 = self.fetch(cpu);
-		self.current_operation.push_str(format!("CPX #${:02X}", operand).as_str());
-        let result: u8 = cpu.X.wrapping_sub(operand);
-        if result == 0 { cpu.set_flag(Flags::Z, 1) } else { cpu.set_flag(Flags::Z, 0) }
-        if operand <= cpu.X { cpu.set_flag(Flags::C, 1) } else { cpu.set_flag(Flags::C, 0) }
-        self.check_and_set_n(result, cpu);
-        cpu.cycle += 2;
-    }
+  //   pub fn cpx_e0(&mut self, cpu : &mut MOS6510) {
+  //       let operand: u8 = self.fetch(cpu);
+		// self.current_operation.push_str(format!("CPX #${:02X}", operand).as_str());
+  //       let result: u8 = cpu.X.wrapping_sub(operand);
+  //       if result == 0 { cpu.set_flag(Flags::Z, 1) } else { cpu.set_flag(Flags::Z, 0) }
+  //       if operand <= cpu.X { cpu.set_flag(Flags::C, 1) } else { cpu.set_flag(Flags::C, 0) }
+  //       self.check_and_set_n(result, cpu);
+  //       cpu.cycle += 2;
+  //   }
 
-    pub fn cpx_ec(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { operand, address, high, low } = self.absolute(cpu);
-		self.current_operation.push_str(format!("CPX ${:02X}{:02X}", high.unwrap(), low).as_str());
-        let result: u8 = cpu.X.wrapping_sub(operand);
-        if result == 0 { cpu.set_flag(Flags::Z, 1) } else { cpu.set_flag(Flags::Z, 0) }
-        if operand <= cpu.X { cpu.set_flag(Flags::C, 1) } else { cpu.set_flag(Flags::C, 0) }
-        self.check_and_set_n(result, cpu);
-        cpu.cycle += 4;
-    }
+  //   pub fn cpx_ec(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { operand, address, high, low } = self.absolute(cpu);
+		// self.current_operation.push_str(format!("CPX ${:02X}{:02X}", high.unwrap(), low).as_str());
+  //       let result: u8 = cpu.X.wrapping_sub(operand);
+  //       if result == 0 { cpu.set_flag(Flags::Z, 1) } else { cpu.set_flag(Flags::Z, 0) }
+  //       if operand <= cpu.X { cpu.set_flag(Flags::C, 1) } else { cpu.set_flag(Flags::C, 0) }
+  //       self.check_and_set_n(result, cpu);
+  //       cpu.cycle += 4;
+  //   }
 
-    pub fn cpx_e4(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { operand, address, high, low } = self.zero_page(cpu);
-		self.current_operation.push_str(format!("CPX ${:02X}", low).as_str());
-        let result: u8 = cpu.X.wrapping_sub(operand);
-        if result == 0 { cpu.set_flag(Flags::Z, 1) } else { cpu.set_flag(Flags::Z, 0) }
-        if operand <= cpu.X { cpu.set_flag(Flags::C, 1) } else { cpu.set_flag(Flags::C, 0) }
-        self.check_and_set_n(result, cpu);
-        cpu.cycle += 3;
-    }
+  //   pub fn cpx_e4(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { operand, address, high, low } = self.zero_page(cpu);
+		// self.current_operation.push_str(format!("CPX ${:02X}", low).as_str());
+  //       let result: u8 = cpu.X.wrapping_sub(operand);
+  //       if result == 0 { cpu.set_flag(Flags::Z, 1) } else { cpu.set_flag(Flags::Z, 0) }
+  //       if operand <= cpu.X { cpu.set_flag(Flags::C, 1) } else { cpu.set_flag(Flags::C, 0) }
+  //       self.check_and_set_n(result, cpu);
+  //       cpu.cycle += 3;
+  //   }
 
-    pub fn cpy_c0(&mut self, cpu : &mut MOS6510) {
-        let operand: u8 = self.fetch(cpu);
-		self.current_operation.push_str(format!("CPY #${:02X}", operand).as_str());
-        let result: u8 = cpu.Y.wrapping_sub(operand);
-        if result == 0 { cpu.set_flag(Flags::Z, 1) } else { cpu.set_flag(Flags::Z, 0) }
-        if operand <= cpu.Y { cpu.set_flag(Flags::C, 1) } else { cpu.set_flag(Flags::C, 0) }
-        self.check_and_set_n(result, cpu);
-        cpu.cycle += 2;
-    }
+  //   pub fn cpy_c0(&mut self, cpu : &mut MOS6510) {
+  //       let operand: u8 = self.fetch(cpu);
+		// self.current_operation.push_str(format!("CPY #${:02X}", operand).as_str());
+  //       let result: u8 = cpu.Y.wrapping_sub(operand);
+  //       if result == 0 { cpu.set_flag(Flags::Z, 1) } else { cpu.set_flag(Flags::Z, 0) }
+  //       if operand <= cpu.Y { cpu.set_flag(Flags::C, 1) } else { cpu.set_flag(Flags::C, 0) }
+  //       self.check_and_set_n(result, cpu);
+  //       cpu.cycle += 2;
+  //   }
 
-    pub fn cpy_cc(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { operand, address, high, low } = self.absolute(cpu);
-		self.current_operation.push_str(format!("CPY ${:02X}{:02X}", high.unwrap(), low).as_str());
-        let result: u8 = cpu.Y.wrapping_sub(operand);
-        if result == 0 { cpu.set_flag(Flags::Z, 1) } else { cpu.set_flag(Flags::Z, 0) }
-        if operand <= cpu.Y { cpu.set_flag(Flags::C, 1) } else { cpu.set_flag(Flags::C, 0) }
-        self.check_and_set_n(result, cpu);
-        cpu.cycle += 4;
-    }
+  //   pub fn cpy_cc(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { operand, address, high, low } = self.absolute(cpu);
+		// self.current_operation.push_str(format!("CPY ${:02X}{:02X}", high.unwrap(), low).as_str());
+  //       let result: u8 = cpu.Y.wrapping_sub(operand);
+  //       if result == 0 { cpu.set_flag(Flags::Z, 1) } else { cpu.set_flag(Flags::Z, 0) }
+  //       if operand <= cpu.Y { cpu.set_flag(Flags::C, 1) } else { cpu.set_flag(Flags::C, 0) }
+  //       self.check_and_set_n(result, cpu);
+  //       cpu.cycle += 4;
+  //   }
 
-    pub fn cpy_c4(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { operand, address, high, low } = self.zero_page(cpu);
-		self.current_operation.push_str(format!("CPY ${:02X}", low).as_str());
-        let result: u8 = cpu.Y.wrapping_sub(operand);
-        if result == 0 { cpu.set_flag(Flags::Z, 1) } else { cpu.set_flag(Flags::Z, 0) }
-        if operand <= cpu.Y { cpu.set_flag(Flags::C, 1) } else { cpu.set_flag(Flags::C, 0) }
-        self.check_and_set_n(result, cpu);
-        cpu.cycle += 3;
-    }
+  //   pub fn cpy_c4(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { operand, address, high, low } = self.zero_page(cpu);
+		// self.current_operation.push_str(format!("CPY ${:02X}", low).as_str());
+  //       let result: u8 = cpu.Y.wrapping_sub(operand);
+  //       if result == 0 { cpu.set_flag(Flags::Z, 1) } else { cpu.set_flag(Flags::Z, 0) }
+  //       if operand <= cpu.Y { cpu.set_flag(Flags::C, 1) } else { cpu.set_flag(Flags::C, 0) }
+  //       self.check_and_set_n(result, cpu);
+  //       cpu.cycle += 3;
+  //   }
 
     pub fn jmp_4c(&mut self, cpu : &mut MOS6510) {
         let AddrReturn { operand, address, high, low } = self.absolute(cpu);

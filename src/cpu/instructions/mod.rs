@@ -3,6 +3,8 @@ pub mod load;
 pub mod trans;
 pub mod stack;
 pub mod shift;
+pub mod arith;
+pub mod inc;
 
 pub mod test;
 
@@ -12,3 +14,5 @@ pub use load::*;
 pub use trans::*;
 pub use stack::*;
 pub use shift::*;
+pub use arith::*;
+pub use inc::*;
