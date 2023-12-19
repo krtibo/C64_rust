@@ -5,7 +5,7 @@ extern crate sfml;
 use sfml::graphics::*;
 use sfml::SfBox;
 use sfml::window::*;
-use crate::Event::*;
+use sfml::window::Event::*;
 use super::cpu::MOS6510;
 
 pub struct PPU {
