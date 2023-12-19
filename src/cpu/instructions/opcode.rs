@@ -33,7 +33,7 @@ impl Opcode {
         self.table[0x01] = Opcode::ora_01;
         self.table[0x05] = Opcode::ora_05;
         self.table[0x06] = Opcode::asl_06;
-        self.table[0x08] = Opcode::php_08;
+        self.table[0x08] = php_08;
         self.table[0x09] = Opcode::ora_09;
         self.table[0x0a] = Opcode::asl_0a;
         self.table[0x0e] = Opcode::asl_0e;
@@ -49,7 +49,7 @@ impl Opcode {
         self.table[0x21] = Opcode::and_21;
         self.table[0x25] = Opcode::and_25;
         self.table[0x26] = Opcode::rol_26;
-        self.table[0x28] = Opcode::plp_28;
+        self.table[0x28] = plp_28;
         self.table[0x29] = Opcode::and_29;
         self.table[0x2a] = Opcode::rol_2a;
         self.table[0x2d] = Opcode::and_2d;
@@ -65,7 +65,7 @@ impl Opcode {
         self.table[0x41] = Opcode::eor_41;
         self.table[0x45] = Opcode::eor_45;
         self.table[0x46] = Opcode::lsr_46;
-        self.table[0x48] = Opcode::pha_48;
+        self.table[0x48] = pha_48;
         self.table[0x49] = Opcode::eor_49;
         self.table[0x4a] = Opcode::lsr_4a;
         self.table[0x4c] = Opcode::jmp_4c;
@@ -80,7 +80,7 @@ impl Opcode {
         self.table[0x5d] = Opcode::eor_5d;
         self.table[0x60] = Opcode::rts_60;
         self.table[0x66] = Opcode::ror_66;
-        self.table[0x68] = Opcode::pla_68;
+        self.table[0x68] = pla_68;
         self.table[0x6a] = Opcode::ror_6a;
         self.table[0x6c] = Opcode::jmp_6c;
         self.table[0x6e] = Opcode::ror_6e;
@@ -92,7 +92,7 @@ impl Opcode {
         self.table[0x85] = sta_85;
         self.table[0x86] = stx_86;
         self.table[0x88] = Opcode::dey_88;
-        self.table[0x8a] = Opcode::txa_8a;
+        self.table[0x8a] = txa_8a;
         self.table[0x8c] = sty_8c;
         self.table[0x8d] = sta_8d;
         self.table[0x8e] = stx_8e;
@@ -100,9 +100,9 @@ impl Opcode {
         self.table[0x94] = sty_94;
         self.table[0x95] = sta_95;
         self.table[0x96] = stx_96;
-        self.table[0x98] = Opcode::tya_98;
+        self.table[0x98] = tya_98;
         self.table[0x99] = sta_99;
-        self.table[0x9a] = Opcode::txs_9a;
+        self.table[0x9a] = txs_9a;
         self.table[0x9d] = sta_9d;
         self.table[0xa0] = ldy_a0;
         self.table[0xa1] = lda_a1;
@@ -110,9 +110,9 @@ impl Opcode {
         self.table[0xa4] = ldy_a4;
         self.table[0xa5] = lda_a5;
         self.table[0xa6] = ldx_a6;
-        self.table[0xa8] = Opcode::tay_a8;
+        self.table[0xa8] = tay_a8;
         self.table[0xa9] = lda_a9;
-        self.table[0xaa] = Opcode::tax_aa;
+        self.table[0xaa] = tax_aa;
         self.table[0xac] = ldy_ac;
         self.table[0xad] = lda_ad;
         self.table[0xae] = ldx_ae;
@@ -122,7 +122,7 @@ impl Opcode {
         self.table[0xb6] = ldx_b6;
         self.table[0xb8] = Opcode::clv_b8;
         self.table[0xb9] = lda_b9;
-        self.table[0xba] = Opcode::tsx_ba;
+        self.table[0xba] = tsx_ba;
         self.table[0xbc] = ldy_bc;
         self.table[0xbd] = lda_bd;
         self.table[0xbe] = ldx_be;
@@ -189,11 +189,11 @@ impl Opcode {
         cpu.cycle += 7;
     }
 
-    pub fn php_08(&mut self, cpu : &mut MOS6510) {
-        self.current_operation.push_str("PHP");
-        cpu.push_on_stack(cpu.P);
-        cpu.cycle += 3;
-    }
+    // pub fn php_08(&mut self, cpu : &mut MOS6510) {
+    //     self.current_operation.push_str("PHP");
+    //     cpu.push_on_stack(cpu.P);
+    //     cpu.cycle += 3;
+    // }
 
     pub fn clc_18(&mut self, cpu : &mut MOS6510) {
         self.current_operation.push_str("CLC");
@@ -201,11 +201,11 @@ impl Opcode {
         cpu.cycle += 2;
     }
 
-    pub fn plp_28(&mut self, cpu : &mut MOS6510) {
-        self.current_operation.push_str("PLP");
-        cpu.P = cpu.pull_from_stack();
-        cpu.cycle += 4;
-    }
+    // pub fn plp_28(&mut self, cpu : &mut MOS6510) {
+    //     self.current_operation.push_str("PLP");
+    //     cpu.P = cpu.pull_from_stack();
+    //     cpu.cycle += 4;
+    // }
 
     pub fn sec_38(&mut self, cpu : &mut MOS6510) {
         self.current_operation.push_str("SEC");
@@ -213,11 +213,11 @@ impl Opcode {
         cpu.cycle += 2;
     }
 
-    pub fn pha_48(&mut self, cpu : &mut MOS6510) {
-        self.current_operation.push_str("PHA");
-        cpu.push_on_stack(cpu.A);
-        cpu.cycle += 3;
-    }
+    // pub fn pha_48(&mut self, cpu : &mut MOS6510) {
+    //     self.current_operation.push_str("PHA");
+    //     cpu.push_on_stack(cpu.A);
+    //     cpu.cycle += 3;
+    // }
 
     pub fn cli_58(&mut self, cpu : &mut MOS6510) {
         self.current_operation.push_str("CLI");
@@ -235,13 +235,13 @@ impl Opcode {
         cpu.cycle += 4;
     }
 
-    pub fn pla_68(&mut self, cpu : &mut MOS6510) {
-        self.current_operation.push_str("PLA");
-        cpu.A = cpu.pull_from_stack();
-        self.check_and_set_n(cpu.A, cpu);
-        self.check_and_set_z(cpu.A, cpu);
-        cpu.cycle += 4;
-    }
+    // pub fn pla_68(&mut self, cpu : &mut MOS6510) {
+    //     self.current_operation.push_str("PLA");
+    //     cpu.A = cpu.pull_from_stack();
+    //     self.check_and_set_n(cpu.A, cpu);
+    //     self.check_and_set_z(cpu.A, cpu);
+    //     cpu.cycle += 4;
+    // }
 
     pub fn sei_78(&mut self, cpu : &mut MOS6510) {
         self.current_operation.push_str("SEI");
@@ -257,46 +257,46 @@ impl Opcode {
         cpu.cycle += 2;
     }
 
-    pub fn txa_8a(&mut self, cpu : &mut MOS6510) {
-        self.current_operation.push_str("TXA");
-        cpu.A = cpu.X;
-        self.check_and_set_n(cpu.A, cpu);
-        self.check_and_set_z(cpu.A, cpu);
-        cpu.cycle += 2;
-    }
+    // pub fn txa_8a(&mut self, cpu : &mut MOS6510) {
+    //     self.current_operation.push_str("TXA");
+    //     cpu.A = cpu.X;
+    //     self.check_and_set_n(cpu.A, cpu);
+    //     self.check_and_set_z(cpu.A, cpu);
+    //     cpu.cycle += 2;
+    // }
 
-    pub fn tya_98(&mut self, cpu : &mut MOS6510) {
-        self.current_operation.push_str("TYA");
-        cpu.A = cpu.Y;
-        self.check_and_set_n(cpu.A, cpu);
-        self.check_and_set_z(cpu.A, cpu);
-        cpu.cycle += 2;
-    }
+    // pub fn tya_98(&mut self, cpu : &mut MOS6510) {
+    //     self.current_operation.push_str("TYA");
+    //     cpu.A = cpu.Y;
+    //     self.check_and_set_n(cpu.A, cpu);
+    //     self.check_and_set_z(cpu.A, cpu);
+    //     cpu.cycle += 2;
+    // }
 
-    pub fn txs_9a(&mut self, cpu : &mut MOS6510) {
-        self.current_operation.push_str("TXS");
-        cpu.S = cpu.X;
-        self.check_and_set_n(cpu.S, cpu);
-        self.check_and_set_z(cpu.S, cpu);
-        cpu.cycle += 2;
-    }
+    // pub fn txs_9a(&mut self, cpu : &mut MOS6510) {
+    //     self.current_operation.push_str("TXS");
+    //     cpu.S = cpu.X;
+    //     self.check_and_set_n(cpu.S, cpu);
+    //     self.check_and_set_z(cpu.S, cpu);
+    //     cpu.cycle += 2;
+    // }
 
 
-    pub fn tay_a8(&mut self, cpu : &mut MOS6510) {
-        self.current_operation.push_str("TAY");
-        cpu.Y = cpu.A;
-        self.check_and_set_n(cpu.Y, cpu);
-        self.check_and_set_z(cpu.Y, cpu);
-        cpu.cycle += 2;
-    }
+    // pub fn tay_a8(&mut self, cpu : &mut MOS6510) {
+    //     self.current_operation.push_str("TAY");
+    //     cpu.Y = cpu.A;
+    //     self.check_and_set_n(cpu.Y, cpu);
+    //     self.check_and_set_z(cpu.Y, cpu);
+    //     cpu.cycle += 2;
+    // }
 
-    pub fn tax_aa(&mut self, cpu : &mut MOS6510) {
-        self.current_operation.push_str("TAX");
-        cpu.X = cpu.A;
-        self.check_and_set_n(cpu.X, cpu);
-        self.check_and_set_z(cpu.X, cpu);
-        cpu.cycle += 2;
-    }
+    // pub fn tax_aa(&mut self, cpu : &mut MOS6510) {
+    //     self.current_operation.push_str("TAX");
+    //     cpu.X = cpu.A;
+    //     self.check_and_set_n(cpu.X, cpu);
+    //     self.check_and_set_z(cpu.X, cpu);
+    //     cpu.cycle += 2;
+    // }
 
     pub fn clv_b8(&mut self, cpu : &mut MOS6510) {
         self.current_operation.push_str("CLV");
@@ -304,13 +304,13 @@ impl Opcode {
         cpu.cycle += 2;
     }
 
-    pub fn tsx_ba(&mut self, cpu : &mut MOS6510) {
-        self.current_operation.push_str("TSX");
-        cpu.X = cpu.S;
-        self.check_and_set_n(cpu.X, cpu);
-        self.check_and_set_z(cpu.X, cpu);
-        cpu.cycle += 2;
-    }
+    // pub fn tsx_ba(&mut self, cpu : &mut MOS6510) {
+    //     self.current_operation.push_str("TSX");
+    //     cpu.X = cpu.S;
+    //     self.check_and_set_n(cpu.X, cpu);
+    //     self.check_and_set_z(cpu.X, cpu);
+    //     cpu.cycle += 2;
+    // }
 
     pub fn iny_c8(&mut self, cpu : &mut MOS6510) {
         self.current_operation.push_str("INY");
