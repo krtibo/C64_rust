@@ -87,45 +87,45 @@ impl Opcode {
         self.table[0x76] = Opcode::ror_76;
         self.table[0x78] = Opcode::sei_78;
         self.table[0x7e] = Opcode::ror_7e;
-        self.table[0x81] = Opcode::sta_81;
-        self.table[0x84] = Opcode::sty_84;
-        self.table[0x85] = Opcode::sta_85;
-        self.table[0x86] = Opcode::stx_86;
+        self.table[0x81] = sta_81;
+        self.table[0x84] = sty_84;
+        self.table[0x85] = sta_85;
+        self.table[0x86] = stx_86;
         self.table[0x88] = Opcode::dey_88;
         self.table[0x8a] = Opcode::txa_8a;
-        self.table[0x8c] = Opcode::sty_8c;
-        self.table[0x8d] = Opcode::sta_8d;
-        self.table[0x8e] = Opcode::stx_8e;
-        self.table[0x91] = Opcode::sta_91;
-        self.table[0x94] = Opcode::sty_94;
-        self.table[0x95] = Opcode::sta_95;
-        self.table[0x96] = Opcode::stx_96;
+        self.table[0x8c] = sty_8c;
+        self.table[0x8d] = sta_8d;
+        self.table[0x8e] = stx_8e;
+        self.table[0x91] = sta_91;
+        self.table[0x94] = sty_94;
+        self.table[0x95] = sta_95;
+        self.table[0x96] = stx_96;
         self.table[0x98] = Opcode::tya_98;
-        self.table[0x99] = Opcode::sta_99;
+        self.table[0x99] = sta_99;
         self.table[0x9a] = Opcode::txs_9a;
-        self.table[0x9d] = Opcode::sta_9d;
-        self.table[0xa0] = Opcode::ldy_a0;
-        self.table[0xa1] = Opcode::lda_a1;
-        self.table[0xa2] = Opcode::ldx_a2;
-        self.table[0xa4] = Opcode::ldy_a4;
-        self.table[0xa5] = Opcode::lda_a5;
-        self.table[0xa6] = Opcode::ldx_a6;
+        self.table[0x9d] = sta_9d;
+        self.table[0xa0] = ldy_a0;
+        self.table[0xa1] = lda_a1;
+        self.table[0xa2] = ldx_a2;
+        self.table[0xa4] = ldy_a4;
+        self.table[0xa5] = lda_a5;
+        self.table[0xa6] = ldx_a6;
         self.table[0xa8] = Opcode::tay_a8;
         self.table[0xa9] = lda_a9;
         self.table[0xaa] = Opcode::tax_aa;
-        self.table[0xac] = Opcode::ldy_ac;
-        self.table[0xad] = Opcode::lda_ad;
-        self.table[0xae] = Opcode::ldx_ae;
-        self.table[0xb1] = Opcode::lda_b1;
-        self.table[0xb4] = Opcode::ldy_b4;
-        self.table[0xb5] = Opcode::lda_b5;
-        self.table[0xb6] = Opcode::ldx_b6;
+        self.table[0xac] = ldy_ac;
+        self.table[0xad] = lda_ad;
+        self.table[0xae] = ldx_ae;
+        self.table[0xb1] = lda_b1;
+        self.table[0xb4] = ldy_b4;
+        self.table[0xb5] = lda_b5;
+        self.table[0xb6] = ldx_b6;
         self.table[0xb8] = Opcode::clv_b8;
-        self.table[0xb9] = Opcode::lda_b9;
+        self.table[0xb9] = lda_b9;
         self.table[0xba] = Opcode::tsx_ba;
-        self.table[0xbc] = Opcode::ldy_bc;
-        self.table[0xbd] = Opcode::lda_bd;
-        self.table[0xbe] = Opcode::ldx_be;
+        self.table[0xbc] = ldy_bc;
+        self.table[0xbd] = lda_bd;
+        self.table[0xbe] = ldx_be;
         self.table[0xc0] = Opcode::cpy_c0;
         self.table[0xc1] = Opcode::cmp_c1;
         self.table[0xc4] = Opcode::cpy_c4;
@@ -353,263 +353,263 @@ impl Opcode {
         cpu.cycle += 2;
     }
 
-    pub fn lda_a9(&mut self, cpu : &mut MOS6510) {
-        let operand: u8 = self.fetch(cpu);
-		self.current_operation.push_str(format!("LDA #${:02X}", operand).as_str());
-        cpu.A = operand;
-        self.check_and_set_n(cpu.A, cpu);
-        self.check_and_set_z(cpu.A, cpu);
-        cpu.cycle += 2;
-    }
+  //   pub fn lda_a9(&mut self, cpu : &mut MOS6510) {
+  //       let operand: u8 = self.fetch(cpu);
+		// self.current_operation.push_str(format!("LDA #${:02X}", operand).as_str());
+  //       cpu.A = operand;
+  //       self.check_and_set_n(cpu.A, cpu);
+  //       self.check_and_set_z(cpu.A, cpu);
+  //       cpu.cycle += 2;
+  //   }
 
-    pub fn lda_ad(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { operand, address, high, low } = self.absolute(cpu);
-		self.current_operation.push_str(format!("LDA ${:02X}{:02X}", high.unwrap(), low).as_str());
-        cpu.A = operand;
-        self.check_and_set_n(cpu.A, cpu);
-        self.check_and_set_z(cpu.A, cpu);
-        cpu.cycle += 4;
-    }
+  //   pub fn lda_ad(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { operand, address, high, low } = self.absolute(cpu);
+		// self.current_operation.push_str(format!("LDA ${:02X}{:02X}", high.unwrap(), low).as_str());
+  //       cpu.A = operand;
+  //       self.check_and_set_n(cpu.A, cpu);
+  //       self.check_and_set_z(cpu.A, cpu);
+  //       cpu.cycle += 4;
+  //   }
 
-    pub fn lda_bd(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { operand, address, high, low } = self.absolute_indexed(cpu.X as u16, cpu);
-		self.current_operation.push_str(format!("LDA ${:02X}{:02X}, X", high.unwrap(), low).as_str());
-        cpu.A = operand;
-        self.check_and_set_n(cpu.A, cpu);
-        self.check_and_set_z(cpu.A, cpu);
-        cpu.cycle += 4;
-        // TODO: cycle is 4+1 if page is crossed
-    }
+  //   pub fn lda_bd(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { operand, address, high, low } = self.absolute_indexed(cpu.X as u16, cpu);
+		// self.current_operation.push_str(format!("LDA ${:02X}{:02X}, X", high.unwrap(), low).as_str());
+  //       cpu.A = operand;
+  //       self.check_and_set_n(cpu.A, cpu);
+  //       self.check_and_set_z(cpu.A, cpu);
+  //       cpu.cycle += 4;
+  //       // TODO: cycle is 4+1 if page is crossed
+  //   }
 
-    pub fn lda_b9(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { operand, address, high, low } = self.absolute_indexed(cpu.Y as u16, cpu);
-		self.current_operation.push_str(format!("LDA ${:02X}{:02X}, Y", high.unwrap(), low).as_str());
-        cpu.A = operand;
-        self.check_and_set_n(cpu.A, cpu);
-        self.check_and_set_z(cpu.A, cpu);
-        cpu.cycle += 4;
-        // TODO: cycle is 4+1 if page is crossed
-    }
+  //   pub fn lda_b9(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { operand, address, high, low } = self.absolute_indexed(cpu.Y as u16, cpu);
+		// self.current_operation.push_str(format!("LDA ${:02X}{:02X}, Y", high.unwrap(), low).as_str());
+  //       cpu.A = operand;
+  //       self.check_and_set_n(cpu.A, cpu);
+  //       self.check_and_set_z(cpu.A, cpu);
+  //       cpu.cycle += 4;
+  //       // TODO: cycle is 4+1 if page is crossed
+  //   }
 
-    pub fn lda_a5(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { operand, address, high, low } = self.zero_page(cpu);
-		self.current_operation.push_str(format!("LDA ${:02X}", low).as_str());
-        cpu.A = operand;    
-        self.check_and_set_n(cpu.A, cpu);
-        self.check_and_set_z(cpu.A, cpu);
-        cpu.cycle += 3;
-    }
+  //   pub fn lda_a5(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { operand, address, high, low } = self.zero_page(cpu);
+		// self.current_operation.push_str(format!("LDA ${:02X}", low).as_str());
+  //       cpu.A = operand;    
+  //       self.check_and_set_n(cpu.A, cpu);
+  //       self.check_and_set_z(cpu.A, cpu);
+  //       cpu.cycle += 3;
+  //   }
 
-    pub fn lda_b5(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { operand, address, high, low } = self.zero_page_indexed(cpu.X, cpu);
-		self.current_operation.push_str(format!("LDA ${:02X}, X", low).as_str());
-        cpu.A = operand;    
-        self.check_and_set_n(cpu.A, cpu);
-        self.check_and_set_z(cpu.A, cpu);
-        cpu.cycle += 4;
-    }
+  //   pub fn lda_b5(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { operand, address, high, low } = self.zero_page_indexed(cpu.X, cpu);
+		// self.current_operation.push_str(format!("LDA ${:02X}, X", low).as_str());
+  //       cpu.A = operand;    
+  //       self.check_and_set_n(cpu.A, cpu);
+  //       self.check_and_set_z(cpu.A, cpu);
+  //       cpu.cycle += 4;
+  //   }
 
-    pub fn lda_a1(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { operand, address, high, low } = self.zero_page_indexed_indirect(cpu.X, cpu);
-		self.current_operation.push_str(format!("LDA (${:02X}, X)", low).as_str());
-        cpu.A = operand;
-        self.check_and_set_n(cpu.A, cpu);
-        self.check_and_set_z(cpu.A, cpu);
-        cpu.cycle += 6;
-    }
+  //   pub fn lda_a1(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { operand, address, high, low } = self.zero_page_indexed_indirect(cpu.X, cpu);
+		// self.current_operation.push_str(format!("LDA (${:02X}, X)", low).as_str());
+  //       cpu.A = operand;
+  //       self.check_and_set_n(cpu.A, cpu);
+  //       self.check_and_set_z(cpu.A, cpu);
+  //       cpu.cycle += 6;
+  //   }
 
-    pub fn lda_b1(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { operand, address, high, low } = self.zero_page_indirect_indexed(cpu.X, cpu);
-		self.current_operation.push_str(format!("LDA (${:02X}), Y", low).as_str());
-        cpu.A = operand;
-        self.check_and_set_n(cpu.A, cpu);
-        self.check_and_set_z(cpu.A, cpu);
-        cpu.cycle += 5;
-        // TODO: cycle is 5+1 if page is crossed
-    }
+  //   pub fn lda_b1(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { operand, address, high, low } = self.zero_page_indirect_indexed(cpu.X, cpu);
+		// self.current_operation.push_str(format!("LDA (${:02X}), Y", low).as_str());
+  //       cpu.A = operand;
+  //       self.check_and_set_n(cpu.A, cpu);
+  //       self.check_and_set_z(cpu.A, cpu);
+  //       cpu.cycle += 5;
+  //       // TODO: cycle is 5+1 if page is crossed
+  //   }
 
-    pub fn ldx_a2(&mut self, cpu : &mut MOS6510) {
-        let operand: u8 = self.fetch(cpu);
-		self.current_operation.push_str(format!("LDX #${:02X}", operand).as_str());
-        cpu.X = operand;
-        self.check_and_set_n(cpu.X, cpu);
-        self.check_and_set_z(cpu.X, cpu);
-        cpu.cycle += 2;
-    }
+  //   pub fn ldx_a2(&mut self, cpu : &mut MOS6510) {
+  //       let operand: u8 = self.fetch(cpu);
+		// self.current_operation.push_str(format!("LDX #${:02X}", operand).as_str());
+  //       cpu.X = operand;
+  //       self.check_and_set_n(cpu.X, cpu);
+  //       self.check_and_set_z(cpu.X, cpu);
+  //       cpu.cycle += 2;
+  //   }
 
-    pub fn ldx_ae(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { operand, address, high, low } = self.absolute(cpu);
-		self.current_operation.push_str(format!("LDX ${:02X}{:02X}", high.unwrap(), low).as_str());
-        cpu.X = operand;
-        self.check_and_set_n(cpu.X, cpu);
-        self.check_and_set_z(cpu.X, cpu);
-        cpu.cycle += 4;
-    }
+  //   pub fn ldx_ae(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { operand, address, high, low } = self.absolute(cpu);
+		// self.current_operation.push_str(format!("LDX ${:02X}{:02X}", high.unwrap(), low).as_str());
+  //       cpu.X = operand;
+  //       self.check_and_set_n(cpu.X, cpu);
+  //       self.check_and_set_z(cpu.X, cpu);
+  //       cpu.cycle += 4;
+  //   }
 
-    pub fn ldx_be(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { operand, address, high, low } = self.absolute_indexed(cpu.Y as u16, cpu);
-		self.current_operation.push_str(format!("LDX ${:02X}{:02X}, Y", high.unwrap(), low).as_str());
-        cpu.X = operand;
-        self.check_and_set_n(cpu.X, cpu);
-        self.check_and_set_z(cpu.X, cpu);
-        cpu.cycle += 4;
-        // TODO: cycle is 4+1 if page is crossed
-    }
+  //   pub fn ldx_be(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { operand, address, high, low } = self.absolute_indexed(cpu.Y as u16, cpu);
+		// self.current_operation.push_str(format!("LDX ${:02X}{:02X}, Y", high.unwrap(), low).as_str());
+  //       cpu.X = operand;
+  //       self.check_and_set_n(cpu.X, cpu);
+  //       self.check_and_set_z(cpu.X, cpu);
+  //       cpu.cycle += 4;
+  //       // TODO: cycle is 4+1 if page is crossed
+  //   }
 
-    pub fn ldx_a6(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { operand, address, high, low } = self.zero_page(cpu);
-		self.current_operation.push_str(format!("LDX ${:02X}", low).as_str());
-        cpu.X = operand;    
-        self.check_and_set_n(cpu.X, cpu);
-        self.check_and_set_z(cpu.X, cpu);
-        cpu.cycle += 3;
-    }
+  //   pub fn ldx_a6(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { operand, address, high, low } = self.zero_page(cpu);
+		// self.current_operation.push_str(format!("LDX ${:02X}", low).as_str());
+  //       cpu.X = operand;    
+  //       self.check_and_set_n(cpu.X, cpu);
+  //       self.check_and_set_z(cpu.X, cpu);
+  //       cpu.cycle += 3;
+  //   }
 
-    pub fn ldx_b6(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { operand, address, high, low } = self.zero_page_indexed(cpu.Y, cpu);
-		self.current_operation.push_str(format!("LDX ${:02X}, Y", low).as_str());
-        cpu.X = operand;
-        self.check_and_set_n(cpu.X, cpu);
-        self.check_and_set_z(cpu.X, cpu);
-        cpu.cycle += 4;
-    }
+  //   pub fn ldx_b6(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { operand, address, high, low } = self.zero_page_indexed(cpu.Y, cpu);
+		// self.current_operation.push_str(format!("LDX ${:02X}, Y", low).as_str());
+  //       cpu.X = operand;
+  //       self.check_and_set_n(cpu.X, cpu);
+  //       self.check_and_set_z(cpu.X, cpu);
+  //       cpu.cycle += 4;
+  //   }
 
-    pub fn ldy_a0(&mut self, cpu : &mut MOS6510) {
-        let operand: u8 = self.fetch(cpu);
-		self.current_operation.push_str(format!("LDY #${:02X}", operand).as_str());
-        cpu.Y = operand;
-        self.check_and_set_n(cpu.Y, cpu);
-        self.check_and_set_z(cpu.Y, cpu);
-        cpu.cycle += 2;
-    }
+  //   pub fn ldy_a0(&mut self, cpu : &mut MOS6510) {
+  //       let operand: u8 = self.fetch(cpu);
+		// self.current_operation.push_str(format!("LDY #${:02X}", operand).as_str());
+  //       cpu.Y = operand;
+  //       self.check_and_set_n(cpu.Y, cpu);
+  //       self.check_and_set_z(cpu.Y, cpu);
+  //       cpu.cycle += 2;
+  //   }
 
-    pub fn ldy_ac(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { operand, address, high, low } = self.absolute(cpu);
-		self.current_operation.push_str(format!("LDY ${:02X}{:02X}", high.unwrap(), low).as_str());
-        cpu.Y = operand;
-        self.check_and_set_n(cpu.Y, cpu);
-        self.check_and_set_z(cpu.Y, cpu);
-        cpu.cycle += 4;
-    }
+  //   pub fn ldy_ac(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { operand, address, high, low } = self.absolute(cpu);
+		// self.current_operation.push_str(format!("LDY ${:02X}{:02X}", high.unwrap(), low).as_str());
+  //       cpu.Y = operand;
+  //       self.check_and_set_n(cpu.Y, cpu);
+  //       self.check_and_set_z(cpu.Y, cpu);
+  //       cpu.cycle += 4;
+  //   }
 
-    pub fn ldy_bc(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { operand, address, high, low } = self.absolute_indexed(cpu.X as u16, cpu);
-		self.current_operation.push_str(format!("LDY ${:02X}{:02X}, X", high.unwrap(), low).as_str());
-        cpu.Y = operand;
-        self.check_and_set_n(cpu.Y, cpu);
-        self.check_and_set_z(cpu.Y, cpu);
-        cpu.cycle += 4;
-        // TODO: cycle is 4+1 if page is crossed
-    }
+  //   pub fn ldy_bc(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { operand, address, high, low } = self.absolute_indexed(cpu.X as u16, cpu);
+		// self.current_operation.push_str(format!("LDY ${:02X}{:02X}, X", high.unwrap(), low).as_str());
+  //       cpu.Y = operand;
+  //       self.check_and_set_n(cpu.Y, cpu);
+  //       self.check_and_set_z(cpu.Y, cpu);
+  //       cpu.cycle += 4;
+  //       // TODO: cycle is 4+1 if page is crossed
+  //   }
 
-    pub fn ldy_a4(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { operand, address, high, low } = self.zero_page(cpu);
-		self.current_operation.push_str(format!("LDY ${:02X}", low).as_str());
-        cpu.Y = operand;
-        self.check_and_set_n(cpu.Y, cpu);
-        self.check_and_set_z(cpu.Y, cpu);
-        cpu.cycle += 3;
-    }
+  //   pub fn ldy_a4(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { operand, address, high, low } = self.zero_page(cpu);
+		// self.current_operation.push_str(format!("LDY ${:02X}", low).as_str());
+  //       cpu.Y = operand;
+  //       self.check_and_set_n(cpu.Y, cpu);
+  //       self.check_and_set_z(cpu.Y, cpu);
+  //       cpu.cycle += 3;
+  //   }
 
-    pub fn ldy_b4(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { operand, address, high, low } = self.zero_page_indexed(cpu.X, cpu);
-		self.current_operation.push_str(format!("LDY ${:02X}, X", low).as_str());
-        cpu.Y = operand;
-        self.check_and_set_n(cpu.Y, cpu);
-        self.check_and_set_z(cpu.Y, cpu);
-        cpu.cycle += 4;
-    }
+  //   pub fn ldy_b4(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { operand, address, high, low } = self.zero_page_indexed(cpu.X, cpu);
+		// self.current_operation.push_str(format!("LDY ${:02X}, X", low).as_str());
+  //       cpu.Y = operand;
+  //       self.check_and_set_n(cpu.Y, cpu);
+  //       self.check_and_set_z(cpu.Y, cpu);
+  //       cpu.cycle += 4;
+  //   }
 
-    pub fn sta_8d(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { operand, address, high, low } = self.absolute(cpu);
-		self.current_operation.push_str(format!("STA ${:02X}{:02X}", high.unwrap(), low).as_str());
-        cpu.mmu.write(cpu.A, address);
-        cpu.cycle += 4;
-    }
+  //   pub fn sta_8d(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { operand, address, high, low } = self.absolute(cpu);
+		// self.current_operation.push_str(format!("STA ${:02X}{:02X}", high.unwrap(), low).as_str());
+  //       cpu.mmu.write(cpu.A, address);
+  //       cpu.cycle += 4;
+  //   }
 
-    pub fn sta_9d(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { operand, address, high, low } = self.absolute_indexed(cpu.X as u16, cpu);
-		self.current_operation.push_str(format!("STA ${:02X}{:02X}, X", high.unwrap(), low).as_str());
-        cpu.mmu.write(cpu.A, address);
-        cpu.cycle += 5;
-    }
+  //   pub fn sta_9d(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { operand, address, high, low } = self.absolute_indexed(cpu.X as u16, cpu);
+		// self.current_operation.push_str(format!("STA ${:02X}{:02X}, X", high.unwrap(), low).as_str());
+  //       cpu.mmu.write(cpu.A, address);
+  //       cpu.cycle += 5;
+  //   }
 
-    pub fn sta_99(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { operand, address, high, low } = self.absolute_indexed(cpu.Y as u16, cpu);
-		self.current_operation.push_str(format!("STA ${:02X}{:02X}, Y", high.unwrap(), low).as_str());
-        cpu.mmu.write(cpu.A, address);
-        cpu.cycle += 5;
-    }
+  //   pub fn sta_99(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { operand, address, high, low } = self.absolute_indexed(cpu.Y as u16, cpu);
+		// self.current_operation.push_str(format!("STA ${:02X}{:02X}, Y", high.unwrap(), low).as_str());
+  //       cpu.mmu.write(cpu.A, address);
+  //       cpu.cycle += 5;
+  //   }
 
-    pub fn sta_85(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { operand, address, high, low } = self.zero_page(cpu);
-		self.current_operation.push_str(format!("STA ${:02X}", low).as_str());
-        cpu.mmu.write(cpu.A, address);
-        cpu.cycle += 3;
-    }
+  //   pub fn sta_85(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { operand, address, high, low } = self.zero_page(cpu);
+		// self.current_operation.push_str(format!("STA ${:02X}", low).as_str());
+  //       cpu.mmu.write(cpu.A, address);
+  //       cpu.cycle += 3;
+  //   }
 
-    pub fn sta_95(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { operand, address, high, low } = self.zero_page_indexed(cpu.X, cpu);
-		self.current_operation.push_str(format!("STA ${:02X}, X", low).as_str());
-        cpu.mmu.write(cpu.A, address);
-        cpu.cycle += 4;
-    }
+  //   pub fn sta_95(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { operand, address, high, low } = self.zero_page_indexed(cpu.X, cpu);
+		// self.current_operation.push_str(format!("STA ${:02X}, X", low).as_str());
+  //       cpu.mmu.write(cpu.A, address);
+  //       cpu.cycle += 4;
+  //   }
 
-    pub fn sta_81(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { operand, address, high, low } = self.zero_page_indexed_indirect(cpu.X, cpu);
-		self.current_operation.push_str(format!("STA (${:02X}, X)", low).as_str());
-        cpu.mmu.write(cpu.A, address);
-        cpu.cycle += 6;
-    }
+  //   pub fn sta_81(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { operand, address, high, low } = self.zero_page_indexed_indirect(cpu.X, cpu);
+		// self.current_operation.push_str(format!("STA (${:02X}, X)", low).as_str());
+  //       cpu.mmu.write(cpu.A, address);
+  //       cpu.cycle += 6;
+  //   }
 
-    pub fn sta_91(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { operand, address, high, low } = self.zero_page_indirect_indexed(cpu.X, cpu);
-		self.current_operation.push_str(format!("STA (${:02X}), Y", low).as_str());
-        cpu.mmu.write(cpu.A, address);
-        cpu.cycle += 6;
-    }
+  //   pub fn sta_91(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { operand, address, high, low } = self.zero_page_indirect_indexed(cpu.X, cpu);
+		// self.current_operation.push_str(format!("STA (${:02X}), Y", low).as_str());
+  //       cpu.mmu.write(cpu.A, address);
+  //       cpu.cycle += 6;
+  //   }
 
-    pub fn stx_8e(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { operand, address, high, low } = self.absolute(cpu);
-		self.current_operation.push_str(format!("STX ${:02X}{:02X}", high.unwrap(), low).as_str());
-        cpu.mmu.write(cpu.X, address);
-        cpu.cycle += 4;
-    }
+  //   pub fn stx_8e(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { operand, address, high, low } = self.absolute(cpu);
+		// self.current_operation.push_str(format!("STX ${:02X}{:02X}", high.unwrap(), low).as_str());
+  //       cpu.mmu.write(cpu.X, address);
+  //       cpu.cycle += 4;
+  //   }
 
-    pub fn stx_86(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { operand, address, high, low } = self.zero_page(cpu);
-		self.current_operation.push_str(format!("STX ${:02X}", low).as_str());
-        cpu.mmu.write(cpu.X, address);
-        cpu.cycle += 3;
-    }
+  //   pub fn stx_86(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { operand, address, high, low } = self.zero_page(cpu);
+		// self.current_operation.push_str(format!("STX ${:02X}", low).as_str());
+  //       cpu.mmu.write(cpu.X, address);
+  //       cpu.cycle += 3;
+  //   }
 
-    pub fn stx_96(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { operand, address, high, low } = self.zero_page_indexed(cpu.Y, cpu);
-		self.current_operation.push_str(format!("STX ${:02X}, Y", low).as_str());
-        cpu.mmu.write(cpu.X, address);
-        cpu.cycle += 4;
-    }
+  //   pub fn stx_96(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { operand, address, high, low } = self.zero_page_indexed(cpu.Y, cpu);
+		// self.current_operation.push_str(format!("STX ${:02X}, Y", low).as_str());
+  //       cpu.mmu.write(cpu.X, address);
+  //       cpu.cycle += 4;
+  //   }
 
-    pub fn sty_8c(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { operand, address, high, low } = self.absolute(cpu);
-		self.current_operation.push_str(format!("STY ${:02X}{:02X}", high.unwrap(), low).as_str());
-        cpu.mmu.write(cpu.Y, address);
-        cpu.cycle += 4;
-    }
+  //   pub fn sty_8c(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { operand, address, high, low } = self.absolute(cpu);
+		// self.current_operation.push_str(format!("STY ${:02X}{:02X}", high.unwrap(), low).as_str());
+  //       cpu.mmu.write(cpu.Y, address);
+  //       cpu.cycle += 4;
+  //   }
 
-    pub fn sty_84(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { operand, address, high, low } = self.zero_page(cpu);
-		self.current_operation.push_str(format!("STY ${:02X}", low).as_str());
-        cpu.mmu.write(cpu.Y, address);
-        cpu.cycle += 3;
-    }
+  //   pub fn sty_84(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { operand, address, high, low } = self.zero_page(cpu);
+		// self.current_operation.push_str(format!("STY ${:02X}", low).as_str());
+  //       cpu.mmu.write(cpu.Y, address);
+  //       cpu.cycle += 3;
+  //   }
 
-    pub fn sty_94(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { operand, address, high, low } = self.zero_page_indexed(cpu.X, cpu);
-		self.current_operation.push_str(format!("STY ${:02X}, X", low).as_str());
-        cpu.mmu.write(cpu.Y, address);
-        cpu.cycle += 4;
-    }
+  //   pub fn sty_94(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { operand, address, high, low } = self.zero_page_indexed(cpu.X, cpu);
+		// self.current_operation.push_str(format!("STY ${:02X}, X", low).as_str());
+  //       cpu.mmu.write(cpu.Y, address);
+  //       cpu.cycle += 4;
+  //   }
 
     pub fn cmp_c9(&mut self, cpu : &mut MOS6510) {
         let operand: u8 = self.fetch(cpu);
