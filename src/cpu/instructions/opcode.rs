@@ -29,7 +29,7 @@ impl Opcode {
     }
 
     pub fn init(&mut self) {
-        self.table[0x00] = Opcode::brk_00;
+        self.table[0x00] = brk_00;
         self.table[0x01] = Opcode::ora_01;
         self.table[0x05] = Opcode::ora_05;
         self.table[0x06] = asl_06;
@@ -41,11 +41,11 @@ impl Opcode {
         self.table[0x11] = Opcode::ora_11;
         self.table[0x15] = Opcode::ora_15;
         self.table[0x16] = asl_16;
-        self.table[0x18] = Opcode::clc_18;
+        self.table[0x18] = clc_18;
         self.table[0x19] = Opcode::ora_19;
         self.table[0x1d] = Opcode::ora_1d;
         self.table[0x1e] = asl_1e;
-        self.table[0x20] = Opcode::jsr_20;
+        self.table[0x20] = jsr_20;
         self.table[0x21] = Opcode::and_21;
         self.table[0x25] = Opcode::and_25;
         self.table[0x26] = rol_26;
@@ -57,35 +57,35 @@ impl Opcode {
         self.table[0x31] = Opcode::and_31;
         self.table[0x35] = Opcode::and_35;
         self.table[0x36] = rol_36;
-        self.table[0x38] = Opcode::sec_38;
+        self.table[0x38] = sec_38;
         self.table[0x39] = Opcode::and_39;
         self.table[0x3d] = Opcode::and_3d;
         self.table[0x3e] = rol_3e;
-        self.table[0x40] = Opcode::rti_40;
+        self.table[0x40] = rti_40;
         self.table[0x41] = Opcode::eor_41;
         self.table[0x45] = Opcode::eor_45;
         self.table[0x46] = lsr_46;
         self.table[0x48] = pha_48;
         self.table[0x49] = Opcode::eor_49;
         self.table[0x4a] = lsr_4a;
-        self.table[0x4c] = Opcode::jmp_4c;
+        self.table[0x4c] = jmp_4c;
         self.table[0x4d] = Opcode::eor_4d;
         self.table[0x4e] = lsr_4e;
         self.table[0x51] = Opcode::eor_51;
         self.table[0x55] = Opcode::eor_55;
         self.table[0x56] = lsr_56;
-        self.table[0x58] = Opcode::cli_58;
+        self.table[0x58] = cli_58;
         self.table[0x59] = Opcode::eor_59;
         self.table[0x5e] = lsr_5e;
         self.table[0x5d] = Opcode::eor_5d;
-        self.table[0x60] = Opcode::rts_60;
+        self.table[0x60] = rts_60;
         self.table[0x66] = ror_66;
         self.table[0x68] = pla_68;
         self.table[0x6a] = ror_6a;
-        self.table[0x6c] = Opcode::jmp_6c;
+        self.table[0x6c] = jmp_6c;
         self.table[0x6e] = ror_6e;
         self.table[0x76] = ror_76;
-        self.table[0x78] = Opcode::sei_78;
+        self.table[0x78] = sei_78;
         self.table[0x7e] = ror_7e;
         self.table[0x81] = sta_81;
         self.table[0x84] = sty_84;
@@ -120,7 +120,7 @@ impl Opcode {
         self.table[0xb4] = ldy_b4;
         self.table[0xb5] = lda_b5;
         self.table[0xb6] = ldx_b6;
-        self.table[0xb8] = Opcode::clv_b8;
+        self.table[0xb8] = clv_b8;
         self.table[0xb9] = lda_b9;
         self.table[0xba] = tsx_ba;
         self.table[0xbc] = ldy_bc;
@@ -140,7 +140,7 @@ impl Opcode {
         self.table[0xd1] = cmp_d1;
         self.table[0xd5] = cmp_d5;
         self.table[0xd6] = dec_d6;
-        self.table[0xd8] = Opcode::cld_d8;
+        self.table[0xd8] = cld_d8;
         self.table[0xd9] = cmp_d9;
         self.table[0xdd] = cmp_dd;
         self.table[0xde] = dec_de;
@@ -152,7 +152,7 @@ impl Opcode {
         self.table[0xec] = cpx_ec;
         self.table[0xee] = inc_ee;
         self.table[0xf6] = inc_f6;
-        self.table[0xf8] = Opcode::sed_f8;
+        self.table[0xf8] = sed_f8;
         self.table[0xfe] = inc_fe;
     }
 
@@ -178,16 +178,16 @@ impl Opcode {
         self.table[current_opcode as usize](self, cpu)
     }
     
-    pub fn brk_00(&mut self, cpu : &mut MOS6510) {
-        self.current_operation.push_str("BRK");
-        let pc: [u8; 2] = self.u16_to_u8s(cpu.PC + 1);
-        cpu.push_on_stack(pc[0]);
-        cpu.push_on_stack(pc[1]);
-        cpu.push_on_stack(cpu.P);
-        cpu.PC = 0xFFFE;
-        cpu.set_flag(Flags::I, 1);
-        cpu.cycle += 7;
-    }
+    // pub fn brk_00(&mut self, cpu : &mut MOS6510) {
+    //     self.current_operation.push_str("BRK");
+    //     let pc: [u8; 2] = self.u16_to_u8s(cpu.PC + 1);
+    //     cpu.push_on_stack(pc[0]);
+    //     cpu.push_on_stack(pc[1]);
+    //     cpu.push_on_stack(cpu.P);
+    //     cpu.PC = 0xFFFE;
+    //     cpu.set_flag(Flags::I, 1);
+    //     cpu.cycle += 7;
+    // }
 
     // pub fn php_08(&mut self, cpu : &mut MOS6510) {
     //     self.current_operation.push_str("PHP");
@@ -195,11 +195,11 @@ impl Opcode {
     //     cpu.cycle += 3;
     // }
 
-    pub fn clc_18(&mut self, cpu : &mut MOS6510) {
-        self.current_operation.push_str("CLC");
-        cpu.set_flag(Flags::C, 0);
-        cpu.cycle += 2;
-    }
+    // pub fn clc_18(&mut self, cpu : &mut MOS6510) {
+    //     self.current_operation.push_str("CLC");
+    //     cpu.set_flag(Flags::C, 0);
+    //     cpu.cycle += 2;
+    // }
 
     // pub fn plp_28(&mut self, cpu : &mut MOS6510) {
     //     self.current_operation.push_str("PLP");
@@ -207,11 +207,11 @@ impl Opcode {
     //     cpu.cycle += 4;
     // }
 
-    pub fn sec_38(&mut self, cpu : &mut MOS6510) {
-        self.current_operation.push_str("SEC");
-        cpu.set_flag(Flags::C, 1);
-        cpu.cycle += 2;
-    }
+    // pub fn sec_38(&mut self, cpu : &mut MOS6510) {
+    //     self.current_operation.push_str("SEC");
+    //     cpu.set_flag(Flags::C, 1);
+    //     cpu.cycle += 2;
+    // }
 
     // pub fn pha_48(&mut self, cpu : &mut MOS6510) {
     //     self.current_operation.push_str("PHA");
@@ -219,21 +219,21 @@ impl Opcode {
     //     cpu.cycle += 3;
     // }
 
-    pub fn cli_58(&mut self, cpu : &mut MOS6510) {
-        self.current_operation.push_str("CLI");
-        cpu.set_flag(Flags::I, 0);
-        cpu.cycle += 2;
-    }
+    // pub fn cli_58(&mut self, cpu : &mut MOS6510) {
+    //     self.current_operation.push_str("CLI");
+    //     cpu.set_flag(Flags::I, 0);
+    //     cpu.cycle += 2;
+    // }
 
-    pub fn rts_60(&mut self, cpu : &mut MOS6510) {
-        self.current_operation.push_str("RTS");
-        let stack: u16 = cpu.stack_addr();
-        let pc_low = cpu.mmu.read(stack);
-        let pc_high = cpu.mmu.read(stack - 1);
-        cpu.PC = self.u8s_to_u16(pc_high, pc_low) + 1;
-        cpu.S.wrapping_add(2);
-        cpu.cycle += 4;
-    }
+    // pub fn rts_60(&mut self, cpu : &mut MOS6510) {
+    //     self.current_operation.push_str("RTS");
+    //     let stack: u16 = cpu.stack_addr();
+    //     let pc_low = cpu.mmu.read(stack);
+    //     let pc_high = cpu.mmu.read(stack - 1);
+    //     cpu.PC = self.u8s_to_u16(pc_high, pc_low) + 1;
+    //     cpu.S.wrapping_add(2);
+    //     cpu.cycle += 4;
+    // }
 
     // pub fn pla_68(&mut self, cpu : &mut MOS6510) {
     //     self.current_operation.push_str("PLA");
@@ -243,11 +243,11 @@ impl Opcode {
     //     cpu.cycle += 4;
     // }
 
-    pub fn sei_78(&mut self, cpu : &mut MOS6510) {
-        self.current_operation.push_str("SEI");
-        cpu.set_flag(Flags::I, 1);
-        cpu.cycle += 2;
-    }
+    // pub fn sei_78(&mut self, cpu : &mut MOS6510) {
+    //     self.current_operation.push_str("SEI");
+    //     cpu.set_flag(Flags::I, 1);
+    //     cpu.cycle += 2;
+    // }
 
     // pub fn dey_88(&mut self, cpu : &mut MOS6510) {
     //     self.current_operation.push_str("DEY");
@@ -298,11 +298,11 @@ impl Opcode {
     //     cpu.cycle += 2;
     // }
 
-    pub fn clv_b8(&mut self, cpu : &mut MOS6510) {
-        self.current_operation.push_str("CLV");
-        cpu.set_flag(Flags::V, 0);
-        cpu.cycle += 2;
-    }
+    // pub fn clv_b8(&mut self, cpu : &mut MOS6510) {
+    //     self.current_operation.push_str("CLV");
+    //     cpu.set_flag(Flags::V, 0);
+    //     cpu.cycle += 2;
+    // }
 
     // pub fn tsx_ba(&mut self, cpu : &mut MOS6510) {
     //     self.current_operation.push_str("TSX");
@@ -328,11 +328,11 @@ impl Opcode {
     //     cpu.cycle += 2;
     // }
 
-    pub fn cld_d8(&mut self, cpu : &mut MOS6510) {
-        self.current_operation.push_str("CLD");
-        cpu.set_flag(Flags::D, 0);
-        cpu.cycle += 2;
-    }
+    // pub fn cld_d8(&mut self, cpu : &mut MOS6510) {
+    //     self.current_operation.push_str("CLD");
+    //     cpu.set_flag(Flags::D, 0);
+    //     cpu.cycle += 2;
+    // }
 
     // pub fn inx_e8(&mut self, cpu : &mut MOS6510) {
     //     self.current_operation.push_str("INX");
@@ -347,11 +347,11 @@ impl Opcode {
         cpu.cycle += 2;
     }
 
-    pub fn sed_f8(&mut self, cpu : &mut MOS6510) {
-        self.current_operation.push_str("SED");
-        cpu.set_flag(Flags::D, 1);
-        cpu.cycle += 2;
-    }
+    // pub fn sed_f8(&mut self, cpu : &mut MOS6510) {
+    //     self.current_operation.push_str("SED");
+    //     cpu.set_flag(Flags::D, 1);
+    //     cpu.cycle += 2;
+    // }
 
   //   pub fn lda_a9(&mut self, cpu : &mut MOS6510) {
   //       let operand: u8 = self.fetch(cpu);
@@ -831,29 +831,29 @@ impl Opcode {
   //       cpu.cycle += 3;
   //   }
 
-    pub fn jmp_4c(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { operand, address, high, low } = self.absolute(cpu);
-		self.current_operation.push_str(format!("JMP ${:02X}{:02X}", high.unwrap(), low).as_str());
-        cpu.PC = address;
-        cpu.cycle += 3;
-    }
+  //   pub fn jmp_4c(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { operand, address, high, low } = self.absolute(cpu);
+		// self.current_operation.push_str(format!("JMP ${:02X}{:02X}", high.unwrap(), low).as_str());
+  //       cpu.PC = address;
+  //       cpu.cycle += 3;
+  //   }
 
-    pub fn jmp_6c(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { operand, address, high, low } = self.absolute_indirect(cpu);
-		self.current_operation.push_str(format!("JMP (${:02X}{:02X})", high.unwrap(), low).as_str());
-        cpu.PC = address;
-        cpu.cycle += 5;
-    }
+  //   pub fn jmp_6c(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { operand, address, high, low } = self.absolute_indirect(cpu);
+		// self.current_operation.push_str(format!("JMP (${:02X}{:02X})", high.unwrap(), low).as_str());
+  //       cpu.PC = address;
+  //       cpu.cycle += 5;
+  //   }
 
-    pub fn jsr_20(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { operand, address, high, low } = self.absolute(cpu);
-		self.current_operation.push_str(format!("JSR ${:02X}{:02X}", high.unwrap(), low).as_str());
-        let pc_bytes = self.u16_to_u8s(cpu.PC);
-        cpu.push_on_stack(pc_bytes[0]);
-        cpu.push_on_stack(pc_bytes[1]);
-        cpu.PC = address;
-        cpu.cycle += 6;
-    }
+  //   pub fn jsr_20(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { operand, address, high, low } = self.absolute(cpu);
+		// self.current_operation.push_str(format!("JSR ${:02X}{:02X}", high.unwrap(), low).as_str());
+  //       let pc_bytes = self.u16_to_u8s(cpu.PC);
+  //       cpu.push_on_stack(pc_bytes[0]);
+  //       cpu.push_on_stack(pc_bytes[1]);
+  //       cpu.PC = address;
+  //       cpu.cycle += 6;
+  //   }
 
   //   pub fn asl_0a(&mut self, cpu : &mut MOS6510) {
 		// self.current_operation.push_str(format!("ASL A").as_str());
@@ -1089,15 +1089,15 @@ impl Opcode {
   //       cpu.cycle += 6;
   //   }
 
-    pub fn rti_40(&mut self, cpu : &mut MOS6510) {
-        let status: u8 = self.fetch(cpu);
-        let low: u8 = self.fetch(cpu);
-        let high: u8 = self.fetch(cpu);
-        self.current_operation.push_str(format!("RTI flags: {:08b} PC: {:02X}{:02X}", status, high, low).as_str());
-        cpu.PC = self.u8s_to_u16(high, low);
-        cpu.P = status;
-        cpu.cycle += 6;
-    }
+    // pub fn rti_40(&mut self, cpu : &mut MOS6510) {
+    //     let status: u8 = self.fetch(cpu);
+    //     let low: u8 = self.fetch(cpu);
+    //     let high: u8 = self.fetch(cpu);
+    //     self.current_operation.push_str(format!("RTI flags: {:08b} PC: {:02X}{:02X}", status, high, low).as_str());
+    //     cpu.PC = self.u8s_to_u16(high, low);
+    //     cpu.P = status;
+    //     cpu.cycle += 6;
+    // }
 
     pub fn and_29(&mut self, cpu : &mut MOS6510) {
         let operand: u8 = self.fetch(cpu);
