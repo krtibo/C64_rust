@@ -7,6 +7,7 @@ pub mod arith;
 pub mod inc;
 pub mod ctrl;
 pub mod flags;
+pub mod logic;
 
 pub mod test;
 
@@ -20,3 +21,4 @@ pub use arith::*;
 pub use inc::*;
 pub use ctrl::*;
 pub use flags::*;
+pub use logic::*;

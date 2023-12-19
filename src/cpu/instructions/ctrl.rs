@@ -14,6 +14,11 @@ pub fn brk_00(opc: &mut Opcode, cpu : &mut MOS6510) {
     cpu.cycle += 7;
 }
 
+pub fn nop_ea(opc: &mut Opcode, cpu : &mut MOS6510) {
+    opc.current_operation.push_str("NOP");
+    cpu.cycle += 2;
+}
+
 pub fn jmp_4c(opc: &mut Opcode, cpu : &mut MOS6510) {
     let AddrReturn { operand, address, high, low } = opc.absolute(cpu);
     opc.current_operation.push_str(format!("JMP ${:02X}{:02X}", high.unwrap(), low).as_str());
