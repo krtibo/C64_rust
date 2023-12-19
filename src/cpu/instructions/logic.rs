@@ -1,6 +1,7 @@
 use super::Opcode;
 use super::AddrReturn;
 use super::super::MOS6510;
+use super::super::Flags;
 
 pub fn and_29(opc: &mut Opcode, cpu : &mut MOS6510) {
     let operand: u8 = opc.fetch(cpu);
@@ -216,4 +217,24 @@ pub fn eor_51(opc: &mut Opcode, cpu : &mut MOS6510) {
     opc.check_and_set_n(cpu.A, cpu);
     opc.check_and_set_z(cpu.A, cpu);
     cpu.cycle += 5;
+}
+
+pub fn bit_2c(opc: &mut Opcode, cpu : &mut MOS6510) {
+    let AddrReturn { operand, address, high, low } = opc.absolute(cpu);
+    opc.current_operation.push_str(format!("BIT ${:02X}{:02X}", high.unwrap(), low).as_str());
+    let result = cpu.A & operand;
+    if opc.get_bit(operand, 6) == 1 { cpu.set_flag(Flags::V, 1) } else { cpu.set_flag(Flags::V, 0) }
+    opc.check_and_set_n(operand, cpu);
+    opc.check_and_set_z(result, cpu);
+    cpu.cycle += 4;
+}
+
+pub fn bit_24(opc: &mut Opcode, cpu : &mut MOS6510) {
+    let AddrReturn { operand, address, high, low } = opc.zero_page(cpu);
+    opc.current_operation.push_str(format!("BIT ${:02X}", low).as_str());
+    let result = cpu.A & operand;
+    if opc.get_bit(operand, 6) == 1 { cpu.set_flag(Flags::V, 1) } else { cpu.set_flag(Flags::V, 0) }
+    opc.check_and_set_n(operand, cpu);
+    opc.check_and_set_z(result, cpu);
+    cpu.cycle += 3;
 }

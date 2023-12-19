@@ -47,11 +47,13 @@ impl Opcode {
         self.table[0x1e] = asl_1e;
         self.table[0x20] = jsr_20;
         self.table[0x21] = and_21;
+        self.table[0x24] = bit_24;
         self.table[0x25] = and_25;
         self.table[0x26] = rol_26;
         self.table[0x28] = plp_28;
         self.table[0x29] = and_29;
         self.table[0x2a] = rol_2a;
+        self.table[0x2c] = bit_2c;
         self.table[0x2d] = and_2d;
         self.table[0x2e] = rol_2e;
         self.table[0x31] = and_31;
