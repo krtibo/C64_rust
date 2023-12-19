@@ -32,61 +32,61 @@ impl Opcode {
         self.table[0x00] = Opcode::brk_00;
         self.table[0x01] = Opcode::ora_01;
         self.table[0x05] = Opcode::ora_05;
-        self.table[0x06] = Opcode::asl_06;
+        self.table[0x06] = asl_06;
         self.table[0x08] = php_08;
         self.table[0x09] = Opcode::ora_09;
-        self.table[0x0a] = Opcode::asl_0a;
-        self.table[0x0e] = Opcode::asl_0e;
+        self.table[0x0a] = asl_0a;
+        self.table[0x0e] = asl_0e;
         self.table[0x0d] = Opcode::ora_0d;
         self.table[0x11] = Opcode::ora_11;
         self.table[0x15] = Opcode::ora_15;
-        self.table[0x16] = Opcode::asl_16;
+        self.table[0x16] = asl_16;
         self.table[0x18] = Opcode::clc_18;
         self.table[0x19] = Opcode::ora_19;
         self.table[0x1d] = Opcode::ora_1d;
-        self.table[0x1e] = Opcode::asl_1e;
+        self.table[0x1e] = asl_1e;
         self.table[0x20] = Opcode::jsr_20;
         self.table[0x21] = Opcode::and_21;
         self.table[0x25] = Opcode::and_25;
-        self.table[0x26] = Opcode::rol_26;
+        self.table[0x26] = rol_26;
         self.table[0x28] = plp_28;
         self.table[0x29] = Opcode::and_29;
-        self.table[0x2a] = Opcode::rol_2a;
+        self.table[0x2a] = rol_2a;
         self.table[0x2d] = Opcode::and_2d;
-        self.table[0x2e] = Opcode::rol_2e;
+        self.table[0x2e] = rol_2e;
         self.table[0x31] = Opcode::and_31;
         self.table[0x35] = Opcode::and_35;
-        self.table[0x36] = Opcode::rol_36;
+        self.table[0x36] = rol_36;
         self.table[0x38] = Opcode::sec_38;
         self.table[0x39] = Opcode::and_39;
         self.table[0x3d] = Opcode::and_3d;
-        self.table[0x3e] = Opcode::rol_3e;
+        self.table[0x3e] = rol_3e;
         self.table[0x40] = Opcode::rti_40;
         self.table[0x41] = Opcode::eor_41;
         self.table[0x45] = Opcode::eor_45;
-        self.table[0x46] = Opcode::lsr_46;
+        self.table[0x46] = lsr_46;
         self.table[0x48] = pha_48;
         self.table[0x49] = Opcode::eor_49;
-        self.table[0x4a] = Opcode::lsr_4a;
+        self.table[0x4a] = lsr_4a;
         self.table[0x4c] = Opcode::jmp_4c;
         self.table[0x4d] = Opcode::eor_4d;
-        self.table[0x4e] = Opcode::lsr_4e;
+        self.table[0x4e] = lsr_4e;
         self.table[0x51] = Opcode::eor_51;
         self.table[0x55] = Opcode::eor_55;
-        self.table[0x56] = Opcode::lsr_56;
+        self.table[0x56] = lsr_56;
         self.table[0x58] = Opcode::cli_58;
         self.table[0x59] = Opcode::eor_59;
-        self.table[0x5e] = Opcode::lsr_5e;
+        self.table[0x5e] = lsr_5e;
         self.table[0x5d] = Opcode::eor_5d;
         self.table[0x60] = Opcode::rts_60;
-        self.table[0x66] = Opcode::ror_66;
+        self.table[0x66] = ror_66;
         self.table[0x68] = pla_68;
-        self.table[0x6a] = Opcode::ror_6a;
+        self.table[0x6a] = ror_6a;
         self.table[0x6c] = Opcode::jmp_6c;
-        self.table[0x6e] = Opcode::ror_6e;
-        self.table[0x76] = Opcode::ror_76;
+        self.table[0x6e] = ror_6e;
+        self.table[0x76] = ror_76;
         self.table[0x78] = Opcode::sei_78;
-        self.table[0x7e] = Opcode::ror_7e;
+        self.table[0x7e] = ror_7e;
         self.table[0x81] = sta_81;
         self.table[0x84] = sty_84;
         self.table[0x85] = sta_85;
@@ -855,239 +855,239 @@ impl Opcode {
         cpu.cycle += 6;
     }
 
-    pub fn asl_0a(&mut self, cpu : &mut MOS6510) {
-		self.current_operation.push_str(format!("ASL A").as_str());
-        cpu.set_flag(Flags::C, self.get_bit(cpu.A, 7));
-        cpu.set_flag(Flags::N, self.get_bit(cpu.A, 6));
-        cpu.A = cpu.A << 1;
-        self.check_and_set_z(cpu.A, cpu);
-        cpu.cycle += 2;
-    }
+  //   pub fn asl_0a(&mut self, cpu : &mut MOS6510) {
+		// self.current_operation.push_str(format!("ASL A").as_str());
+  //       cpu.set_flag(Flags::C, self.get_bit(cpu.A, 7));
+  //       cpu.set_flag(Flags::N, self.get_bit(cpu.A, 6));
+  //       cpu.A = cpu.A << 1;
+  //       self.check_and_set_z(cpu.A, cpu);
+  //       cpu.cycle += 2;
+  //   }
 
-    pub fn asl_0e(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { mut operand, address, high, low } = self.absolute(cpu);
-		self.current_operation.push_str(format!("ASL ${:02X}{:02X}", high.unwrap(), low).as_str());
-        cpu.set_flag(Flags::C, self.get_bit(operand, 7));
-        cpu.set_flag(Flags::N, self.get_bit(operand, 6));
-        operand = operand << 1;
-        cpu.mmu.write(operand, address);
-        self.check_and_set_z(operand, cpu);
-        cpu.cycle += 6;
-    }
+  //   pub fn asl_0e(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { mut operand, address, high, low } = self.absolute(cpu);
+		// self.current_operation.push_str(format!("ASL ${:02X}{:02X}", high.unwrap(), low).as_str());
+  //       cpu.set_flag(Flags::C, self.get_bit(operand, 7));
+  //       cpu.set_flag(Flags::N, self.get_bit(operand, 6));
+  //       operand = operand << 1;
+  //       cpu.mmu.write(operand, address);
+  //       self.check_and_set_z(operand, cpu);
+  //       cpu.cycle += 6;
+  //   }
 
-    pub fn asl_1e(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { mut operand, address, high, low } = self.absolute_indexed(cpu.X as u16, cpu);
-		self.current_operation.push_str(format!("ASL ${:02X}{:02X}, X", high.unwrap(), low).as_str());
-        cpu.set_flag(Flags::C, self.get_bit(operand, 7));
-        cpu.set_flag(Flags::N, self.get_bit(operand, 6));
-        operand = operand << 1;
-        cpu.mmu.write(operand, address);
-        self.check_and_set_z(operand, cpu);
-        cpu.cycle += 7;
-    }
+  //   pub fn asl_1e(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { mut operand, address, high, low } = self.absolute_indexed(cpu.X as u16, cpu);
+		// self.current_operation.push_str(format!("ASL ${:02X}{:02X}, X", high.unwrap(), low).as_str());
+  //       cpu.set_flag(Flags::C, self.get_bit(operand, 7));
+  //       cpu.set_flag(Flags::N, self.get_bit(operand, 6));
+  //       operand = operand << 1;
+  //       cpu.mmu.write(operand, address);
+  //       self.check_and_set_z(operand, cpu);
+  //       cpu.cycle += 7;
+  //   }
 
-    pub fn asl_06(&mut self, cpu : &mut MOS6510) {
-        let low: u8 = self.fetch(cpu);
-		self.current_operation.push_str(format!("ASL ${:02X}", low).as_str());
-        let address = self.u8s_to_u16(0x00, low);
-        let mut operand = cpu.mmu.read(address);
-        cpu.set_flag(Flags::C, self.get_bit(operand, 7));
-        cpu.set_flag(Flags::N, self.get_bit(operand, 6));
-        operand = operand << 1;
-        cpu.mmu.write(operand, address);
-        self.check_and_set_z(operand, cpu);
-        cpu.cycle += 5;
-    }
+  //   pub fn asl_06(&mut self, cpu : &mut MOS6510) {
+  //       let low: u8 = self.fetch(cpu);
+		// self.current_operation.push_str(format!("ASL ${:02X}", low).as_str());
+  //       let address = self.u8s_to_u16(0x00, low);
+  //       let mut operand = cpu.mmu.read(address);
+  //       cpu.set_flag(Flags::C, self.get_bit(operand, 7));
+  //       cpu.set_flag(Flags::N, self.get_bit(operand, 6));
+  //       operand = operand << 1;
+  //       cpu.mmu.write(operand, address);
+  //       self.check_and_set_z(operand, cpu);
+  //       cpu.cycle += 5;
+  //   }
 
-    pub fn asl_16(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { mut operand, address, high, low } = self.zero_page_indexed(cpu.X, cpu);
-		self.current_operation.push_str(format!("ASL ${:02X}, X", low).as_str());
-        cpu.set_flag(Flags::C, self.get_bit(operand, 7));
-        cpu.set_flag(Flags::N, self.get_bit(operand, 6));
-        operand = operand << 1;
-        cpu.mmu.write(operand, address);
-        self.check_and_set_z(operand, cpu);
-        cpu.cycle += 6;
-    }
+  //   pub fn asl_16(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { mut operand, address, high, low } = self.zero_page_indexed(cpu.X, cpu);
+		// self.current_operation.push_str(format!("ASL ${:02X}, X", low).as_str());
+  //       cpu.set_flag(Flags::C, self.get_bit(operand, 7));
+  //       cpu.set_flag(Flags::N, self.get_bit(operand, 6));
+  //       operand = operand << 1;
+  //       cpu.mmu.write(operand, address);
+  //       self.check_and_set_z(operand, cpu);
+  //       cpu.cycle += 6;
+  //   }
 
-    pub fn lsr_4a(&mut self, cpu : &mut MOS6510) {
-		self.current_operation.push_str(format!("LSR A").as_str());
-        cpu.set_flag(Flags::N, 0);
-        cpu.set_flag(Flags::C, self.get_bit(cpu.A, 0));
-        cpu.A = cpu.A >> 1;
-        self.check_and_set_z(cpu.A, cpu);
-        cpu.cycle += 2;
-    }
+  //   pub fn lsr_4a(&mut self, cpu : &mut MOS6510) {
+		// self.current_operation.push_str(format!("LSR A").as_str());
+  //       cpu.set_flag(Flags::N, 0);
+  //       cpu.set_flag(Flags::C, self.get_bit(cpu.A, 0));
+  //       cpu.A = cpu.A >> 1;
+  //       self.check_and_set_z(cpu.A, cpu);
+  //       cpu.cycle += 2;
+  //   }
 
-    pub fn lsr_4e(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { mut operand, address, high, low } = self.absolute(cpu);
-		self.current_operation.push_str(format!("LSR ${:02X}{:02X}", high.unwrap(), low).as_str());
-        cpu.set_flag(Flags::N, 0);
-        cpu.set_flag(Flags::C, self.get_bit(operand, 0));
-        operand = operand >> 1;
-        cpu.mmu.write(operand, address);
-        self.check_and_set_z(operand, cpu);
-        cpu.cycle += 6;
-    }
+  //   pub fn lsr_4e(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { mut operand, address, high, low } = self.absolute(cpu);
+		// self.current_operation.push_str(format!("LSR ${:02X}{:02X}", high.unwrap(), low).as_str());
+  //       cpu.set_flag(Flags::N, 0);
+  //       cpu.set_flag(Flags::C, self.get_bit(operand, 0));
+  //       operand = operand >> 1;
+  //       cpu.mmu.write(operand, address);
+  //       self.check_and_set_z(operand, cpu);
+  //       cpu.cycle += 6;
+  //   }
 
-    pub fn lsr_5e(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { mut operand, address, high, low } = self.absolute_indexed(cpu.X as u16, cpu);
-		self.current_operation.push_str(format!("LSR ${:02X}{:02X}, X", high.unwrap(), low).as_str());
-        cpu.set_flag(Flags::N, 0);
-        cpu.set_flag(Flags::C, self.get_bit(operand, 0));
-        operand = operand >> 1;
-        cpu.mmu.write(operand, address);
-        self.check_and_set_z(operand, cpu);
-        cpu.cycle += 7;
-    }
+  //   pub fn lsr_5e(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { mut operand, address, high, low } = self.absolute_indexed(cpu.X as u16, cpu);
+		// self.current_operation.push_str(format!("LSR ${:02X}{:02X}, X", high.unwrap(), low).as_str());
+  //       cpu.set_flag(Flags::N, 0);
+  //       cpu.set_flag(Flags::C, self.get_bit(operand, 0));
+  //       operand = operand >> 1;
+  //       cpu.mmu.write(operand, address);
+  //       self.check_and_set_z(operand, cpu);
+  //       cpu.cycle += 7;
+  //   }
 
-    pub fn lsr_46(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { mut operand, address, high, low } = self.zero_page(cpu);
-		self.current_operation.push_str(format!("LSR ${:02X}", low).as_str());
-        cpu.set_flag(Flags::N, 0);
-        cpu.set_flag(Flags::C, self.get_bit(operand, 0));
-        operand = operand >> 1;
-        cpu.mmu.write(operand, address);
-        self.check_and_set_z(operand, cpu);
-        cpu.cycle += 5;
-    }
+  //   pub fn lsr_46(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { mut operand, address, high, low } = self.zero_page(cpu);
+		// self.current_operation.push_str(format!("LSR ${:02X}", low).as_str());
+  //       cpu.set_flag(Flags::N, 0);
+  //       cpu.set_flag(Flags::C, self.get_bit(operand, 0));
+  //       operand = operand >> 1;
+  //       cpu.mmu.write(operand, address);
+  //       self.check_and_set_z(operand, cpu);
+  //       cpu.cycle += 5;
+  //   }
 
-    pub fn lsr_56(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { mut operand, address, high, low } = self.zero_page_indexed(cpu.X, cpu);
-		self.current_operation.push_str(format!("LSR ${:02X}, X", low).as_str());
-        cpu.set_flag(Flags::N, 0);
-        cpu.set_flag(Flags::C, self.get_bit(operand, 0));
-        operand = operand >> 1;
-        cpu.mmu.write(operand, address);
-        self.check_and_set_z(operand, cpu);
-        cpu.cycle += 6;
-    }
+  //   pub fn lsr_56(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { mut operand, address, high, low } = self.zero_page_indexed(cpu.X, cpu);
+		// self.current_operation.push_str(format!("LSR ${:02X}, X", low).as_str());
+  //       cpu.set_flag(Flags::N, 0);
+  //       cpu.set_flag(Flags::C, self.get_bit(operand, 0));
+  //       operand = operand >> 1;
+  //       cpu.mmu.write(operand, address);
+  //       self.check_and_set_z(operand, cpu);
+  //       cpu.cycle += 6;
+  //   }
 
-    pub fn rol_2a(&mut self, cpu : &mut MOS6510) {
-		self.current_operation.push_str(format!("ROL A").as_str());
-        cpu.set_flag(Flags::N, self.get_bit(cpu.A, 6));
-        let input_bit_7: u8 = self.get_bit(cpu.A, 7);
-        cpu.A = cpu.A << 1;
-        if cpu.get_flag(Flags::C) { cpu.A = cpu.A | 0b0000_0001 }
-        cpu.set_flag(Flags::C, input_bit_7);
-        self.check_and_set_z(cpu.A, cpu);
-        cpu.cycle += 2;
-    }
+  //   pub fn rol_2a(&mut self, cpu : &mut MOS6510) {
+		// self.current_operation.push_str(format!("ROL A").as_str());
+  //       cpu.set_flag(Flags::N, self.get_bit(cpu.A, 6));
+  //       let input_bit_7: u8 = self.get_bit(cpu.A, 7);
+  //       cpu.A = cpu.A << 1;
+  //       if cpu.get_flag(Flags::C) { cpu.A = cpu.A | 0b0000_0001 }
+  //       cpu.set_flag(Flags::C, input_bit_7);
+  //       self.check_and_set_z(cpu.A, cpu);
+  //       cpu.cycle += 2;
+  //   }
 
-    pub fn rol_2e(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { mut operand, address, high, low } = self.absolute(cpu);
-		self.current_operation.push_str(format!("ROL ${:02X}{:02X}", high.unwrap(), low).as_str());
-        cpu.set_flag(Flags::N, self.get_bit(operand, 6));
-        let input_bit_7: u8 = self.get_bit(operand, 7);
-        operand = operand << 1;
-        if cpu.get_flag(Flags::C) { operand = operand | 0b0000_0001 }
-        cpu.mmu.write(operand, address);
-        cpu.set_flag(Flags::C, input_bit_7);
-        self.check_and_set_z(operand, cpu);
-        cpu.cycle += 6;
-    }
+  //   pub fn rol_2e(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { mut operand, address, high, low } = self.absolute(cpu);
+		// self.current_operation.push_str(format!("ROL ${:02X}{:02X}", high.unwrap(), low).as_str());
+  //       cpu.set_flag(Flags::N, self.get_bit(operand, 6));
+  //       let input_bit_7: u8 = self.get_bit(operand, 7);
+  //       operand = operand << 1;
+  //       if cpu.get_flag(Flags::C) { operand = operand | 0b0000_0001 }
+  //       cpu.mmu.write(operand, address);
+  //       cpu.set_flag(Flags::C, input_bit_7);
+  //       self.check_and_set_z(operand, cpu);
+  //       cpu.cycle += 6;
+  //   }
 
-    pub fn rol_3e(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { mut operand, address, high, low } = self.absolute_indexed(cpu.X as u16, cpu);
-		self.current_operation.push_str(format!("ROL ${:02X}{:02X}, X", high.unwrap(), low).as_str());
-        cpu.set_flag(Flags::N, self.get_bit(operand, 6));
-        let input_bit_7: u8 = self.get_bit(operand, 7);
-        operand = operand << 1;
-        if cpu.get_flag(Flags::C) { operand = operand | 0b0000_0001 }
-        cpu.mmu.write(operand, address);
-        cpu.set_flag(Flags::C, input_bit_7);
-        self.check_and_set_z(operand, cpu);
-        cpu.cycle += 7;
-    }
+  //   pub fn rol_3e(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { mut operand, address, high, low } = self.absolute_indexed(cpu.X as u16, cpu);
+		// self.current_operation.push_str(format!("ROL ${:02X}{:02X}, X", high.unwrap(), low).as_str());
+  //       cpu.set_flag(Flags::N, self.get_bit(operand, 6));
+  //       let input_bit_7: u8 = self.get_bit(operand, 7);
+  //       operand = operand << 1;
+  //       if cpu.get_flag(Flags::C) { operand = operand | 0b0000_0001 }
+  //       cpu.mmu.write(operand, address);
+  //       cpu.set_flag(Flags::C, input_bit_7);
+  //       self.check_and_set_z(operand, cpu);
+  //       cpu.cycle += 7;
+  //   }
 
-    pub fn rol_26(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { mut operand, address, high, low } = self.zero_page(cpu);
-		self.current_operation.push_str(format!("ROL ${:02X}", low).as_str());
-        cpu.set_flag(Flags::N, self.get_bit(operand, 6));
-        let input_bit_7: u8 = self.get_bit(operand, 7);
-        operand = operand << 1;
-        if cpu.get_flag(Flags::C) { operand = operand | 0b0000_0001 }
-        cpu.mmu.write(operand, address);
-        cpu.set_flag(Flags::C, input_bit_7);
-        self.check_and_set_z(operand, cpu);
-        cpu.cycle += 5;
-    }
+  //   pub fn rol_26(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { mut operand, address, high, low } = self.zero_page(cpu);
+		// self.current_operation.push_str(format!("ROL ${:02X}", low).as_str());
+  //       cpu.set_flag(Flags::N, self.get_bit(operand, 6));
+  //       let input_bit_7: u8 = self.get_bit(operand, 7);
+  //       operand = operand << 1;
+  //       if cpu.get_flag(Flags::C) { operand = operand | 0b0000_0001 }
+  //       cpu.mmu.write(operand, address);
+  //       cpu.set_flag(Flags::C, input_bit_7);
+  //       self.check_and_set_z(operand, cpu);
+  //       cpu.cycle += 5;
+  //   }
 
-    pub fn rol_36(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { mut operand, address, high, low } = self.zero_page_indexed(cpu.X, cpu);
-		self.current_operation.push_str(format!("ROL ${:02X}, X", low).as_str());
-        cpu.set_flag(Flags::N, self.get_bit(operand, 6));
-        let input_bit_7: u8 = self.get_bit(operand, 7);
-        operand = operand << 1;
-        if cpu.get_flag(Flags::C) { operand = operand | 0b0000_0001 }
-        cpu.mmu.write(operand, address);
-        cpu.set_flag(Flags::C, input_bit_7);
-        self.check_and_set_z(operand, cpu);
-        cpu.cycle += 6;
-    }
+  //   pub fn rol_36(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { mut operand, address, high, low } = self.zero_page_indexed(cpu.X, cpu);
+		// self.current_operation.push_str(format!("ROL ${:02X}, X", low).as_str());
+  //       cpu.set_flag(Flags::N, self.get_bit(operand, 6));
+  //       let input_bit_7: u8 = self.get_bit(operand, 7);
+  //       operand = operand << 1;
+  //       if cpu.get_flag(Flags::C) { operand = operand | 0b0000_0001 }
+  //       cpu.mmu.write(operand, address);
+  //       cpu.set_flag(Flags::C, input_bit_7);
+  //       self.check_and_set_z(operand, cpu);
+  //       cpu.cycle += 6;
+  //   }
 
-    pub fn ror_6a(&mut self, cpu : &mut MOS6510) {
-		self.current_operation.push_str(format!("ROR A").as_str());
-        if cpu.get_flag(Flags::C) { cpu.set_flag(Flags::N, 1) } else { cpu.set_flag(Flags::N, 0) }
-        let input_bit_0: u8 = self.get_bit(cpu.A, 0);
-        cpu.A = cpu.A >> 1;
-        if cpu.get_flag(Flags::C) { cpu.A = cpu.A | 0b1000_0000 }
-        cpu.set_flag(Flags::C, input_bit_0);
-        self.check_and_set_z(cpu.A, cpu);
-        cpu.cycle += 2;
-    }
+  //   pub fn ror_6a(&mut self, cpu : &mut MOS6510) {
+		// self.current_operation.push_str(format!("ROR A").as_str());
+  //       if cpu.get_flag(Flags::C) { cpu.set_flag(Flags::N, 1) } else { cpu.set_flag(Flags::N, 0) }
+  //       let input_bit_0: u8 = self.get_bit(cpu.A, 0);
+  //       cpu.A = cpu.A >> 1;
+  //       if cpu.get_flag(Flags::C) { cpu.A = cpu.A | 0b1000_0000 }
+  //       cpu.set_flag(Flags::C, input_bit_0);
+  //       self.check_and_set_z(cpu.A, cpu);
+  //       cpu.cycle += 2;
+  //   }
 
-    pub fn ror_6e(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { mut operand, address, high, low } = self.absolute(cpu);
-		self.current_operation.push_str(format!("ROR ${:02X}{:02X}", high.unwrap(), low).as_str());
-        if cpu.get_flag(Flags::C) { cpu.set_flag(Flags::N, 1) } else { cpu.set_flag(Flags::N, 0) }
-        let input_bit_0: u8 = self.get_bit(operand, 0);
-        operand = operand >> 1;
-        if cpu.get_flag(Flags::C) { operand = operand | 0b1000_0000 }
-        cpu.mmu.write(operand, address);
-        cpu.set_flag(Flags::C, input_bit_0);
-        self.check_and_set_z(operand, cpu);
-        cpu.cycle += 6;
-    }
+  //   pub fn ror_6e(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { mut operand, address, high, low } = self.absolute(cpu);
+		// self.current_operation.push_str(format!("ROR ${:02X}{:02X}", high.unwrap(), low).as_str());
+  //       if cpu.get_flag(Flags::C) { cpu.set_flag(Flags::N, 1) } else { cpu.set_flag(Flags::N, 0) }
+  //       let input_bit_0: u8 = self.get_bit(operand, 0);
+  //       operand = operand >> 1;
+  //       if cpu.get_flag(Flags::C) { operand = operand | 0b1000_0000 }
+  //       cpu.mmu.write(operand, address);
+  //       cpu.set_flag(Flags::C, input_bit_0);
+  //       self.check_and_set_z(operand, cpu);
+  //       cpu.cycle += 6;
+  //   }
 
-    pub fn ror_7e(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { mut operand, address, high, low } = self.absolute_indexed(cpu.X as u16, cpu);
-		self.current_operation.push_str(format!("ROR ${:02X}{:02X}, X", high.unwrap(), low).as_str());
-        if cpu.get_flag(Flags::C) { cpu.set_flag(Flags::N, 1) } else { cpu.set_flag(Flags::N, 0) }
-        let input_bit_0: u8 = self.get_bit(operand, 0);
-        operand = operand >> 1;
-        if cpu.get_flag(Flags::C) { operand = operand | 0b1000_0000 }
-        cpu.mmu.write(operand, address);
-        cpu.set_flag(Flags::C, input_bit_0);
-        self.check_and_set_z(operand, cpu);
-        cpu.cycle += 7;
-    }
+  //   pub fn ror_7e(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { mut operand, address, high, low } = self.absolute_indexed(cpu.X as u16, cpu);
+		// self.current_operation.push_str(format!("ROR ${:02X}{:02X}, X", high.unwrap(), low).as_str());
+  //       if cpu.get_flag(Flags::C) { cpu.set_flag(Flags::N, 1) } else { cpu.set_flag(Flags::N, 0) }
+  //       let input_bit_0: u8 = self.get_bit(operand, 0);
+  //       operand = operand >> 1;
+  //       if cpu.get_flag(Flags::C) { operand = operand | 0b1000_0000 }
+  //       cpu.mmu.write(operand, address);
+  //       cpu.set_flag(Flags::C, input_bit_0);
+  //       self.check_and_set_z(operand, cpu);
+  //       cpu.cycle += 7;
+  //   }
 
-    pub fn ror_66(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { mut operand, address, high, low } = self.zero_page(cpu);
-		self.current_operation.push_str(format!("ROR ${:02X}", low).as_str());
-        if cpu.get_flag(Flags::C) { cpu.set_flag(Flags::N, 1) } else { cpu.set_flag(Flags::N, 0) }
-        let input_bit_0: u8 = self.get_bit(operand, 0);
-        operand = operand >> 1;
-        if cpu.get_flag(Flags::C) { operand = operand | 0b1000_0000 }
-        cpu.mmu.write(operand, address);
-        cpu.set_flag(Flags::C, input_bit_0);
-        self.check_and_set_z(operand, cpu);
-        cpu.cycle += 5;
-    }
+  //   pub fn ror_66(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { mut operand, address, high, low } = self.zero_page(cpu);
+		// self.current_operation.push_str(format!("ROR ${:02X}", low).as_str());
+  //       if cpu.get_flag(Flags::C) { cpu.set_flag(Flags::N, 1) } else { cpu.set_flag(Flags::N, 0) }
+  //       let input_bit_0: u8 = self.get_bit(operand, 0);
+  //       operand = operand >> 1;
+  //       if cpu.get_flag(Flags::C) { operand = operand | 0b1000_0000 }
+  //       cpu.mmu.write(operand, address);
+  //       cpu.set_flag(Flags::C, input_bit_0);
+  //       self.check_and_set_z(operand, cpu);
+  //       cpu.cycle += 5;
+  //   }
 
-    pub fn ror_76(&mut self, cpu : &mut MOS6510) {
-        let AddrReturn { mut operand, address, high, low } = self.zero_page_indexed(cpu.X, cpu);
-		self.current_operation.push_str(format!("ROR ${:02X}, X", low).as_str());
-        if cpu.get_flag(Flags::C) { cpu.set_flag(Flags::N, 1) } else { cpu.set_flag(Flags::N, 0) }
-        let input_bit_0: u8 = self.get_bit(operand, 0);
-        operand = operand >> 1;
-        if cpu.get_flag(Flags::C) { operand = operand | 0b1000_0000 }
-        cpu.mmu.write(operand, address);
-        cpu.set_flag(Flags::C, input_bit_0);
-        self.check_and_set_z(operand, cpu);
-        cpu.cycle += 6;
-    }
+  //   pub fn ror_76(&mut self, cpu : &mut MOS6510) {
+  //       let AddrReturn { mut operand, address, high, low } = self.zero_page_indexed(cpu.X, cpu);
+		// self.current_operation.push_str(format!("ROR ${:02X}, X", low).as_str());
+  //       if cpu.get_flag(Flags::C) { cpu.set_flag(Flags::N, 1) } else { cpu.set_flag(Flags::N, 0) }
+  //       let input_bit_0: u8 = self.get_bit(operand, 0);
+  //       operand = operand >> 1;
+  //       if cpu.get_flag(Flags::C) { operand = operand | 0b1000_0000 }
+  //       cpu.mmu.write(operand, address);
+  //       cpu.set_flag(Flags::C, input_bit_0);
+  //       self.check_and_set_z(operand, cpu);
+  //       cpu.cycle += 6;
+  //   }
 
     pub fn rti_40(&mut self, cpu : &mut MOS6510) {
         let status: u8 = self.fetch(cpu);
