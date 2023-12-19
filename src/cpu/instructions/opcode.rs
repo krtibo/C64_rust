@@ -178,8 +178,6 @@ impl Opcode {
         self.table[current_opcode as usize](self, cpu)
     }
     
-    // --- HELPER FUNCTIONS ---
-
     pub fn check_and_set_n(&mut self, value : u8, cpu : &mut MOS6510) {
         if (value & 0b1000_0000 == 0b1000_0000) { 
             cpu.set_flag(Flags::N, 1); 
