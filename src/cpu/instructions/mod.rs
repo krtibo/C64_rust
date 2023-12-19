@@ -8,6 +8,7 @@ pub mod inc;
 pub mod ctrl;
 pub mod flags;
 pub mod logic;
+pub mod branch;
 
 pub mod test;
 
@@ -22,3 +23,4 @@ pub use inc::*;
 pub use ctrl::*;
 pub use flags::*;
 pub use logic::*;
+pub use branch::*;

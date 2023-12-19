@@ -38,6 +38,7 @@ impl Opcode {
         self.table[0x0a] = asl_0a;
         self.table[0x0e] = asl_0e;
         self.table[0x0d] = ora_0d;
+        self.table[0x10] = bpl_10;
         self.table[0x11] = ora_11;
         self.table[0x15] = ora_15;
         self.table[0x16] = asl_16;
@@ -56,6 +57,7 @@ impl Opcode {
         self.table[0x2c] = bit_2c;
         self.table[0x2d] = and_2d;
         self.table[0x2e] = rol_2e;
+        self.table[0x30] = bmi_30;
         self.table[0x31] = and_31;
         self.table[0x35] = and_35;
         self.table[0x36] = rol_36;
@@ -73,6 +75,7 @@ impl Opcode {
         self.table[0x4c] = jmp_4c;
         self.table[0x4d] = eor_4d;
         self.table[0x4e] = lsr_4e;
+        self.table[0x50] = bvc_50;
         self.table[0x51] = eor_51;
         self.table[0x55] = eor_55;
         self.table[0x56] = lsr_56;
@@ -86,6 +89,7 @@ impl Opcode {
         self.table[0x6a] = ror_6a;
         self.table[0x6c] = jmp_6c;
         self.table[0x6e] = ror_6e;
+        self.table[0x70] = bvs_70;
         self.table[0x76] = ror_76;
         self.table[0x78] = sei_78;
         self.table[0x7e] = ror_7e;
@@ -98,6 +102,7 @@ impl Opcode {
         self.table[0x8c] = sty_8c;
         self.table[0x8d] = sta_8d;
         self.table[0x8e] = stx_8e;
+        self.table[0x90] = bcc_90;
         self.table[0x91] = sta_91;
         self.table[0x94] = sty_94;
         self.table[0x95] = sta_95;
@@ -118,6 +123,7 @@ impl Opcode {
         self.table[0xac] = ldy_ac;
         self.table[0xad] = lda_ad;
         self.table[0xae] = ldx_ae;
+        self.table[0xb0] = bcs_b0;
         self.table[0xb1] = lda_b1;
         self.table[0xb4] = ldy_b4;
         self.table[0xb5] = lda_b5;
@@ -139,6 +145,7 @@ impl Opcode {
         self.table[0xcc] = cpy_cc;
         self.table[0xcd] = cmp_cd;
         self.table[0xce] = dec_ce;
+        self.table[0xd0] = bne_d0;
         self.table[0xd1] = cmp_d1;
         self.table[0xd5] = cmp_d5;
         self.table[0xd6] = dec_d6;
@@ -153,6 +160,7 @@ impl Opcode {
         self.table[0xea] = nop_ea;
         self.table[0xec] = cpx_ec;
         self.table[0xee] = inc_ee;
+        self.table[0xf0] = beq_f0;
         self.table[0xf6] = inc_f6;
         self.table[0xf8] = sed_f8;
         self.table[0xfe] = inc_fe;
@@ -266,12 +274,12 @@ impl Opcode {
         AddrReturn { operand: cpu.mmu.read(address), address, high: None, low }
     }
 
-    pub fn relative(&mut self, index: u8, cpu : &mut MOS6510) -> AddrReturn {
+    pub fn relative(&mut self, cpu : &mut MOS6510) -> AddrReturn {
         let offset: i16 = self.fetch(cpu) as i16;
         let pc_bytes: [u8; 2] = self.u16_to_u8s(cpu.PC);
         let value: u8 = offset.wrapping_add(pc_bytes[1] as i16) as u8;
         let address: u16 = self.u8s_to_u16(pc_bytes[0], value);
         cpu.PC = address;
-        AddrReturn { operand: value, address, high: None, low: offset as u8 }
+        AddrReturn { operand: value, address, high: Some(pc_bytes[0]), low: value as u8 }
     }
 }
