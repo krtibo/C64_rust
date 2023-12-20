@@ -84,14 +84,22 @@ impl Opcode {
         self.table[0x5e] = lsr_5e;
         self.table[0x5d] = eor_5d;
         self.table[0x60] = rts_60;
+        self.table[0x61] = adc_61;
+        self.table[0x65] = adc_65;
         self.table[0x66] = ror_66;
         self.table[0x68] = pla_68;
+        self.table[0x69] = adc_69;
         self.table[0x6a] = ror_6a;
         self.table[0x6c] = jmp_6c;
+        self.table[0x6d] = adc_6d;
         self.table[0x6e] = ror_6e;
         self.table[0x70] = bvs_70;
+        self.table[0x71] = adc_71;
+        self.table[0x75] = adc_75;
         self.table[0x76] = ror_76;
         self.table[0x78] = sei_78;
+        self.table[0x79] = adc_79;
+        self.table[0x7d] = adc_7d;
         self.table[0x7e] = ror_7e;
         self.table[0x81] = sta_81;
         self.table[0x84] = sty_84;
@@ -173,12 +181,13 @@ impl Opcode {
 
     pub fn fetch(&mut self, cpu : &mut MOS6510) -> u8 {
         let ret = cpu.mmu.read(cpu.PC);
-        if (cpu.PC < 65535) {
-            cpu.PC += 1;
-        } else {
-            // TODO: take this out
-            cpu.PC = 0xA000;
-        }
+        cpu.PC = cpu.PC.wrapping_add(1);
+        // if (cpu.PC < 65535) {
+        //     cpu.PC += 1;
+        // } else {
+        //     // TODO: take this out
+        //     cpu.PC = 0xA000;
+        // }
         ret
     }
     
