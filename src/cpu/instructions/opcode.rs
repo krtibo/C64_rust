@@ -162,15 +162,23 @@ impl Opcode {
         self.table[0xdd] = cmp_dd;
         self.table[0xde] = dec_de;
         self.table[0xe0] = cpx_e0;
+        self.table[0xe1] = sbc_e1;
         self.table[0xe4] = cpx_e4;
+        self.table[0xe5] = sbc_e5;
         self.table[0xe6] = inc_e6;
         self.table[0xe8] = inx_e8;
+        self.table[0xe9] = sbc_e9;
         self.table[0xea] = nop_ea;
         self.table[0xec] = cpx_ec;
+        self.table[0xed] = sbc_ed;
         self.table[0xee] = inc_ee;
         self.table[0xf0] = beq_f0;
+        self.table[0xf1] = sbc_f1;
+        self.table[0xf5] = sbc_f5;
         self.table[0xf6] = inc_f6;
         self.table[0xf8] = sed_f8;
+        self.table[0xf9] = sbc_f9;
+        self.table[0xfd] = sbc_fd;
         self.table[0xfe] = inc_fe;
     }
 
