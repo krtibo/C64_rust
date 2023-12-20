@@ -48,7 +48,7 @@ impl MOS6510 {
             X   : 0x00,
             Y   : 0x00,
             S   : 0xFF, // not sure about this one
-            PC  : 0xA000,
+            PC  : 0xFCE2,
             P   : 0b0010_0100,
             mmu : MMU::new(),
             cycle : 0, // 19656 is a raster cycle
@@ -107,7 +107,7 @@ impl MOS6510 {
             
             // DEBUGGER RENDER
             dbg.clear();
-            dbg.create_snapshot(format!("  0x{:02X}   {}", self.PC, opc.current_operation), self);
+            dbg.create_snapshot(format!("  0x{:04X}   {}", self.PC, opc.current_operation), self);
             dbg.render(&self.mmu.RAM);
             // WHOA SLOW DOWN
             thread::sleep(time::Duration::from_millis(100));
@@ -180,10 +180,12 @@ impl MOS6510 {
         let stack: u16 = self.stack_addr();
         self.mmu.write(value, stack);
         self.S -= 1;
+        // self.S = self.S.wrapping_sub(1);
     }
 
     pub fn pull_from_stack(&mut self) -> u8 {
         self.S += 1;
+        // self.S = self.S.wrapping_add(1);
         let stack: u16 = self.stack_addr();
         self.mmu.read(stack)
     }
