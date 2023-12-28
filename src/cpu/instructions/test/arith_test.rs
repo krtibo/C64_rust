@@ -79,4 +79,52 @@ fn cmp_is_negative() {
 
 #[test]
 fn sbc_non_decimal() {
+    let TestSetup { mut cpu, mut opc } = setup();
+    cpu.set_flag(Flags::D, 0);
+    cpu.set_flag(Flags::C, 1);
+    cpu.A = 10;
+    let operand: u8 = 5;
+    sbc(&mut opc, &mut cpu, operand);
+
+    assert_eq!(cpu.A, 4);
+    assert_eq!(cpu.get_flag(Flags::C), true);
+}
+
+#[test]
+fn sbc_non_decimal_carry() {
+    let TestSetup { mut cpu, mut opc } = setup();
+    cpu.set_flag(Flags::D, 0);
+    cpu.set_flag(Flags::C, 1);
+    cpu.A = 10;
+    let operand: u8 = 15;
+    sbc(&mut opc, &mut cpu, operand);
+    let result: i8 = -6;
+
+    assert_eq!(cpu.A, result as u8);
+    assert_eq!(cpu.get_flag(Flags::C), false);
+}
+
+#[test]
+fn sbc_non_decimal_overflow() {
+    let TestSetup { mut cpu, mut opc } = setup();
+    cpu.set_flag(Flags::D, 0);
+    cpu.set_flag(Flags::C, 1);
+    cpu.A = 130;
+    let operand: u8 = 1;
+    sbc(&mut opc, &mut cpu, operand);
+
+    assert_eq!(cpu.A, 128);
+    assert_eq!(cpu.get_flag(Flags::V), true);
+}
+
+#[test]
+fn sbc_decimal() {
+    let TestSetup { mut cpu, mut opc } = setup();
+    cpu.set_flag(Flags::D, 1);
+    cpu.set_flag(Flags::C, 1);
+    cpu.A = 0x13;
+    let operand: u8 = 0x11;
+    sbc(&mut opc, &mut cpu, operand);
+
+    assert_eq!(cpu.A, 1);
 }
