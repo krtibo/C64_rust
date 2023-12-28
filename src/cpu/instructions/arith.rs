@@ -10,98 +10,98 @@ pub fn cmp(opc: &mut Opcode, cpu: &mut MOS6510, operand: u8, register: u8) {
     opc.check_and_set_n(result, cpu);
 }
 
-pub fn cmp_c9(opc: &mut Opcode, cpu : &mut MOS6510) {
+pub fn cmp_c9(opc: &mut Opcode, cpu: &mut MOS6510) {
     let operand: u8 = opc.fetch(cpu);
     opc.current_operation.push_str(format!("CMP #${:02X}", operand).as_str());
     cmp(opc, cpu, operand, cpu.A);
     cpu.cycle += 2;
 }
 
-pub fn cmp_cd(opc: &mut Opcode, cpu : &mut MOS6510) {
+pub fn cmp_cd(opc: &mut Opcode, cpu: &mut MOS6510) {
     let AddrReturn { operand, address, high, low } = opc.absolute(cpu);
     opc.current_operation.push_str(format!("CMP ${:02X}{:02X}", high.unwrap(), low).as_str());
     cmp(opc, cpu, operand, cpu.A);
     cpu.cycle += 4;
 }
 
-pub fn cmp_dd(opc: &mut Opcode, cpu : &mut MOS6510) {
+pub fn cmp_dd(opc: &mut Opcode, cpu: &mut MOS6510) {
     let AddrReturn { operand, address, high, low } = opc.absolute_indexed(cpu.X as u16, cpu);
     opc.current_operation.push_str(format!("CMP ${:02X}{:02X}, X", high.unwrap(), low).as_str());
     cmp(opc, cpu, operand, cpu.A);
     cpu.cycle += 4;
 }
 
-pub fn cmp_d9(opc: &mut Opcode, cpu : &mut MOS6510) {
+pub fn cmp_d9(opc: &mut Opcode, cpu: &mut MOS6510) {
     let AddrReturn { operand, address, high, low } = opc.absolute_indexed(cpu.Y as u16, cpu);
     opc.current_operation.push_str(format!("CMP ${:02X}{:02X}, Y", high.unwrap(), low).as_str());
     cmp(opc, cpu, operand, cpu.A);
     cpu.cycle += 4;
 }
 
-pub fn cmp_c5(opc: &mut Opcode, cpu : &mut MOS6510) {
+pub fn cmp_c5(opc: &mut Opcode, cpu: &mut MOS6510) {
     let AddrReturn { operand, address, high, low } = opc.zero_page(cpu);
     opc.current_operation.push_str(format!("CMP ${:02X}", low).as_str());
     cmp(opc, cpu, operand, cpu.A);
     cpu.cycle += 3;
 }
 
-pub fn cmp_d5(opc: &mut Opcode, cpu : &mut MOS6510) {
+pub fn cmp_d5(opc: &mut Opcode, cpu: &mut MOS6510) {
     let AddrReturn { mut operand, address, high, low } = opc.zero_page_indexed(cpu.X, cpu);
     opc.current_operation.push_str(format!("CMP ${:02X}, X", low).as_str());
     cmp(opc, cpu, operand, cpu.A);
     cpu.cycle += 4;
 }
 
-pub fn cmp_c1(opc: &mut Opcode, cpu : &mut MOS6510) {
+pub fn cmp_c1(opc: &mut Opcode, cpu: &mut MOS6510) {
     let AddrReturn { operand, address, high, low } = opc.zero_page_indexed_indirect(cpu.X, cpu);
     opc.current_operation.push_str(format!("CMP (${:02X}, X)", low).as_str());
     cmp(opc, cpu, operand, cpu.A);
     cpu.cycle += 6;
 }
 
-pub fn cmp_d1(opc: &mut Opcode, cpu : &mut MOS6510) {
+pub fn cmp_d1(opc: &mut Opcode, cpu: &mut MOS6510) {
     let AddrReturn { operand, address, high, low } = opc.zero_page_indirect_indexed(cpu.X, cpu);
     opc.current_operation.push_str(format!("CMP (${:02X}), Y", low).as_str());
     cmp(opc, cpu, operand, cpu.A);
     cpu.cycle += 5;
 }
 
-pub fn cpx_e0(opc: &mut Opcode, cpu : &mut MOS6510) {
+pub fn cpx_e0(opc: &mut Opcode, cpu: &mut MOS6510) {
     let operand: u8 = opc.fetch(cpu);
     opc.current_operation.push_str(format!("CPX #${:02X}", operand).as_str());
     cmp(opc, cpu, operand, cpu.X);
     cpu.cycle += 2;
 }
 
-pub fn cpx_ec(opc: &mut Opcode, cpu : &mut MOS6510) {
+pub fn cpx_ec(opc: &mut Opcode, cpu: &mut MOS6510) {
     let AddrReturn { operand, address, high, low } = opc.absolute(cpu);
     opc.current_operation.push_str(format!("CPX ${:02X}{:02X}", high.unwrap(), low).as_str());
     cmp(opc, cpu, operand, cpu.X);
     cpu.cycle += 4;
 }
 
-pub fn cpx_e4(opc: &mut Opcode, cpu : &mut MOS6510) {
+pub fn cpx_e4(opc: &mut Opcode, cpu: &mut MOS6510) {
     let AddrReturn { operand, address, high, low } = opc.zero_page(cpu);
     opc.current_operation.push_str(format!("CPX ${:02X}", low).as_str());
     cmp(opc, cpu, operand, cpu.X);
     cpu.cycle += 3;
 }
 
-pub fn cpy_c0(opc: &mut Opcode, cpu : &mut MOS6510) {
+pub fn cpy_c0(opc: &mut Opcode, cpu: &mut MOS6510) {
     let operand: u8 = opc.fetch(cpu);
     opc.current_operation.push_str(format!("CPY #${:02X}", operand).as_str());
     cmp(opc, cpu, operand, cpu.Y);
     cpu.cycle += 2;
 }
 
-pub fn cpy_cc(opc: &mut Opcode, cpu : &mut MOS6510) {
+pub fn cpy_cc(opc: &mut Opcode, cpu: &mut MOS6510) {
     let AddrReturn { operand, address, high, low } = opc.absolute(cpu);
     opc.current_operation.push_str(format!("CPY ${:02X}{:02X}", high.unwrap(), low).as_str());
     cmp(opc, cpu, operand, cpu.Y);
     cpu.cycle += 4;
 }
 
-pub fn cpy_c4(opc: &mut Opcode, cpu : &mut MOS6510) {
+pub fn cpy_c4(opc: &mut Opcode, cpu: &mut MOS6510) {
     let AddrReturn { operand, address, high, low } = opc.zero_page(cpu);
     opc.current_operation.push_str(format!("CPY ${:02X}", low).as_str());
     cmp(opc, cpu, operand, cpu.Y);
@@ -124,56 +124,56 @@ pub fn adc(opc: &mut Opcode, cpu: &mut MOS6510, operand: u8) {
     }
 }
 
-pub fn adc_69(opc: &mut Opcode, cpu : &mut MOS6510) {
+pub fn adc_69(opc: &mut Opcode, cpu: &mut MOS6510) {
     let operand: u8 = opc.fetch(cpu);
     opc.current_operation.push_str(format!("ADC #${:02X}", operand).as_str());
     adc(opc, cpu, operand);
     cpu.cycle += 2;
 }
 
-pub fn adc_6d(opc: &mut Opcode, cpu : &mut MOS6510) {
+pub fn adc_6d(opc: &mut Opcode, cpu: &mut MOS6510) {
     let AddrReturn { operand, address, high, low } = opc.absolute(cpu);
     opc.current_operation.push_str(format!("ADC ${:02X}{:02X}", high.unwrap(), low).as_str());
     adc(opc, cpu, operand);
     cpu.cycle += 4;
 }
 
-pub fn adc_7d(opc: &mut Opcode, cpu : &mut MOS6510) {
+pub fn adc_7d(opc: &mut Opcode, cpu: &mut MOS6510) {
     let AddrReturn { operand, address, high, low } = opc.absolute_indexed(cpu.X as u16, cpu);
     opc.current_operation.push_str(format!("ADC ${:02X}{:02X}, X", high.unwrap(), low).as_str());
     adc(opc, cpu, operand);
     cpu.cycle += 4;
 }
 
-pub fn adc_79(opc: &mut Opcode, cpu : &mut MOS6510) {
+pub fn adc_79(opc: &mut Opcode, cpu: &mut MOS6510) {
     let AddrReturn { operand, address, high, low } = opc.absolute_indexed(cpu.Y as u16, cpu);
     opc.current_operation.push_str(format!("ADC ${:02X}{:02X}, Y", high.unwrap(), low).as_str());
     adc(opc, cpu, operand);
     cpu.cycle += 4;
 }
 
-pub fn adc_65(opc: &mut Opcode, cpu : &mut MOS6510) {
+pub fn adc_65(opc: &mut Opcode, cpu: &mut MOS6510) {
     let AddrReturn { operand, address, high, low } = opc.zero_page(cpu);
     opc.current_operation.push_str(format!("ADC ${:02X}", low).as_str());
     adc(opc, cpu, operand);
     cpu.cycle += 3;
 }
 
-pub fn adc_75(opc: &mut Opcode, cpu : &mut MOS6510) {
+pub fn adc_75(opc: &mut Opcode, cpu: &mut MOS6510) {
     let AddrReturn { operand, address, high, low } = opc.zero_page_indexed(cpu.X, cpu);
     opc.current_operation.push_str(format!("ADC ${:02X}, X", low).as_str());
     adc(opc, cpu, operand);
     cpu.cycle += 4;
 }
 
-pub fn adc_61(opc: &mut Opcode, cpu : &mut MOS6510) {
+pub fn adc_61(opc: &mut Opcode, cpu: &mut MOS6510) {
     let AddrReturn { operand, address, high, low } = opc.zero_page_indexed_indirect(cpu.X, cpu);
     opc.current_operation.push_str(format!("ADC (${:02X}, X)", low).as_str());
     adc(opc, cpu, operand);
     cpu.cycle += 6;
 }
 
-pub fn adc_71(opc: &mut Opcode, cpu : &mut MOS6510) {
+pub fn adc_71(opc: &mut Opcode, cpu: &mut MOS6510) {
     let AddrReturn { operand, address, high, low } = opc.zero_page_indirect_indexed(cpu.Y, cpu);
     opc.current_operation.push_str(format!("ADC (${:02X}), Y", low).as_str());
     adc(opc, cpu, operand);
@@ -194,56 +194,56 @@ pub fn sbc(opc: &mut Opcode, cpu: &mut MOS6510, operand: u8) {
     }
 }
 
-pub fn sbc_e9(opc: &mut Opcode, cpu : &mut MOS6510) {
+pub fn sbc_e9(opc: &mut Opcode, cpu: &mut MOS6510) {
     let operand: u8 = opc.fetch(cpu);
     opc.current_operation.push_str(format!("SBC #${:02X}", operand).as_str());
     sbc(opc, cpu, operand);
     cpu.cycle += 2;
 }
 
-pub fn sbc_ed(opc: &mut Opcode, cpu : &mut MOS6510) {
+pub fn sbc_ed(opc: &mut Opcode, cpu: &mut MOS6510) {
     let AddrReturn { operand, address, high, low } = opc.absolute(cpu);
     opc.current_operation.push_str(format!("SBC ${:02X}{:02X}", high.unwrap(), low).as_str());
     sbc(opc, cpu, operand);
     cpu.cycle += 4;
 }
 
-pub fn sbc_fd(opc: &mut Opcode, cpu : &mut MOS6510) {
+pub fn sbc_fd(opc: &mut Opcode, cpu: &mut MOS6510) {
     let AddrReturn { operand, address, high, low } = opc.absolute_indexed(cpu.X as u16, cpu);
     opc.current_operation.push_str(format!("SBC ${:02X}{:02X}, X", high.unwrap(), low).as_str());
     sbc(opc, cpu, operand);
     cpu.cycle += 4;
 }
 
-pub fn sbc_f9(opc: &mut Opcode, cpu : &mut MOS6510) {
+pub fn sbc_f9(opc: &mut Opcode, cpu: &mut MOS6510) {
     let AddrReturn { operand, address, high, low } = opc.absolute_indexed(cpu.Y as u16, cpu);
     opc.current_operation.push_str(format!("SBC ${:02X}{:02X}, Y", high.unwrap(), low).as_str());
     sbc(opc, cpu, operand);
     cpu.cycle += 4;
 }
 
-pub fn sbc_e5(opc: &mut Opcode, cpu : &mut MOS6510) {
+pub fn sbc_e5(opc: &mut Opcode, cpu: &mut MOS6510) {
     let AddrReturn { operand, address, high, low } = opc.zero_page(cpu);
     opc.current_operation.push_str(format!("SBC ${:02X}", low).as_str());
     sbc(opc, cpu, operand);
     cpu.cycle += 3;
 }
 
-pub fn sbc_f5(opc: &mut Opcode, cpu : &mut MOS6510) {
+pub fn sbc_f5(opc: &mut Opcode, cpu: &mut MOS6510) {
     let AddrReturn { operand, address, high, low } = opc.zero_page_indexed(cpu.X, cpu);
     opc.current_operation.push_str(format!("SBC ${:02X}, X", low).as_str());
     sbc(opc, cpu, operand);
     cpu.cycle += 4;
 }
 
-pub fn sbc_e1(opc: &mut Opcode, cpu : &mut MOS6510) {
+pub fn sbc_e1(opc: &mut Opcode, cpu: &mut MOS6510) {
     let AddrReturn { operand, address, high, low } = opc.zero_page_indexed_indirect(cpu.X, cpu);
     opc.current_operation.push_str(format!("SBC (${:02X}, X)", low).as_str());
     sbc(opc, cpu, operand);
     cpu.cycle += 6;
 }
 
-pub fn sbc_f1(opc: &mut Opcode, cpu : &mut MOS6510) {
+pub fn sbc_f1(opc: &mut Opcode, cpu: &mut MOS6510) {
     let AddrReturn { operand, address, high, low } = opc.zero_page_indirect_indexed(cpu.Y, cpu);
     opc.current_operation.push_str(format!("SBC (${:02X}), Y", low).as_str());
     sbc(opc, cpu, operand);
