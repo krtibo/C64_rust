@@ -139,12 +139,6 @@ impl MOS6510 {
         self.init();
     }
 
-    // pub fn byte_cat(self, h : u8, l : u8) -> u16 {
-    //     let high : u16 = (h as u16) << 8;
-    //     let low : u16 = l as u16;
-    //     (high | low) as u16
-    // }
-
     // flags: N V 1 B D I Z C
     pub fn set_flag(&mut self, flag : Flags, value: u8) {
         match flag {
