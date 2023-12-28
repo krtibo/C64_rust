@@ -115,7 +115,7 @@ pub fn adc(opc: &mut Opcode, cpu: &mut MOS6510, operand: u8) {
         if result > 99 { cpu.set_flag(Flags::C, 1) } else { cpu.set_flag(Flags::C, 0) }
         cpu.A = opc.bcd(cpu.A).wrapping_add(opc.bcd(operand)).wrapping_add(carry);
     } else {
-        let result: i16 = (cpu.A as i16 + operand as i16) as i16;
+        let result: i16 = (cpu.A as i16 + operand as i16 + carry as i16) as i16;
         if result > 255 { cpu.set_flag(Flags::C, 1) } else { cpu.set_flag(Flags::C, 0) }
         if result > 127 || result < -127 { cpu.set_flag(Flags::V, 1) } else { cpu.set_flag(Flags::V, 0) }
         cpu.A = (cpu.A as i8).wrapping_add(operand as i8).wrapping_add(carry as i8) as u8;
@@ -185,10 +185,10 @@ pub fn sbc(opc: &mut Opcode, cpu: &mut MOS6510, operand: u8) {
     if cpu.get_flag(Flags::D) {
         cpu.A = opc.bcd(cpu.A).wrapping_sub(opc.bcd(operand)).wrapping_sub(carry);
     } else {
-        let result: i16 = (cpu.A as i8 - operand as i8) as i16;
+        let result: i16 = (cpu.A as i8 - operand as i8 - carry as i8) as i16;
         if result >= 0 { cpu.set_flag(Flags::C, 1) } else { cpu.set_flag(Flags::C, 0) }
         if result > 127 || result < -127 { cpu.set_flag(Flags::V, 1) } else { cpu.set_flag(Flags::V, 0) }
-        cpu.A = cpu.A.wrapping_sub(operand).wrapping_sub(carry);
+        cpu.A = (cpu.A as i8).wrapping_sub(operand as i8).wrapping_sub(carry as i8) as u8;
         opc.check_and_set_n(cpu.A, cpu);
         opc.check_and_set_z(cpu.A, cpu);
     }
