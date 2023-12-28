@@ -148,14 +148,14 @@ impl MOS6510 {
     // flags: N V 1 B D I Z C
     pub fn set_flag(&mut self, flag : Flags, value: u8) {
         match flag {
-            Flags::N       => self.P = self.P | (value << 7),
-            Flags::V       => self.P = self.P | (value << 6),
-            Flags::Unused  => self.P = self.P | (value << 5),
-            Flags::B       => self.P = self.P | (value << 4),
-            Flags::D       => self.P = self.P | (value << 3),
-            Flags::I       => self.P = self.P | (value << 2),
-            Flags::Z       => self.P = self.P | (value << 1),
-            Flags::C       => self.P = self.P | value,
+            Flags::N       => if value == 1 { self.P |= (value << 7) } else { self.P &= !(1 << 7) },
+            Flags::V       => if value == 1 { self.P |= (value << 6) } else { self.P &= !(1 << 6) },
+            Flags::Unused  => if value == 1 { self.P |= (value << 5) } else { self.P &= !(1 << 5) },
+            Flags::B       => if value == 1 { self.P |= (value << 4) } else { self.P &= !(1 << 4) },
+            Flags::D       => if value == 1 { self.P |= (value << 3) } else { self.P &= !(1 << 3) },
+            Flags::I       => if value == 1 { self.P |= (value << 2) } else { self.P &= !(1 << 2) },
+            Flags::Z       => if value == 1 { self.P |= (value << 1) } else { self.P &= !(1 << 1) },
+            Flags::C       => if value == 1 { self.P |= value } else { self.P &= !1 },
         }
     }
 
