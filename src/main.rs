@@ -5,7 +5,7 @@ use self::cpu::MOS6510;
 
 fn main() {
 
-    // for this to work i needed to:
+    // to set up sfml:
     // make a .bashrc/.zshrc with two env variables:
     // export SFML_INCLUDE_DIR=/opt/homebrew/Cellar/sfml/2.5.1_2/include
 	// export SFML_LIBS_DIR=/opt/homebrew/Cellar/sfml/2.5.1_2/lib
