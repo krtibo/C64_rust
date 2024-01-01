@@ -1,5 +1,8 @@
 pub mod load_test;
 pub mod arith_test;
+pub mod inc_test;
+pub mod logic_test;
+pub mod shift_test;
 
 use crate::MOS6510;
 use super::super::Opcode;
