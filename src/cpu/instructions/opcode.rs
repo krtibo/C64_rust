@@ -182,12 +182,12 @@ impl Opcode {
         self.table[0xfe] = inc_fe;
     }
 
-    pub fn unknown(&mut self, cpu : &mut MOS6510) {
+    pub fn unknown(&mut self, cpu: &mut MOS6510) {
         self.current_operation.push_str("////////////// n/a");
         cpu.cycle += 4;
     }
 
-    pub fn fetch(&mut self, cpu : &mut MOS6510) -> u8 {
+    pub fn fetch(&mut self, cpu: &mut MOS6510) -> u8 {
         let ret = cpu.mmu.read(cpu.PC);
         cpu.PC = cpu.PC.wrapping_add(1);
         // if (cpu.PC < 65535) {
@@ -199,13 +199,13 @@ impl Opcode {
         ret
     }
     
-    pub fn execute(&mut self, cpu : &mut MOS6510) {
+    pub fn execute(&mut self, cpu: &mut MOS6510) {
         let current_opcode: u8 = self.fetch(cpu);
         self.current_operation = format!("{:02X} - ", current_opcode);
         self.table[current_opcode as usize](self, cpu)
     }
     
-    pub fn check_and_set_n(&mut self, value : u8, cpu : &mut MOS6510) {
+    pub fn check_and_set_n(&mut self, value : u8, cpu: &mut MOS6510) {
         if (value & 0b1000_0000 == 0b1000_0000) { 
             cpu.set_flag(Flags::N, 1); 
         } else { 
@@ -213,7 +213,7 @@ impl Opcode {
         }
     }
 
-    pub fn check_and_set_z(&mut self, value : u8, cpu : &mut MOS6510) {
+    pub fn check_and_set_z(&mut self, value : u8, cpu: &mut MOS6510) {
         if value == 0 { cpu.set_flag(Flags::Z, 1) } else { cpu.set_flag(Flags::Z, 0) }
     }
 
@@ -240,21 +240,21 @@ impl Opcode {
         high * 10 + low
     }
 
-    pub fn absolute(&mut self, cpu : &mut MOS6510) -> AddrReturn {
+    pub fn absolute(&mut self, cpu: &mut MOS6510) -> AddrReturn {
         let low: u8 = self.fetch(cpu);
         let high: u8 = self.fetch(cpu);
         let address: u16 = self.u8s_to_u16(high, low);
         AddrReturn { operand: cpu.mmu.read(address), address, high: Some(high), low }
     }
 
-    pub fn absolute_indexed(&mut self, index: u16, cpu : &mut MOS6510) -> AddrReturn {
+    pub fn absolute_indexed(&mut self, index: u16, cpu: &mut MOS6510) -> AddrReturn {
         let low: u8 = self.fetch(cpu);
         let high: u8 = self.fetch(cpu);
         let address: u16 = self.u8s_to_u16(high, low) + index;
         AddrReturn { operand: cpu.mmu.read(address), address, high: Some(high), low }
     }
 
-    pub fn absolute_indirect(&mut self, cpu : &mut MOS6510) -> AddrReturn {
+    pub fn absolute_indirect(&mut self, cpu: &mut MOS6510) -> AddrReturn {
         let low: u8 = self.fetch(cpu);
         let high: u8 = self.fetch(cpu);
         let low_address: u8 = cpu.mmu.read(self.u8s_to_u16(high, low));
@@ -263,19 +263,19 @@ impl Opcode {
         AddrReturn { operand: cpu.mmu.read(address), address, high: Some(high), low }
     }
 
-    pub fn zero_page(&mut self, cpu : &mut MOS6510) -> AddrReturn {
+    pub fn zero_page(&mut self, cpu: &mut MOS6510) -> AddrReturn {
         let low: u8 = self.fetch(cpu);
         let address: u16 = self.u8s_to_u16(0x00, low);
         AddrReturn { operand: cpu.mmu.read(address), address, high: None, low }
     }
 
-    pub fn zero_page_indexed(&mut self, index: u8, cpu : &mut MOS6510) -> AddrReturn {
+    pub fn zero_page_indexed(&mut self, index: u8, cpu: &mut MOS6510) -> AddrReturn {
         let low: u8 = self.fetch(cpu);
         let address: u16 = self.u8s_to_u16(0x00, low.wrapping_add(index));
         AddrReturn { operand: cpu.mmu.read(address), address, high: None, low }
     }
 
-    pub fn zero_page_indexed_indirect(&mut self, index: u8, cpu : &mut MOS6510) -> AddrReturn {
+    pub fn zero_page_indexed_indirect(&mut self, index: u8, cpu: &mut MOS6510) -> AddrReturn {
         let low: u8 = self.fetch(cpu);
         let low_address: u8 = cpu.mmu.read(self.u8s_to_u16(0x00, low.wrapping_add(index)));
         let high_address: u8 = cpu.mmu.read(self.u8s_to_u16(0x00, low.wrapping_add(index).wrapping_add(1)));
@@ -283,7 +283,7 @@ impl Opcode {
         AddrReturn { operand: cpu.mmu.read(address), address, high: None, low }
     }
 
-    pub fn zero_page_indirect_indexed(&mut self, index: u8, cpu : &mut MOS6510) -> AddrReturn {
+    pub fn zero_page_indirect_indexed(&mut self, index: u8, cpu: &mut MOS6510) -> AddrReturn {
         let low: u8 = self.fetch(cpu);
         let low_address: u8 = cpu.mmu.read(self.u8s_to_u16(0x00, low)).wrapping_add(index);
         let high_address: u8 = cpu.mmu.read(self.u8s_to_u16(0x00, low)).wrapping_add(index).wrapping_add(1);
@@ -291,7 +291,7 @@ impl Opcode {
         AddrReturn { operand: cpu.mmu.read(address), address, high: None, low }
     }
 
-    pub fn relative(&mut self, cpu : &mut MOS6510) -> AddrReturn {
+    pub fn relative(&mut self, cpu: &mut MOS6510) -> AddrReturn {
         let offset: i16 = self.fetch(cpu) as i16;
         let pc_bytes: [u8; 2] = self.u16_to_u8s(cpu.PC);
         let value: u8 = offset.wrapping_add(pc_bytes[1] as i16) as u8;
