@@ -7,27 +7,59 @@ use rand::Rng;
 use std::fs::File;
 use std::io::prelude::*;
 
+const RAM_SIZE: usize = 65536;
+const KERNAL_SIZE: usize = 8192;
+const CHAR_SIZE: usize = 4096;
+const IO_SIZE: usize = CHAR_SIZE;
+const BASIC_SIZE: usize = 8192;
+const KERNAL_OFFSET: usize = 0xE000;
+const CHAR_OFFSET: usize = 0xD000;
+const IO_OFFSET: usize = CHAR_OFFSET;
+const BASIC_OFFSET: usize = 0xA000;
+
+pub enum ROM {
+    KERNAL, BASIC, CHAR
+}
+
 pub struct MMU {
-    pub RAM : [u8; 65536],
+    pub RAM: [u8; RAM_SIZE],
+    pub KERNAL: [u8; KERNAL_SIZE],
+    pub CHAR: [u8; CHAR_SIZE],
+    pub IO: [u8; IO_SIZE],
+    pub BASIC: [u8; BASIC_SIZE]
 }
 
 impl MMU {
     pub fn new() -> MMU {
         MMU {
-            RAM : [0; 65536],
+            RAM: [0; RAM_SIZE],
+            KERNAL: [0; KERNAL_SIZE],
+            CHAR: [0; CHAR_SIZE],
+            IO: [0; IO_SIZE],
+            BASIC: [0; BASIC_SIZE],
         }
     }
 
     pub fn init(&mut self) {
         // initialize the default values of registers in memory
-        self.write(0b0000_0111, 0x0001);
+        self.RAM[0x0001] = 0b0000_0111;
     }
 
     pub fn write(&mut self, byte : u8, address : u16) {
-        self.RAM[address as usize] = byte;
+        let _address: usize = address as usize;
+        match address {
+            0xA000..=0xBFFF =>
+                if self.loram() && self.hiram() { self.BASIC[_address - BASIC_OFFSET] = byte; } else { self.RAM[_address] = byte; }
+            0xD000..=0xDFFF =>
+                if self.loram() || self.hiram() {
+                    if self.charen() { self.IO[_address - IO_OFFSET] = byte; } else { self.CHAR[_address - CHAR_OFFSET] = byte; }
+                } else { self.RAM[_address] = byte; }
+            0xE000..=0xFFFF => if self.hiram() { self.KERNAL[_address - KERNAL_OFFSET] = byte; } else { self.RAM[_address] = byte; }
+            _ => self.RAM[address as usize] = byte,
+        }
     }
 
-    pub fn copy_file_to_ram(&mut self, path: &str, address: u16) {
+    pub fn load_rom(&mut self, path: &str, rom: ROM) {
         let mut buffer : Vec<u8> = Vec::new();
 
         // open the file from path
@@ -40,18 +72,26 @@ impl MMU {
 
         // copy rom_buffer to RAM address
         for i in 0..buffer.len() {
-            self.RAM[address as usize + i] = buffer[i];
+            match rom {
+                ROM::KERNAL => self.KERNAL[i] = buffer[i],
+                ROM::BASIC => self.BASIC[i] = buffer[i],
+                ROM::CHAR => self.CHAR[i] = buffer[i],
+            }
         }
     }
 
     pub fn read(&mut self, address : u16) -> u8 {
-        self.RAM[address as usize]
-    }
-
-    pub fn randomize(&mut self) {
-        let mut rng = rand::thread_rng();
-        for i in 0..self.RAM.len() {
-            self.RAM[i] = rng.gen_range(0, 2);
+        let _address: usize = address as usize;
+        // println!("{:4x}", address);
+        match address {
+            0xA000..=0xBFFF =>
+                if self.loram() && self.hiram() { self.BASIC[_address - BASIC_OFFSET] } else { self.RAM[_address] }
+            0xD000..=0xDFFF =>
+                if self.loram() || self.hiram() {
+                    if self.charen() { self.IO[_address - IO_OFFSET] } else { self.CHAR[_address - CHAR_OFFSET] }
+                } else { self.RAM[_address] }
+            0xE000..=0xFFFF => if self.hiram() { self.KERNAL[_address - KERNAL_OFFSET] } else { self.RAM[_address] }
+            _ => self.RAM[address as usize]
         }
     }
 
@@ -60,6 +100,19 @@ impl MMU {
             self.RAM[i] = 0;
         }
     }
+
+    pub fn loram(&mut self) -> bool {
+        (self.RAM[0x0001] & 0b0000_0001) >= 1
+    }
+
+    pub fn hiram(&mut self) -> bool {
+        (self.RAM[0x0001] & 0b0000_0010) >= 1
+    }
+
+    pub fn charen(&mut self) -> bool {
+        (self.RAM[0x0001] & 0b0000_0100) >= 1
+    }
+
 }
 
 /* Memory map

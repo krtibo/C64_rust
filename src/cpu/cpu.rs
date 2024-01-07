@@ -4,7 +4,7 @@
 #![allow(non_snake_case)]
 #![allow(unused)]
 
-use super::mmu::MMU;
+use super::mmu::*;
 use super::debugger::debugger::Debugger;
 use super::Opcode;
 use super::ppu::PPU;
@@ -44,11 +44,11 @@ pub enum Flags {
 impl MOS6510 {
     pub fn new() -> MOS6510 {
         MOS6510 {
-            A   : 0x00,
+            A   : 0xAA,
             X   : 0x00,
             Y   : 0x00,
-            S   : 0xFF, // not sure about this one
-            PC  : 0xFCE2,
+            S   : 0xFF,
+            PC  : 0x00FF,
             P   : 0b0010_0100,
             mmu : MMU::new(),
             cycle : 0, // 19656 is a raster cycle
@@ -68,6 +68,7 @@ impl MOS6510 {
             
             // FETCHING
             // this will fetch a byte from the memory where the PC is then execute it
+            let PC_snapshot: u16 = self.PC;
             opc.execute(self);
             
             
@@ -88,9 +89,10 @@ impl MOS6510 {
             // DEBUGGER PAUSE LOOP
             let dbg_event = dbg.poll();
             if (dbg_event == dbg.events.PAUSE) {
+                println!("{:?}", &self.mmu.RAM[0x0400..0x07FF]);
                 loop {
                     dbg.clear();
-                    dbg.render(&self.mmu.RAM);
+                    dbg.render(&mut self.mmu);
                     let dbg_event_stopped = dbg.poll();
                     if dbg_event_stopped == dbg.events.PAUSE { break }
                     // if (!ppu.poll()) { return }
@@ -107,8 +109,8 @@ impl MOS6510 {
             
             // DEBUGGER RENDER
             dbg.clear();
-            dbg.create_snapshot(format!("  0x{:04X}   {}", self.PC, opc.current_operation), self);
-            dbg.render(&self.mmu.RAM);
+            dbg.create_snapshot(format!("  0x{:04X}   {}", PC_snapshot, opc.current_operation), self);
+            dbg.render(&mut self.mmu);
             // WHOA SLOW DOWN
             thread::sleep(time::Duration::from_millis(100));
         }
@@ -116,26 +118,27 @@ impl MOS6510 {
 
     pub fn init(&mut self) {
         // loading basic ROM to A000 - BFFF: 8k
-        self.mmu.copy_file_to_ram("/Users/krtibo/MEGA/PROGRAMMING/C64_rust/rom/basic.rom", 0xA000);
+        self.mmu.load_rom("/Users/krtibo/MEGA/PROGRAMMING/C64_rust/rom/basic.rom", ROM::BASIC);
         // loading charset to D000 - DFFF: 4k
-        self.mmu.copy_file_to_ram("/Users/krtibo/MEGA/PROGRAMMING/C64_rust/rom/character.rom", 0xD000);
+        self.mmu.load_rom("/Users/krtibo/MEGA/PROGRAMMING/C64_rust/rom/character.rom", ROM::CHAR);
         // loading kernal ROM to E000 - FFFF: 8k
-        self.mmu.copy_file_to_ram("/Users/krtibo/MEGA/PROGRAMMING/C64_rust/rom/kernal.rom", 0xE000);
+        self.mmu.load_rom("/Users/krtibo/MEGA/PROGRAMMING/C64_rust/rom/kernal.rom", ROM::KERNAL);
         self.mmu.init();
 
         // the program counter is loaded with the value at FFFC-FFFD, Default: $FCE2.
-        // B
-        // self.PC = (self.mmu.read(0xFFFD) as u16) << 8 | self.mmu.read(0xFFFC) as u16;
+        self.PC = (self.mmu.read(0xFFFD) as u16) << 8 | self.mmu.read(0xFFFC) as u16;
+        // self.PC = 0xA000;
     } // init
 
     pub fn reset(&mut self) {
-        self.A = 0x00;
+        self.A = 0xAA;
         self.X = 0x00;
         self.Y = 0x00;
         self.S = 0xFF;
         self.P = 0b0010_0100;
         self.cycle = 0;
         self.mmu.clear();
+        self.mmu.init();
         self.init();
     }
 
@@ -173,13 +176,13 @@ impl MOS6510 {
     pub fn push_on_stack(&mut self, value : u8) {
         let stack: u16 = self.stack_addr();
         self.mmu.write(value, stack);
-        self.S -= 1;
-        // self.S = self.S.wrapping_sub(1);
+        // self.S -= 1;
+        self.S = self.S.wrapping_sub(1);
     }
 
     pub fn pull_from_stack(&mut self) -> u8 {
-        self.S += 1;
-        // self.S = self.S.wrapping_add(1);
+        // self.S += 1;
+        self.S = self.S.wrapping_add(1);
         let stack: u16 = self.stack_addr();
         self.mmu.read(stack)
     }
