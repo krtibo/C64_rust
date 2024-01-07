@@ -15,16 +15,18 @@ pub struct AddrReturn {
 }
 
 pub struct Opcode {
-    pub table : [fn(&mut Opcode, &mut MOS6510); 256],
-    pub current_operation : String,
+    pub table: [fn(&mut Opcode, &mut MOS6510); 256],
+    pub current_operation: String,
+    pub omit_fetch: bool, 
 }
 
 impl Opcode {
 
     pub fn new() -> Opcode {
         Opcode {
-            table : [Opcode::unknown; 256],
-            current_operation : String::from(""),
+            table: [Opcode::unknown; 256],
+            current_operation: String::from(""),
+            omit_fetch: false,
         }
     }
 
@@ -188,8 +190,10 @@ impl Opcode {
     }
 
     pub fn fetch(&mut self, cpu: &mut MOS6510) -> u8 {
-        let ret = cpu.mmu.read(cpu.PC);
         cpu.PC = cpu.PC.wrapping_add(1);
+        let ret = cpu.mmu.read(cpu.PC);
+        // println!("pc: {:x} ret: {:x}", cpu.PC, ret);
+        // println!("{:x}", cpu.PC);
         // if (cpu.PC < 65535) {
         //     cpu.PC += 1;
         // } else {
@@ -200,9 +204,11 @@ impl Opcode {
     }
     
     pub fn execute(&mut self, cpu: &mut MOS6510) {
-        let current_opcode: u8 = self.fetch(cpu);
+        let current_opcode: u8 = cpu.mmu.read(cpu.PC);
         self.current_operation = format!("{:02X} - ", current_opcode);
-        self.table[current_opcode as usize](self, cpu)
+        self.table[current_opcode as usize](self, cpu);
+        if !self.omit_fetch { self.fetch(cpu); }
+        self.omit_fetch = false;
     }
     
     pub fn check_and_set_n(&mut self, value : u8, cpu: &mut MOS6510) {
@@ -223,7 +229,7 @@ impl Opcode {
 
     pub fn u16_to_u8s(&mut self, value : u16) -> [u8; 2] {
         let mut u8s: [u8; 2] = [0; 2];
-        u8s[0] = (value << 8) as u8;        // high byte
+        u8s[0] = (value >> 8) as u8;        // high byte
         u8s[1] = (value & 0x00FF) as u8;    // low byte
         u8s
     }
@@ -296,7 +302,7 @@ impl Opcode {
         let pc_bytes: [u8; 2] = self.u16_to_u8s(cpu.PC);
         let value: u8 = offset.wrapping_add(pc_bytes[1] as i16) as u8;
         let address: u16 = self.u8s_to_u16(pc_bytes[0], value);
-        cpu.PC = address;
+        // cpu.PC = address;
         AddrReturn { operand: value, address, high: Some(pc_bytes[0]), low: value as u8 }
     }
 }

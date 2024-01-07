@@ -11,6 +11,7 @@ pub fn bcc_90(opc: &mut Opcode, cpu: &mut MOS6510) {
         cpu.cycle += 1;
     }
     cpu.cycle += 2;
+    opc.omit_fetch = true;
 }
 
 pub fn bcs_b0(opc: &mut Opcode, cpu: &mut MOS6510) {
@@ -21,6 +22,7 @@ pub fn bcs_b0(opc: &mut Opcode, cpu: &mut MOS6510) {
         cpu.cycle += 1;
     }
     cpu.cycle += 2;
+    opc.omit_fetch = true;
 }
 
 pub fn beq_f0(opc: &mut Opcode, cpu: &mut MOS6510) {
@@ -31,6 +33,7 @@ pub fn beq_f0(opc: &mut Opcode, cpu: &mut MOS6510) {
         cpu.cycle += 1;
     }
     cpu.cycle += 2;
+    opc.omit_fetch = true;
 }
 
 pub fn bmi_30(opc: &mut Opcode, cpu: &mut MOS6510) {
@@ -41,6 +44,7 @@ pub fn bmi_30(opc: &mut Opcode, cpu: &mut MOS6510) {
         cpu.cycle += 1;
     }
     cpu.cycle += 2;
+    opc.omit_fetch = true;
 }
 
 pub fn bne_d0(opc: &mut Opcode, cpu: &mut MOS6510) {
@@ -51,6 +55,7 @@ pub fn bne_d0(opc: &mut Opcode, cpu: &mut MOS6510) {
         cpu.cycle += 1;
     }
     cpu.cycle += 2;
+    opc.omit_fetch = true;
 }
 
 pub fn bpl_10(opc: &mut Opcode, cpu: &mut MOS6510) {
@@ -61,6 +66,7 @@ pub fn bpl_10(opc: &mut Opcode, cpu: &mut MOS6510) {
         cpu.cycle += 1;
     }
     cpu.cycle += 2;
+    opc.omit_fetch = true;
 }
 
 pub fn bvc_50(opc: &mut Opcode, cpu: &mut MOS6510) {
@@ -71,6 +77,7 @@ pub fn bvc_50(opc: &mut Opcode, cpu: &mut MOS6510) {
         cpu.cycle += 1;
     }
     cpu.cycle += 2;
+    opc.omit_fetch = true;
 }
 pub fn bvs_70(opc: &mut Opcode, cpu: &mut MOS6510) {
     let AddrReturn { operand, address, high, low } = opc.relative(cpu);
@@ -80,5 +87,6 @@ pub fn bvs_70(opc: &mut Opcode, cpu: &mut MOS6510) {
         cpu.cycle += 1;
     }
     cpu.cycle += 2;
+    opc.omit_fetch = true;
 }
 
