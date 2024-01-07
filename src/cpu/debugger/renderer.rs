@@ -3,6 +3,7 @@ use super::debugger::Debugger;
 extern crate sfml;
 use sfml::graphics::*;
 use sfml::system::Vector2f;
+use crate::cpu::MMU;
 
 fn render_text(debugger: &mut Debugger, value: String, horizontal_position: f32, vertical_position: f32, color: Color) {
     let font_size = 22;
@@ -97,13 +98,31 @@ pub fn render_instructions(debugger: &mut Debugger) {
     render_sprite(debugger, &texture, Vector2f::new(1011.0, 0.0), Vector2f::new(4.0, 1600.0));
 }
 
-pub fn memory_map(debugger: &mut Debugger, ram: &[u8]) {
+pub fn render_memory_banks(debugger: &mut Debugger, mmu: &mut MMU) {
+    let mut basic_color: Color = if mmu.loram() && mmu.hiram() { debugger.LIGHT_RED } else { debugger.LIGHT_BLUE };
+    let mut kernal_color: Color = if mmu.hiram() { debugger.LIGHT_RED } else { debugger.LIGHT_BLUE };
+    let mut io_color: Color = debugger.LIGHT_BLUE;
+    let mut char_color: Color = debugger.LIGHT_BLUE;
+    if mmu.loram() || mmu.hiram() {
+        if mmu.charen() {
+            io_color = debugger.LIGHT_RED;
+        } else {
+            char_color = debugger.LIGHT_RED;
+        }
+    }
+    render_text(debugger, "BASIC".to_string(), 1032.0, 262.0, basic_color);
+    render_text(debugger, "I/O".to_string(), 1160.0, 262.0, io_color);
+    render_text(debugger, "CHAR".to_string(), 1250.0, 262.0, char_color);
+    render_text(debugger, "KERNAL".to_string(), 1360.0, 262.0, kernal_color);
+}
+
+pub fn memory_map(debugger: &mut Debugger, mmu: &mut MMU) {
     let mut pixels: [u8; 256 * 256 * 4] = [255; 256 * 256 * 4];
     let current_pc_str = &debugger.snapshots[debugger.active_state as usize].PC[6..];
     let current_pc: usize = usize::from_str_radix(current_pc_str, 16).unwrap();
 
-    for i in 0..ram.len() {
-        if (ram[i] != 0) {
+    for i in 0..mmu.RAM.len() {
+        if (mmu.read(i as u16) != 0) {
             pixels[i*4] = 134;
             pixels[i*4+1] = 122;
             pixels[i*4+2] = 221;

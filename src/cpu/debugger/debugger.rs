@@ -7,10 +7,12 @@ use sfml::graphics::Image;
 use sfml::SfBox;
 use sfml::window::*;
 use crate::cpu::MOS6510;
+use crate::cpu::MMU;
 use std::collections::VecDeque;
 use sfml::window::Event::*;
 use super::input_handler::poll_keyboard;
 use super::input_handler::poll_mouse;
+use super::renderer::render_memory_banks;
 use super::renderer::render_registers;
 use super::renderer::render_instructions;
 use super::renderer::memory_map;
@@ -101,10 +103,11 @@ impl Debugger {
         }
     }
 
-	pub fn render(&mut self, ram: &[u8]) {
+	pub fn render(&mut self, mmu: &mut MMU) {
 		render_instructions(self);
 		render_registers(self);
-		memory_map(self, ram);
+        render_memory_banks(self, mmu);
+		memory_map(self, mmu);
 		self.dbg.display();
 	}
 
